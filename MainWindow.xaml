@@ -1,0 +1,125 @@
+<Window x:Class="MemoryLingo.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		Closed="Window_Closed" Loaded="Window_Loaded"
+		Title="Memory Lingo" Height="230" Width="500">
+
+	<Window.Resources>
+		<Style TargetType="{x:Type Label}">
+			<Setter Property="FontFamily" Value="Verdana"/>
+			<Setter Property="FontSize" Value="18"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Margin" Value="4,0,1,0"/>
+			<Setter Property="Padding" Value="2,1,2,1"/>
+		</Style>
+		<Style x:Key="TipLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+			<Setter Property="FontSize" Value="14"/>
+		</Style>
+		<Style TargetType="{x:Type TextBox}">
+			<Setter Property="FontFamily" Value="Verdana"/>
+			<Setter Property="FontSize" Value="18"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="Margin" Value="1,0,1,0"/>
+			<Setter Property="Padding" Value="2,4,2,4"/>
+		</Style>
+		<Style x:Key="StatusLink" TargetType="{x:Type Button}">
+			<Setter Property="FontFamily" Value="Verdana"/>
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Foreground" Value="Blue"/>
+			<Setter Property="Cursor" Value="Hand"/>
+			<Setter Property="Margin" Value="4,0,1,0"/>
+			<Setter Property="Padding" Value="2,1,2,1"/>
+		</Style>
+		<Style x:Key="StatusLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+			<Setter Property="FontSize" Value="14"/>
+		</Style>
+	</Window.Resources>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+
+		<Grid Grid.Row="0" Background="LightCyan">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+			</Grid.ColumnDefinitions>
+			<Label Grid.Row="0" Content="{Binding RuText}"/>
+			<Label Grid.Row="1" Content="{Binding RuTip}" Style="{StaticResource TipLabel}"/>
+			<TextBox Grid.Row="2" Text="{Binding Answer, UpdateSourceTrigger=PropertyChanged}"/>
+			<Label Grid.Row="3" Content="{Binding EnText}"/>
+			<ItemsControl Grid.Row="4" ItemsSource="{Binding WordResults}" Margin="6,0,0,0">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<WrapPanel Orientation="Horizontal"/>
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Label Content="{Binding Text}" Padding="0,1,0,1">
+							<Label.Style>
+								<Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding IsNonWord}" Value="False">
+											<Setter Property="Margin" Value="6,0,0,0"/>
+										</DataTrigger>
+										<DataTrigger Binding="{Binding IsNonWord}" Value="True">
+											<Setter Property="Foreground" Value="Gray"/>
+											<Setter Property="Margin" Value="0,0,0,0"/>
+										</DataTrigger>
+										<DataTrigger Binding="{Binding IsMatch}" Value="False">
+											<Setter Property="Background" Value="Pink"/>
+										</DataTrigger>
+										<MultiDataTrigger>
+											<MultiDataTrigger.Conditions>
+												<Condition Binding="{Binding IsMatch}" Value="False"/>
+												<Condition Binding="{Binding DataContext.HideIncorrectWords, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True"/>
+											</MultiDataTrigger.Conditions>
+											<Setter Property="Foreground" Value="Pink"/>
+										</MultiDataTrigger>
+									</Style.Triggers>
+								</Style>
+							</Label.Style>
+						</Label>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+			<Label Grid.Row="5" Content="{Binding Transcription}" Style="{StaticResource TipLabel}"/>
+		</Grid>
+
+		<Grid Grid.Row="1" Background="LightGray">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+			</Grid.ColumnDefinitions>
+			<Label Grid.Row="0" Content="{Binding RuExample}" Style="{StaticResource TipLabel}"/>
+			<Label Grid.Row="1" Content="{Binding EnExample}" Style="{StaticResource TipLabel}"/>
+			<WrapPanel Grid.Row="2" Orientation="Horizontal">
+				<Button Content="{Binding FileName}" Command="{Binding SelectFileCommand}" Style="{StaticResource StatusLink}"/>
+				<Label Content="{Binding Status}" Style="{StaticResource StatusLabel}"/>
+				<Label Content="{Binding WordStat}" Style="{StaticResource StatusLabel}"/>
+				<Label Content="{Binding VocabularyStat}" Style="{StaticResource StatusLabel}"/>
+			</WrapPanel>
+		</Grid>
+	</Grid>
+</Window>

@@ -1,0 +1,2 @@
+REM https://learn.microsoft.com/en-us/dotnet/core/deploying/single-file/overview?tabs=cli
+dotnet publish --verbosity normal --output c:\GitHub\MemoryLingo\publish\ --runtime win-x64 --self-contained false -p:PublishSingleFile=true
