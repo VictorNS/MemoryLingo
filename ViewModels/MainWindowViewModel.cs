@@ -28,7 +28,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	private string _ruTip = string.Empty;
 	private string _transcription = string.Empty;
 	private string _answer = string.Empty;
-	private string _enText = string.Empty;
 	private string _ruExample = string.Empty;
 	private string _enExample = string.Empty;
 	private string _fileName = string.Empty;
@@ -70,11 +69,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 				RestartValidationTimer();
 			}
 		}
-	}
-	public string EnText
-	{
-		get => _enText;
-		set => SetProperty(ref _enText, value);
 	}
 	public string RuExample
 	{
@@ -287,7 +281,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		{
 			RuTip = _current.Entry.RuTip;
 			Transcription = _current.Entry.Transcription;
-			EnText = _current.Entry.EnText;
 			RuExample = _current.Entry.RuExample;
 			EnExample = _current.Entry.EnExample;
 
@@ -298,7 +291,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		{
 			RuTip = string.Empty;
 			Transcription = string.Empty;
-			EnText = string.Empty;
 			RuExample = string.Empty;
 			EnExample = string.Empty;
 			WordResults.Clear();

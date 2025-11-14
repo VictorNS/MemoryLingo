@@ -25,6 +25,11 @@
 			<Setter Property="Margin" Value="1,0,1,0"/>
 			<Setter Property="Padding" Value="2,4,2,4"/>
 		</Style>
+		<Style x:Key="TipText" TargetType="{x:Type ItemsControl}">
+			<Setter Property="Margin" Value="0"/>
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="MinHeight" Value="28"/>
+		</Style>
 		<Style x:Key="StatusLink" TargetType="{x:Type Button}">
 			<Setter Property="FontFamily" Value="Verdana"/>
 			<Setter Property="FontSize" Value="14"/>
@@ -54,101 +59,150 @@
 			<Setter Property="Height" Value="16"/>
 			<Setter Property="Margin" Value="0"/>
 		</Style>
+		<Style TargetType="{x:Type TabControl}">
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Margin" Value="0"/>
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="TabStripPlacement" Value="Top"/>
+		</Style>
+		<Style TargetType="{x:Type TabItem}">
+			<Setter Property="Background" Value="White"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Padding" Value="8,4"/>
+			<Setter Property="Margin" Value="0"/>
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type TabItem}">
+						<Border x:Name="Border"
+								BorderThickness="{TemplateBinding BorderThickness}"
+								BorderBrush="{TemplateBinding BorderBrush}"
+								Background="{TemplateBinding Background}"
+								Padding="{TemplateBinding Padding}">
+							<ContentPresenter x:Name="ContentSite"
+											  VerticalAlignment="Center"
+											  HorizontalAlignment="Center"
+											  ContentSource="Header"/>
+						</Border>
+						<ControlTemplate.Triggers>
+							<Trigger Property="IsSelected" Value="True">
+								<Setter TargetName="Border" Property="BorderThickness" Value="0"/>
+								<Setter TargetName="Border" Property="Background" Value="LightGray"/>
+							</Trigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style TargetType="{x:Type DataGrid}">
+			<Setter Property="FontFamily" Value="Verdana"/>
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="Margin" Value="4"/>
+		</Style>
 	</Window.Resources>
 
-	<Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="*"/>
-		</Grid.RowDefinitions>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="*"/>
-		</Grid.ColumnDefinitions>
+	<TabControl>
+		<TabItem Header="Lesson">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
 
-		<Grid Grid.Row="0" Background="LightCyan">
-			<Grid.RowDefinitions>
-				<RowDefinition Height="Auto"/>
-				<RowDefinition Height="Auto"/>
-				<RowDefinition Height="Auto"/>
-				<RowDefinition Height="Auto"/>
-				<RowDefinition Height="Auto"/>
-				<RowDefinition Height="Auto"/>
-			</Grid.RowDefinitions>
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="*"/>
-			</Grid.ColumnDefinitions>
-			<Label Grid.Row="0" Content="{Binding RuText}"/>
-			<Label Grid.Row="1" Content="{Binding RuTip}" Style="{StaticResource TipLabel}"/>
-			<TextBox Grid.Row="2" Text="{Binding Answer, UpdateSourceTrigger=PropertyChanged}"/>
-			<Label Grid.Row="3" Content="{Binding EnText}"/>
-			<ItemsControl Grid.Row="4" ItemsSource="{Binding WordResults}" Margin="6,0,0,0">
-				<ItemsControl.ItemsPanel>
-					<ItemsPanelTemplate>
-						<WrapPanel Orientation="Horizontal"/>
-					</ItemsPanelTemplate>
-				</ItemsControl.ItemsPanel>
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<Label Content="{Binding Text}" Padding="0,1,0,1">
-							<Label.Style>
-								<Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
-									<Style.Triggers>
-										<DataTrigger Binding="{Binding IsNonWord}" Value="False">
-											<Setter Property="Margin" Value="6,0,0,0"/>
-										</DataTrigger>
-										<DataTrigger Binding="{Binding IsNonWord}" Value="True">
-											<Setter Property="Foreground" Value="Gray"/>
-											<Setter Property="Margin" Value="0,0,0,0"/>
-										</DataTrigger>
-										<DataTrigger Binding="{Binding IsMatch}" Value="False">
-											<Setter Property="Background" Value="Pink"/>
-										</DataTrigger>
-										<MultiDataTrigger>
-											<MultiDataTrigger.Conditions>
-												<Condition Binding="{Binding IsMatch}" Value="False"/>
-												<Condition Binding="{Binding DataContext.HideIncorrectWords, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True"/>
-											</MultiDataTrigger.Conditions>
-											<Setter Property="Foreground" Value="Pink"/>
-										</MultiDataTrigger>
-									</Style.Triggers>
-								</Style>
-							</Label.Style>
-						</Label>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
-			<Label Grid.Row="5" Content="{Binding Transcription}" Style="{StaticResource TipLabel}"/>
-		</Grid>
+				<Grid Grid.Row="0" Background="LightCyan">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+					<Label Grid.Row="0" Content="{Binding RuText}"/>
+					<Label Grid.Row="1" Content="{Binding RuTip}" Style="{StaticResource TipLabel}"/>
+					<TextBox Grid.Row="2" Text="{Binding Answer, UpdateSourceTrigger=PropertyChanged}"/>
+					<ItemsControl Grid.Row="3" ItemsSource="{Binding WordResults}" Style="{StaticResource TipText}">
+						<ItemsControl.ItemsPanel>
+							<ItemsPanelTemplate>
+								<WrapPanel Orientation="Horizontal"/>
+							</ItemsPanelTemplate>
+						</ItemsControl.ItemsPanel>
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Label Content="{Binding Text}">
+									<Label.Style>
+										<Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+											<Setter Property="Padding" Value="0,1,0,1"/>
+											<Style.Triggers>
+												<DataTrigger Binding="{Binding IsPunctuation}" Value="False">
+													<Setter Property="Margin" Value="6,0,0,0"/>
+												</DataTrigger>
+												<DataTrigger Binding="{Binding IsPunctuation}" Value="True">
+													<Setter Property="Margin" Value="0,0,0,0"/>
+												</DataTrigger>
+												<DataTrigger Binding="{Binding IsNonWord}" Value="True">
+													<Setter Property="Foreground" Value="Gray"/>
+												</DataTrigger>
+												<DataTrigger Binding="{Binding IsMatch}" Value="False">
+													<Setter Property="Background" Value="Pink"/>
+												</DataTrigger>
+												<MultiDataTrigger>
+													<MultiDataTrigger.Conditions>
+														<Condition Binding="{Binding IsMatch}" Value="False"/>
+														<Condition Binding="{Binding DataContext.HideIncorrectWords, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True"/>
+													</MultiDataTrigger.Conditions>
+													<Setter Property="Foreground" Value="Pink"/>
+												</MultiDataTrigger>
+											</Style.Triggers>
+										</Style>
+									</Label.Style>
+								</Label>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+					<Label Grid.Row="4" Content="{Binding Transcription}" Style="{StaticResource TipLabel}"/>
+				</Grid>
 
-		<Grid Grid.Row="1" Background="LightGray">
-			<Grid.RowDefinitions>
-				<RowDefinition Height="Auto"/>
-				<RowDefinition Height="Auto"/>
-				<RowDefinition Height="*"/>
-			</Grid.RowDefinitions>
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="*"/>
-			</Grid.ColumnDefinitions>
-			<Label Grid.Row="0" Content="{Binding RuExample}" Style="{StaticResource TipLabel}"/>
-			<Label Grid.Row="1" Content="{Binding EnExample}" Style="{StaticResource TipLabel}"/>
-			<WrapPanel Grid.Row="2" Orientation="Horizontal">
-				<Button Content="{Binding FileName}" Command="{Binding SelectFileCommand}" Style="{StaticResource StatusLink}"/>
-				<Label Content="{Binding Status}" Style="{StaticResource StatusLabel}"/>
-				<Image Source="{Binding PrevStatusImage}" Style="{StaticResource StatusImage}"/>
-				<Label Content="{Binding PrevStatus}" Style="{StaticResource StatusLabel}"/>
-				<Label Content="{Binding PrevText}" Style="{StaticResource StatusLabelCut}"/>
-				<Image Source="Images/dyslexia-16.png" Style="{StaticResource StatusImage}"/>
-				<Label Content="{Binding VocabularyStat}" Style="{StaticResource StatusLabel}"/>
-			</WrapPanel>
-		</Grid>
+				<Grid Grid.Row="1" Background="LightGray">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="*"/>
+					</Grid.RowDefinitions>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+					<Label Grid.Row="0" Content="{Binding RuExample}" Style="{StaticResource TipLabel}"/>
+					<Label Grid.Row="1" Content="{Binding EnExample}" Style="{StaticResource TipLabel}"/>
+					<Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="Silver" Margin="0,2,0,0" Padding="0,2,0,0">
+						<WrapPanel Orientation="Horizontal">
+							<Button Content="{Binding FileName}" Command="{Binding SelectFileCommand}" Style="{StaticResource StatusLink}"/>
+							<Label Content="{Binding Status}" Style="{StaticResource StatusLabel}"/>
+							<Image Source="{Binding PrevStatusImage}" Style="{StaticResource StatusImage}"/>
+							<Label Content="{Binding PrevStatus}" Style="{StaticResource StatusLabel}"/>
+							<Label Content="{Binding PrevText}" Style="{StaticResource StatusLabelCut}"/>
+							<Image Source="Images/dyslexia-16.png" Style="{StaticResource StatusImage}"/>
+							<Label Content="{Binding VocabularyStat}" Style="{StaticResource StatusLabel}"/>
+						</WrapPanel>
+					</Border>
+				</Grid>
 
-		<Grid Grid.Row="0" Grid.RowSpan="2" Visibility="{Binding IsOverlayVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Panel.ZIndex="1000">
-			<Border Background="#80FFFFFF" CornerRadius="4" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="6">
-				<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-					<Label Content="{Binding CountdownMessage}" FontSize="10" HorizontalAlignment="Center" Foreground="DarkGray"/>
-					<Label Content="Press Ctrl, Space, or Enter to skip" FontSize="8" HorizontalAlignment="Center" Foreground="DarkGray" Margin="0,5,0,0"/>
-				</StackPanel>
-			</Border>
-		</Grid>
-	</Grid>
+				<Grid Grid.Row="0" Grid.RowSpan="2" Visibility="{Binding IsOverlayVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Panel.ZIndex="1000">
+					<Border Background="#80FFFFFF" CornerRadius="4" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="6">
+						<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+							<Label Content="{Binding CountdownMessage}" FontSize="10" HorizontalAlignment="Center" Foreground="DarkGray"/>
+							<Label Content="Press Ctrl, Space, or Enter to skip" FontSize="8" HorizontalAlignment="Center" Foreground="DarkGray" Margin="0,5,0,0"/>
+						</StackPanel>
+					</Border>
+				</Grid>
+			</Grid>
+		</TabItem>
+		<TabItem Header="Vocabularies">
+			<DataGrid/>
+		</TabItem>
+	</TabControl>
 </Window>

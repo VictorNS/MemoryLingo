@@ -19,27 +19,31 @@ public class EntryValidationService
 		{
 			var expectedWord = expectedWords[i];
 			bool isMatch;
-			bool isNonWord;
+			bool isPunctuation;
+			bool isTip;
 
 			if (IsTip(expectedWord))
 			{
 				isMatch = true;
-				isNonWord = true;
+				isPunctuation = false;
+				isTip = true;
 			}
 			else if (expectedWord.Length > 0 && IsPunctuation(expectedWord[0]))
 			{
 				isMatch = true;
-				isNonWord = true;
+				isPunctuation = true;
+				isTip = false;
 			}
 			else
 			{
 				var inputWord = inputIndex < inputWordsNoPunctuation.Count ? inputWordsNoPunctuation[inputIndex] : "";
 				isMatch = string.Equals(inputWord.Trim(), expectedWord.Trim(), StringComparison.OrdinalIgnoreCase);
-				isNonWord = false;
+				isPunctuation = false;
+				isTip = false;
 				inputIndex++;
 			}
 
-			results.Add(new WordCheckResult(expectedWord, isMatch, isNonWord));
+			results.Add(new WordCheckResult(expectedWord, isMatch, isPunctuation, isTip));
 		}
 
 		return results;
