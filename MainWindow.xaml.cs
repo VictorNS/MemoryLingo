@@ -45,7 +45,12 @@ public partial class MainWindow : Window
 
 	private void MainWindow_KeyDown(object sender, KeyEventArgs e)
 	{
-		if (e.Key == Key.F1 || e.Key == Key.LeftCtrl)
+		if (ViewModel.IsOverlayVisible && (e.Key == Key.LeftCtrl || e.Key == Key.Space || e.Key == Key.Enter))
+		{
+			ViewModel.SkipToNextEntry();
+			e.Handled = true;
+		}
+		else if (e.Key == Key.F1 || e.Key == Key.LeftCtrl)
 		{
 			ViewModel.ShowTipsCommand.Execute(null);
 			e.Handled = true;

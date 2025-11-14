@@ -12,13 +12,18 @@ namespace MemoryLingo.ViewModels;
 
 public class MainWindowViewModel : INotifyPropertyChanged
 {
-	readonly EntryValidationService _entryValidationService;
-	readonly LearnService _learnService;
-	VocabularyEntryProgress _current;
-	private DispatcherTimer? _validationTimer;
+	#region logic properties
+	private readonly EntryValidationService _entryValidationService;
+	private readonly LearnService _learnService;
+	private readonly DispatcherTimer _validationTimer = new();
+	private readonly DispatcherTimer _nextEntryTimer = new();
+	private EntryProgress _current = EntryProgress.Empty;
+	private EntryProgress _previous = EntryProgress.Empty;
 	private bool _tipsUsedForCurrentEntry;
+	private int _remainingSeconds;
+	#endregion logic properties
 
-	#region properties
+	#region UI properties
 	private string _ruText = string.Empty;
 	private string _ruTip = string.Empty;
 	private string _transcription = string.Empty;
@@ -29,10 +34,14 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	private string _fileName = string.Empty;
 	private string _filePath = string.Empty;
 	private string _status = string.Empty;
-	private string _wordStat = string.Empty;
+	private string _prevText = string.Empty;
+	private string _prevStatusImage = string.Empty;
+	private string _prevStatus = string.Empty;
 	private string _vocabularyStat = string.Empty;
 	private ObservableCollection<WordCheckResult> _wordResults = [];
 	private bool _hideIncorrectWords = false;
+	private bool _isOverlayVisible = false;
+	private string _countdownMessage = string.Empty;
 
 	public string RuText
 	{
@@ -56,9 +65,9 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		{
 			if (SetProperty(ref _answer, value))
 			{
-				// Restart timer for debouncing
-				_validationTimer?.Stop();
-				_validationTimer?.Start();
+				if (string.IsNullOrWhiteSpace(_answer))
+					return;
+				RestartValidationTimer();
 			}
 		}
 	}
@@ -92,10 +101,20 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		get => _status;
 		set => SetProperty(ref _status, value);
 	}
-	public string WordStat
+	public string PrevText
 	{
-		get => _wordStat;
-		set => SetProperty(ref _wordStat, value);
+		get => _prevText;
+		set => SetProperty(ref _prevText, value);
+	}
+	public string PrevStatusImage
+	{
+		get => _prevStatusImage;
+		set => SetProperty(ref _prevStatusImage, value);
+	}
+	public string PrevStatus
+	{
+		get => _prevStatus;
+		set => SetProperty(ref _prevStatus, value);
 	}
 	public string VocabularyStat
 	{
@@ -112,9 +131,16 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		get => _hideIncorrectWords;
 		set => SetProperty(ref _hideIncorrectWords, value);
 	}
-
-	public ICommand SelectFileCommand { get; }
-	public ICommand ShowTipsCommand { get; }
+	public bool IsOverlayVisible
+	{
+		get => _isOverlayVisible;
+		set => SetProperty(ref _isOverlayVisible, value);
+	}
+	public string CountdownMessage
+	{
+		get => _countdownMessage;
+		set => SetProperty(ref _countdownMessage, value);
+	}
 
 	public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -132,9 +158,8 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	{
 		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 	}
-	#endregion properties
+	#endregion UI properties
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 	public MainWindowViewModel(EntryValidationService entryValidationService, LearnService learnService)
 	{
 		_entryValidationService = entryValidationService;
@@ -142,20 +167,24 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		SelectFileCommand = new RelayCommand(SelectFile);
 		ShowTipsCommand = new RelayCommand(ShowTips);
+		SkipToNextEntryCommand = new RelayCommand(SkipToNextEntry);
 
-		_validationTimer = new DispatcherTimer
-		{
-			Interval = TimeSpan.FromMilliseconds(300)
-		};
+		_validationTimer.Interval = TimeSpan.FromMilliseconds(300);
 		_validationTimer.Tick += (s, e) =>
 		{
 			_validationTimer.Stop();
 			ShowAnswerProgress(_answer);
 		};
+
+		_nextEntryTimer.Interval = TimeSpan.FromSeconds(1);
+		_nextEntryTimer.Tick += OnNextEntryTimerTick;
 	}
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
 	#region events
+	public ICommand SelectFileCommand { get; }
+	public ICommand ShowTipsCommand { get; }
+	public ICommand SkipToNextEntryCommand { get; }
+
 	private void ShowTips()
 	{
 		_tipsUsedForCurrentEntry = true;
@@ -178,7 +207,45 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 			_current = _learnService.GetFirstEntry();
 			ShowEntry(isNewEntry: true, showTips: false);
+			ShowSessionInfo(_current.Session);
 		}
+	}
+
+	private void RestartValidationTimer()
+	{
+		_validationTimer.Stop();
+		_validationTimer.Start();
+	}
+
+	private void StartNextEntryDelay()
+	{
+		IsOverlayVisible = true;
+		_remainingSeconds = 5; // TODO: Get from settings
+		CountdownMessage = $"Next entry in {_remainingSeconds} seconds...";
+		_nextEntryTimer.Start();
+	}
+
+	private void OnNextEntryTimerTick(object? sender, EventArgs e)
+	{
+		_remainingSeconds--;
+
+		if (_remainingSeconds <= 0)
+		{
+			SkipToNextEntry();
+		}
+		else
+		{
+			CountdownMessage = $"{_remainingSeconds} seconds...";
+		}
+	}
+
+	public void SkipToNextEntry()
+	{
+		IsOverlayVisible = false;
+		_nextEntryTimer.Stop();
+		_current = _learnService.GetNextEntry();
+		ShowEntry(isNewEntry: true, showTips: false);
+		ShowSessionInfo(_current.Session);
 	}
 	#endregion events
 
@@ -187,8 +254,10 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		var vocabulary = _learnService.LoadVocabulary(null);
 		ShowVocabularyInfo(vocabulary);
 
+		ShowPreviousEntry();
 		_current = _learnService.GetFirstEntry();
 		ShowEntry(isNewEntry: true, showTips: false);
+		ShowSessionInfo(_current.Session);
 	}
 
 	public void ShowVocabularyInfo(Vocabulary vocabulary)
@@ -196,6 +265,11 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		FileName = vocabulary.FileName;
 		FilePath = vocabulary.FilePath;
 		Status = vocabulary.Status;
+	}
+
+	public void ShowSessionInfo(EntryProgress.SessionProgress sessionProgress)
+	{
+		VocabularyStat = $"{sessionProgress.StudiedEntriesCount}/{sessionProgress.SessionEntriesCount}/{sessionProgress.TotalEntriesCount}";
 	}
 
 	public void ShowEntry(bool isNewEntry, bool showTips)
@@ -231,6 +305,17 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	}
 
+	public void ShowPreviousEntry()
+	{
+		PrevText = _previous.Entry.RuText;
+		PrevStatusImage = $"Images/{(_previous.CorrectAnswers == 0 && _previous.TotalAttempts == 0
+			? "question-mark-16.png"
+			: _previous.IsLastAttemptSuccess
+				? "check-16.png"
+				: "decrease-16.png")}";
+		PrevStatus = $"{_previous.CorrectAnswers}/{_previous.TotalAttempts}";
+	}
+
 	public void ShowAnswerProgress(string answer)
 	{
 		ShowEntry(isNewEntry: false, showTips: false);
@@ -239,10 +324,11 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		if (wordResults.All(w => w.IsMatch))
 		{
+			_previous = _learnService.SaveEntryProgress(_current.Entry.RuText, isCorrect: !_tipsUsedForCurrentEntry);
 			ShowEntry(isNewEntry: false, showTips: true);
-			_current = _learnService.SaveEntryProgress(_current.Entry.RuText, isCorrect: !_tipsUsedForCurrentEntry);
-			var icon = _current.IsLearned ? "✓" : "X";
-			WordStat = $"{icon} {_current.CorrectAnswers}/{_current.TotalAttempts}";
+			ShowPreviousEntry();
+			ShowSessionInfo(_previous.Session);
+			StartNextEntryDelay();
 			return;
 		}
 

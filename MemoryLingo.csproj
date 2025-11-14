@@ -33,4 +33,10 @@
 		</Compile>
 	</ItemGroup>
 
+	<ItemGroup>
+		<Resource Include="Images\check-16.png" />
+		<Resource Include="Images\decrease-16.png" />
+		<Resource Include="Images\question-mark-16.png" />
+		<Resource Include="Images\dyslexia-16.png" />
+	</ItemGroup>
 </Project>

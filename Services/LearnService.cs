@@ -10,7 +10,7 @@ public class LearnService
 	readonly VocabularyService _vocabularyService;
 	Vocabulary _vocabulary;
 	Settings _settings;
-	VocabularyProgress _progress;
+	VocabularyProgress _vocabularyProgress;
 	LearnSession _session;
 	readonly JsonSerializerOptions _serializerOptions = new()
 	{
@@ -37,34 +37,54 @@ public class LearnService
 			? _vocabularyService.CreateEmptyVocabulary()
 			: _vocabularyService.LoadVocabulary(filePath);
 
-		_progress = LoadProgress();
-		SynchronizeProgressWithVocabulary();
+		_vocabularyProgress = LoadProgress();
+		var result = SynchronizeProgressWithVocabulary();
+
+		if (!string.IsNullOrEmpty(result))
+		{
+			_vocabulary = _vocabularyService.CreateEmptyVocabulary();
+			_vocabulary.Status = result;
+			SynchronizeProgressWithVocabulary();
+		}
+
 		SaveProgress();
 		LoadSession();
 
 		return _vocabulary;
 	}
 
-	public void SynchronizeProgressWithVocabulary()
+	public string SynchronizeProgressWithVocabulary()
 	{
+		// check for duplicate RuText entries
+		var duplicates = _vocabulary.Entries
+			.GroupBy(e => e.RuText)
+			.Where(g => g.Count() > 1)
+			.Select(g => g.Key)
+			.ToList();
+
+		if (duplicates.Count > 0)
+			return $"Duplicates: {string.Join(", ", duplicates)}";
+
 		// remove progress entries for removed vocabulary entries
-		var notExistingEntries = _progress.Entries.Keys.Except(_vocabulary.Entries.Select(e => e.RuText)).ToList();
+		var notExistingEntries = _vocabularyProgress.Entries.Keys.Except(_vocabulary.Entries.Select(e => e.RuText)).ToList();
 		foreach (var key in notExistingEntries)
-			_progress.Entries.Remove(key);
+			_vocabularyProgress.Entries.Remove(key);
 
 		// add progress entries for new vocabulary entries
 		foreach (var entry in _vocabulary.Entries)
 		{
-			if (!_progress.Entries.ContainsKey(entry.RuText))
+			if (!_vocabularyProgress.Entries.ContainsKey(entry.RuText))
 			{
 				var newEntry = new VocabularyProgressEntry();
 
-				for (int i = 0; i <= _progress.SessionIndex; i++)
+				for (int i = 0; i <= _vocabularyProgress.SessionIndex; i++)
 					newEntry.Sessions.Add(new VocabularyProgressEntrySession());
 
-				_progress.Entries[entry.RuText] = newEntry;
+				_vocabularyProgress.Entries[entry.RuText] = newEntry;
 			}
 		}
+
+		return "";
 	}
 
 	public void LoadSession()
@@ -72,9 +92,9 @@ public class LearnService
 		int currentSession = 0;
 		Dictionary<string, VocabularyProgressEntry> restEntries = [];
 
-		for (int i = 0; i <= _progress.SessionIndex; i++)
+		for (int i = 0; i <= _vocabularyProgress.SessionIndex; i++)
 		{
-			restEntries = _progress.Entries
+			restEntries = _vocabularyProgress.Entries
 				.Where(kv => kv.Value.SessionIndex >= i && !kv.Value.Sessions[i].IsLearned)
 				.ToDictionary(kv => kv.Key, kv => kv.Value);
 
@@ -90,47 +110,80 @@ public class LearnService
 			SessionIndex = currentSession,
 			EntryIndex = 0,
 			Entries = restEntries,
-			Exercise = [.. restEntries.Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)]
+			Exercise = [.. restEntries.Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)],
+			StudiedEntriesCount = 0,
+			TotalEntriesCount = _vocabularyProgress.Entries.Count,
 		};
 	}
 
-	public VocabularyEntryProgress GetFirstEntry()
+	public EntryProgress GetFirstEntry()
+	{
+		return GetCurrentEntry();
+	}
+
+	public EntryProgress GetNextEntry()
+	{
+		if (_session.EntryIndex + 1 >= _session.Exercise.Count)
+			return EntryProgress.Empty;
+
+		_session.EntryIndex++;
+		return GetCurrentEntry();
+	}
+
+	private EntryProgress GetCurrentEntry()
 	{
 		var ruText = _session.Exercise[_session.EntryIndex];
 		var entry = _vocabulary.Entries.First(e => e.RuText == ruText);
 		var progress = _session.Entries[ruText].Sessions[_session.SessionIndex];
 
-		return new VocabularyEntryProgress
+		return new EntryProgress
 		{
 			Entry = entry,
 			IsLearned = progress.IsLearned,
 			CorrectAnswers = progress.CorrectAnswers,
-			TotalAttempts = progress.TotalAttempts
+			TotalAttempts = progress.TotalAttempts,
+			Session = new()
+			{
+				TotalEntriesCount = _session.TotalEntriesCount,
+				SessionEntriesCount = _session.Entries.Count,
+				StudiedEntriesCount = _session.StudiedEntriesCount
+			}
 		};
 	}
 
-	public VocabularyEntryProgress SaveEntryProgress(string ruText, bool isCorrect)
+	public EntryProgress SaveEntryProgress(string ruText, bool isCorrect)
 	{
-		var entry = _vocabulary.Entries.First(e => e.RuText == ruText);
+		var entry = _vocabulary.Entries.FirstOrDefault(e => e.RuText == ruText);
+		if (entry == null)
+		{
+			throw new InvalidDataException($"Entry with RuText '{ruText}' not found in vocabulary.");
+		}
 		var progress = _session.Entries[ruText].Sessions[_session.SessionIndex];
 		progress.TotalAttempts++;
 
 		if (isCorrect)
 		{
 			progress.CorrectAnswers++;
-			
+
 			if (progress.CorrectAnswers >= _settings.Learn.CorrectAnswersToLearn)
 				progress.IsLearned = true;
 		}
 
 		SaveProgress();
 
-		return new VocabularyEntryProgress
+		return new EntryProgress
 		{
 			Entry = entry,
 			IsLearned = progress.IsLearned,
+			IsLastAttemptSuccess = isCorrect,
 			CorrectAnswers = progress.CorrectAnswers,
-			TotalAttempts = progress.TotalAttempts
+			TotalAttempts = progress.TotalAttempts,
+			Session = new()
+			{
+				TotalEntriesCount = _session.TotalEntriesCount,
+				SessionEntriesCount = _session.Entries.Count,
+				StudiedEntriesCount = _session.StudiedEntriesCount
+			}
 		};
 	}
 
@@ -159,7 +212,7 @@ public class LearnService
 
 		Directory.CreateDirectory(folderPath);
 		var progressFilePath = Path.ChangeExtension(_vocabulary.FilePath, ".progress.json");
-		var json = JsonSerializer.Serialize(_progress, _serializerOptions);
+		var json = JsonSerializer.Serialize(_vocabularyProgress, _serializerOptions);
 		File.WriteAllText(progressFilePath, json);
 	}
 }

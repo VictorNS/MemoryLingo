@@ -5,6 +5,7 @@
 		Title="Memory Lingo" Height="230" Width="500">
 
 	<Window.Resources>
+		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 		<Style TargetType="{x:Type Label}">
 			<Setter Property="FontFamily" Value="Verdana"/>
 			<Setter Property="FontSize" Value="18"/>
@@ -36,6 +37,22 @@
 		</Style>
 		<Style x:Key="StatusLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
 			<Setter Property="FontSize" Value="14"/>
+		</Style>
+		<Style x:Key="StatusLabelCut" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="MaxWidth" Value="200"/>
+			<Setter Property="ContentTemplate">
+				<Setter.Value>
+					<DataTemplate>
+						<TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis"/>
+					</DataTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style x:Key="StatusImage" TargetType="{x:Type Image}">
+			<Setter Property="Width" Value="16"/>
+			<Setter Property="Height" Value="16"/>
+			<Setter Property="Margin" Value="0"/>
 		</Style>
 	</Window.Resources>
 
@@ -117,9 +134,21 @@
 			<WrapPanel Grid.Row="2" Orientation="Horizontal">
 				<Button Content="{Binding FileName}" Command="{Binding SelectFileCommand}" Style="{StaticResource StatusLink}"/>
 				<Label Content="{Binding Status}" Style="{StaticResource StatusLabel}"/>
-				<Label Content="{Binding WordStat}" Style="{StaticResource StatusLabel}"/>
+				<Image Source="{Binding PrevStatusImage}" Style="{StaticResource StatusImage}"/>
+				<Label Content="{Binding PrevStatus}" Style="{StaticResource StatusLabel}"/>
+				<Label Content="{Binding PrevText}" Style="{StaticResource StatusLabelCut}"/>
+				<Image Source="Images/dyslexia-16.png" Style="{StaticResource StatusImage}"/>
 				<Label Content="{Binding VocabularyStat}" Style="{StaticResource StatusLabel}"/>
 			</WrapPanel>
+		</Grid>
+
+		<Grid Grid.Row="0" Grid.RowSpan="2" Visibility="{Binding IsOverlayVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Panel.ZIndex="1000">
+			<Border Background="#80FFFFFF" CornerRadius="4" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="6">
+				<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+					<Label Content="{Binding CountdownMessage}" FontSize="10" HorizontalAlignment="Center" Foreground="DarkGray"/>
+					<Label Content="Press Ctrl, Space, or Enter to skip" FontSize="8" HorizontalAlignment="Center" Foreground="DarkGray" Margin="0,5,0,0"/>
+				</StackPanel>
+			</Border>
 		</Grid>
 	</Grid>
 </Window>

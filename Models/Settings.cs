@@ -36,4 +36,8 @@ public class LearnSettings
 	/// Percentage of difficult entries we will repeat in a third session
     /// </summary>
 	public int DifficultEntriesSession3Percent { get; set; } = 50;
+	/// <summary>
+	/// Delay in seconds before automatically advancing to the next entry
+	/// </summary>
+	public int NextEntryDelaySeconds { get; set; } = 2;
 }
