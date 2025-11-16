@@ -1,5 +1,6 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
+using MemoryLingo.Infrastructure;
 using MemoryLingo.Services;
 using MemoryLingo.ViewModels;
 
@@ -7,10 +8,10 @@ namespace MemoryLingo;
 
 public partial class MainWindow : Window
 {
-	readonly SettingsService _settingsService;
+	readonly SettingsStore _settingsService;
 	public MainWindowViewModel ViewModel { get; }
 
-	public MainWindow(SettingsService settingsService, EntryValidationService entryValidationService, LearnService learnService)
+	public MainWindow(SettingsStore settingsService, EntryValidationService entryValidationService, LearnService learnService)
 	{
 		InitializeComponent();
 		_settingsService = settingsService;
@@ -19,7 +20,7 @@ public partial class MainWindow : Window
 
 	private void Window_Loaded(object sender, RoutedEventArgs e)
 	{
-		var settings = _settingsService.LoadSettings();
+		var settings = _settingsService.Load();
 		Top = settings.Window.Top;
 		Left = settings.Window.Left;
 		Height = settings.Window.Height;
@@ -34,20 +35,19 @@ public partial class MainWindow : Window
 
 	private void Window_Closed(object sender, EventArgs e)
 	{
-		var settings = _settingsService.LoadSettings();
+		var settings = _settingsService.Load();
 		settings.Window.Top = Top;
 		settings.Window.Left = Left;
 		settings.Window.Height = Height;
 		settings.Window.Width = Width;
-		settings.FilePath = ViewModel.FilePath;
-		_settingsService.SaveSettings(settings);
+		_settingsService.Save(settings);
 	}
 
 	private void MainWindow_KeyDown(object sender, KeyEventArgs e)
 	{
 		if (ViewModel.IsOverlayVisible && (e.Key == Key.LeftCtrl || e.Key == Key.Space || e.Key == Key.Enter))
 		{
-			ViewModel.SkipToNextEntry();
+			ViewModel.InitializeNextEntry();
 			e.Handled = true;
 		}
 		else if (e.Key == Key.F1 || e.Key == Key.LeftCtrl)

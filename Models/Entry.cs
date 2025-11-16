@@ -1,6 +1,6 @@
 ﻿namespace MemoryLingo.Models;
 
-public class VocabularyEntry
+public class Entry
 {
 	public string RuText { get; set; } = string.Empty;
 	public string RuTip { get; set; } = string.Empty;

@@ -2,11 +2,20 @@
 using MemoryLingo.Excel;
 using MemoryLingo.Models;
 
-namespace MemoryLingo.Services;
+namespace MemoryLingo.Infrastructure;
 
-public class FileReader
+public class VocabularyStore
 {
-	public Vocabulary ReadDataFromFile(string filePath)
+	Vocabulary? _vocabulary;
+
+	public Vocabulary LoadVocabulary(string filePath)
+	{
+		_vocabulary = ReadDataFromFile(filePath);
+
+		return _vocabulary;
+	}
+
+	private static Vocabulary ReadDataFromFile(string filePath)
 	{
 		if (!File.Exists(filePath))
 			return new Vocabulary
@@ -14,7 +23,7 @@ public class FileReader
 				FileName = Path.GetFileName(filePath),
 				FilePath = filePath,
 				Entries = [],
-				Status = "File not found"
+				ErrorMessage = "File not found"
 			};
 
 
@@ -26,14 +35,14 @@ public class FileReader
 				FileName = Path.GetFileName(filePath),
 				FilePath = filePath,
 				Entries = [],
-				Status = "No worksheets found in the file"
+				ErrorMessage = "No worksheets found in the file"
 			};
 
-		var entries = new List<VocabularyEntry>();
+		var entries = new List<Entry>();
 
 		foreach (var excelRow in worksheet.Rows)
 		{
-			entries.Add(new VocabularyEntry
+			entries.Add(new Entry
 			{
 				RuText = excelRow.GetText(0),
 				RuTip = excelRow.GetText(1),
@@ -49,7 +58,7 @@ public class FileReader
 			FileName = Path.GetFileName(filePath),
 			FilePath = filePath,
 			Entries = entries,
-			Status = ""
+			ErrorMessage = ""
 		};
 	}
 }

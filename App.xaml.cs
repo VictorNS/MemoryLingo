@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using MemoryLingo.Infrastructure;
 using MemoryLingo.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,9 +13,10 @@ public partial class App : Application
 	{
 		var services = new ServiceCollection();
 
-		services.AddTransient<FileReader>();
-		services.AddTransient<SettingsService>();
-		services.AddTransient<VocabularyService>();
+		services.AddTransient<VocabularyListStore>();
+		services.AddTransient<VocabularyProgressStore>();
+		services.AddTransient<SettingsStore>();
+		services.AddTransient<VocabularyStore>();
 		services.AddTransient<EntryValidationService>();
 		services.AddTransient<LearnService>();
 		services.AddTransient<MainWindow>();

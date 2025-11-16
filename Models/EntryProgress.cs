@@ -2,7 +2,7 @@
 
 public class EntryProgress
 {
-	public required VocabularyEntry Entry { get; set; }
+	public required Entry Entry { get; set; }
 	public bool IsLearned { get; set; }
 	public bool IsLastAttemptSuccess { get; set; }
 	public required int CorrectAnswers { get; set; }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using MemoryLingo.Commands;
@@ -15,12 +16,12 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	#region logic properties
 	private readonly EntryValidationService _entryValidationService;
 	private readonly LearnService _learnService;
-	private readonly DispatcherTimer _validationTimer = new();
-	private readonly DispatcherTimer _nextEntryTimer = new();
 	private EntryProgress _current = EntryProgress.Empty;
 	private EntryProgress _previous = EntryProgress.Empty;
 	private bool _tipsUsedForCurrentEntry;
 	private int _remainingSeconds;
+	private readonly DispatcherTimer _validationTimer = new();
+	private readonly DispatcherTimer _nextEntryTimer = new();
 	#endregion logic properties
 
 	#region UI properties
@@ -31,16 +32,16 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	private string _ruExample = string.Empty;
 	private string _enExample = string.Empty;
 	private string _fileName = string.Empty;
-	private string _filePath = string.Empty;
-	private string _status = string.Empty;
 	private string _prevText = string.Empty;
-	private string _prevStatusImage = string.Empty;
+	private string _prevStatusImage = "Images/question-mark-16.png";
 	private string _prevStatus = string.Empty;
 	private string _vocabularyStat = string.Empty;
 	private ObservableCollection<WordCheckResult> _wordResults = [];
 	private bool _hideIncorrectWords = false;
 	private bool _isOverlayVisible = false;
 	private string _countdownMessage = string.Empty;
+	private int _selectedTabIndex = 0;
+	private ObservableCollection<VocabularyFile> _vocabulariesCollection = [];
 
 	public string RuText
 	{
@@ -85,16 +86,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		get => _fileName;
 		set => SetProperty(ref _fileName, value);
 	}
-	public string FilePath
-	{
-		get => _filePath;
-		set => SetProperty(ref _filePath, value);
-	}
-	public string Status
-	{
-		get => _status;
-		set => SetProperty(ref _status, value);
-	}
 	public string PrevText
 	{
 		get => _prevText;
@@ -135,6 +126,16 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		get => _countdownMessage;
 		set => SetProperty(ref _countdownMessage, value);
 	}
+	public int SelectedTabIndex
+	{
+		get => _selectedTabIndex;
+		set => SetProperty(ref _selectedTabIndex, value);
+	}
+	public ObservableCollection<VocabularyFile> VocabulariesCollection
+	{
+		get => _vocabulariesCollection;
+		set => SetProperty(ref _vocabulariesCollection, value);
+	}
 
 	public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -159,15 +160,17 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		_entryValidationService = entryValidationService;
 		_learnService = learnService;
 
-		SelectFileCommand = new RelayCommand(SelectFile);
 		ShowTipsCommand = new RelayCommand(ShowTips);
-		SkipToNextEntryCommand = new RelayCommand(SkipToNextEntry);
+		SkipToNextEntryCommand = new RelayCommand(InitializeNextEntry);
+		AddVocabularyCommand = new RelayCommand(AddVocabulary);
+		DeleteVocabularyCommand = new ParameterizedRelayCommand<VocabularyFile>(DeleteVocabulary);
+		SessionClickCommand = new ParameterizedRelayCommand<SessionClickParameter>(OnSessionClick);
 
 		_validationTimer.Interval = TimeSpan.FromMilliseconds(300);
 		_validationTimer.Tick += (s, e) =>
 		{
 			_validationTimer.Stop();
-			ShowAnswerProgress(_answer);
+			ProcessAnswer(_answer);
 		};
 
 		_nextEntryTimer.Interval = TimeSpan.FromSeconds(1);
@@ -175,34 +178,16 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	}
 
 	#region events
-	public ICommand SelectFileCommand { get; }
 	public ICommand ShowTipsCommand { get; }
 	public ICommand SkipToNextEntryCommand { get; }
+	public ICommand AddVocabularyCommand { get; }
+	public ICommand DeleteVocabularyCommand { get; }
+	public ICommand SessionClickCommand { get; }
 
 	private void ShowTips()
 	{
 		_tipsUsedForCurrentEntry = true;
 		ShowEntry(isNewEntry: false, showTips: true);
-	}
-
-	private void SelectFile()
-	{
-		var openFileDialog = new OpenFileDialog
-		{
-			Filter = "Excel files (*.xlsx)|*.xlsx",
-			FilterIndex = 1,
-			RestoreDirectory = true
-		};
-
-		if (openFileDialog.ShowDialog() == true)
-		{
-			var vocabulary = _learnService.LoadVocabulary(openFileDialog.FileName);
-			ShowVocabularyInfo(vocabulary);
-
-			_current = _learnService.GetFirstEntry();
-			ShowEntry(isNewEntry: true, showTips: false);
-			ShowSessionInfo(_current.Session);
-		}
 	}
 
 	private void RestartValidationTimer()
@@ -225,7 +210,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		if (_remainingSeconds <= 0)
 		{
-			SkipToNextEntry();
+			InitializeNextEntry();
 		}
 		else
 		{
@@ -233,32 +218,45 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	}
 
-	public void SkipToNextEntry()
+	private void OnSessionClick(SessionClickParameter? sessionParam)
 	{
-		IsOverlayVisible = false;
-		_nextEntryTimer.Stop();
-		_current = _learnService.GetNextEntry();
-		ShowEntry(isNewEntry: true, showTips: false);
-		ShowSessionInfo(_current.Session);
+		if (sessionParam == null)
+			return;
+
+		var vocabularyFile = sessionParam.VocabularyFile;
+
+		if (MessageBoxResult.Yes != MessageBox.Show(
+			$"Start session {sessionParam.SessionIndex + 1} for '{vocabularyFile.FileName}'?",
+			"Confirm Session Start",
+			MessageBoxButton.YesNo,
+			MessageBoxImage.Question))
+			return;
+
+		StartVocabularySession(vocabularyFile, sessionParam.SessionIndex);
 	}
 	#endregion events
 
 	public void Initialize()
 	{
-		var vocabulary = _learnService.LoadVocabulary(null);
+		var vocabularies = _learnService.LoadVocabularyList();
+		VocabulariesCollection = new ObservableCollection<VocabularyFile>(vocabularies);
+
+		SelectedTabIndex = 1;
+		/* TODO: restore logic
+		if (_vocabularies.Count == 0)
+		{
+			SelectedTabIndex = 1;
+			return;
+		}
+
+		var vocabulary = _learnService.LoadVocabulary();
 		ShowVocabularyInfo(vocabulary);
 
 		ShowPreviousEntry();
 		_current = _learnService.GetFirstEntry();
 		ShowEntry(isNewEntry: true, showTips: false);
 		ShowSessionInfo(_current.Session);
-	}
-
-	public void ShowVocabularyInfo(Vocabulary vocabulary)
-	{
-		FileName = vocabulary.FileName;
-		FilePath = vocabulary.FilePath;
-		Status = vocabulary.Status;
+		*/
 	}
 
 	public void ShowSessionInfo(EntryProgress.SessionProgress sessionProgress)
@@ -308,7 +306,46 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		PrevStatus = $"{_previous.CorrectAnswers}/{_previous.TotalAttempts}";
 	}
 
-	public void ShowAnswerProgress(string answer)
+	private void AddVocabulary()
+	{
+		var openFileDialog = new OpenFileDialog
+		{
+			Filter = "Excel files (*.xlsx)|*.xlsx",
+			FilterIndex = 1,
+			RestoreDirectory = true
+		};
+
+		if (openFileDialog.ShowDialog() == true)
+		{
+			var vocabularyFile = _learnService.AddVocabularyFile(openFileDialog.FileName);
+			VocabulariesCollection.Add(vocabularyFile);
+		}
+	}
+
+	private void DeleteVocabulary(VocabularyFile? vocabularyFile)
+	{
+		if (vocabularyFile == null)
+			return;
+
+		_learnService.RemoveVocabularyFile(vocabularyFile.FilePath);
+		VocabulariesCollection.Remove(vocabularyFile);
+	}
+
+	private void StartVocabularySession(VocabularyFile vocabularyFile, int sessionNumber)
+	{
+		var vocabulary = _learnService.StartVocabularySession(vocabularyFile.FilePath, sessionNumber);
+		if (vocabulary is null)
+			return;
+
+		FileName = vocabulary.FileName;
+		ShowPreviousEntry();
+		_current = _learnService.GetFirstEntry();
+		ShowEntry(isNewEntry: true, showTips: false);
+		ShowSessionInfo(_current.Session);
+		SelectedTabIndex = 0;
+	}
+
+	public void ProcessAnswer(string answer)
 	{
 		ShowEntry(isNewEntry: false, showTips: false);
 
@@ -316,11 +353,20 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		if (wordResults.All(w => w.IsMatch))
 		{
-			_previous = _learnService.SaveEntryProgress(_current.Entry.RuText, isCorrect: !_tipsUsedForCurrentEntry);
+			// is correct if no tips were used
+			bool isCorrect = !_tipsUsedForCurrentEntry;
+
+			_previous = _learnService.SaveEntryProgress(_current.Entry.RuText, isCorrect: isCorrect);
 			ShowEntry(isNewEntry: false, showTips: true);
 			ShowPreviousEntry();
 			ShowSessionInfo(_previous.Session);
 			StartNextEntryDelay();
+
+			if (isCorrect)
+			{
+				var vocabularies = _learnService.GetVocabularyList();
+				VocabulariesCollection = new ObservableCollection<VocabularyFile>(vocabularies);
+			}
 			return;
 		}
 
@@ -337,5 +383,25 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			HideIncorrectWords = true;
 			WordResults = new ObservableCollection<WordCheckResult>(wordResults);
 		}
+	}
+
+	public void InitializeNextEntry()
+	{
+		IsOverlayVisible = false;
+		_nextEntryTimer.Stop();
+
+		var newEntry = _learnService.GetNextEntry();
+		if (newEntry is null)
+		{
+			_current = EntryProgress.Empty;
+			SelectedTabIndex = 1;
+		}
+		else
+		{
+			_current = newEntry;
+		}
+
+		ShowEntry(isNewEntry: true, showTips: false);
+		ShowSessionInfo(_current.Session);
 	}
 }

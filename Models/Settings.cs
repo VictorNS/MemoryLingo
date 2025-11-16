@@ -3,10 +3,6 @@
 public class Settings
 {
 	public WindowSettings Window { get; set; } = new();
-	/// <summary>
-    /// Path to the last opened vocabulary file
-    /// </summary>
-	public string FilePath { get; set; } = string.Empty;
 	public LearnSettings Learn { get; set; } = new();
 }
 
@@ -34,7 +30,7 @@ public class LearnSettings
 	public int DifficultEntriesSession2Percent { get; set; } = 30;
 	/// <summary>
 	/// Percentage of difficult entries we will repeat in a third session
-    /// </summary>
+	/// </summary>
 	public int DifficultEntriesSession3Percent { get; set; } = 50;
 	/// <summary>
 	/// Delay in seconds before automatically advancing to the next entry
