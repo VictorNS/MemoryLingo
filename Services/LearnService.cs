@@ -30,21 +30,14 @@ public class LearnService
 	public IReadOnlyList<VocabularyFile> LoadVocabularyList()
 	{
 		var vocabularies = _vocabularyListService.Load();
-		bool hasChanges = false;
 
 		foreach (var vocabularyFile in vocabularies)
 		{
 			var checkResult = LoadAndCheckVocabularyFile(vocabularyFile.FilePath);
 
 			if (checkResult.vocabularyFile.HasErrors)
-			{
-				hasChanges = true;
 				vocabularyFile.ErrorMessage = checkResult.vocabularyFile.ErrorMessage;
-			}
 		}
-
-		if (hasChanges)
-			_vocabularyListService.Save();
 
 		return vocabularies;
 	}
@@ -111,7 +104,7 @@ public class LearnService
 
 		if (checkResult.vocabularyFile.HasErrors)
 		{
-			_vocabularyListService.AddErrorAndSave(checkResult.vocabularyFile.FilePath, checkResult.vocabularyFile.ErrorMessage);
+			// TODO: delete? _vocabularyListService.AddErrorAndSave(checkResult.vocabularyFile.FilePath, checkResult.vocabularyFile.ErrorMessage);
 			return null;
 		}
 
@@ -128,6 +121,8 @@ public class LearnService
 
 	public void SynchronizeProgressWithVocabulary()
 	{
+		// TODO: try to keep the original order
+
 		// remove progress entries for removed vocabulary entries
 		var notExistingEntries = _vocabularyProgress.Entries.Keys.Except(_vocabulary.Entries.Select(e => e.RuText)).ToList();
 		foreach (var key in notExistingEntries)
@@ -136,7 +131,6 @@ public class LearnService
 		// add progress entries for vocabulary entries
 		foreach (var entry in _vocabulary.Entries)
 		{
-
 			if (!_vocabularyProgress.Entries.TryGetValue(entry.RuText, out var progressEntry))
 				_vocabularyProgress.Entries.Add(entry.RuText, progressEntry = new VocabularyProgressEntry());
 
@@ -148,6 +142,7 @@ public class LearnService
 	public bool LoadSession(int? sessionNumber)
 	{
 		var currentSession = sessionNumber ?? FindNotCompletedSession();
+		var isSessionRecreated = false;
 
 		if (currentSession > 2)
 			return false;
@@ -158,6 +153,8 @@ public class LearnService
 
 		if (restEntries.Count == 0 || restEntries.Count == _vocabularyProgress.Entries.Count)
 		{
+			isSessionRecreated = true;
+
 			if (currentSession == 0)
 			{
 				foreach (var valuePair in _vocabularyProgress.Entries.Values)
@@ -172,6 +169,7 @@ public class LearnService
 					? _settings.Learn.DifficultEntriesSession2Percent
 					: _settings.Learn.DifficultEntriesSession3Percent;
 				var prevIndex = currentSession - 1;
+				// TODO: try to keep the original order
 				var prevEntries = _vocabularyProgress.Entries
 					.OrderByDescending(kv => kv.Value.Sessions[prevIndex].TotalAttempts)
 					.Select(kv => kv.Key)
@@ -187,10 +185,6 @@ public class LearnService
 					.Where(kv => !kv.Value.Sessions[currentSession].IsLearned)
 					.ToDictionary(kv => kv.Key, kv => kv.Value);
 			}
-
-			_vocabularyProgressStore.Save(_vocabulary.FilePath, _vocabularyProgress);
-			var progress = _vocabularyProgress.GetSessionProgress(_session.SessionIndex);
-			_vocabularyListService.UpdateSessionAndSave(_vocabulary.FilePath, _session.SessionIndex, progress.LearnedEntries, progress.TotalEntries);
 		}
 
 		_session = new LearnSession
@@ -202,6 +196,14 @@ public class LearnService
 			StudiedEntriesCount = 0,
 			TotalEntriesCount = _vocabularyProgress.Entries.Count,
 		};
+
+		if (isSessionRecreated)
+		{
+			// update vocabulary progress
+			_vocabularyProgressStore.Save(_vocabulary.FilePath, _vocabularyProgress);
+			var progress = _vocabularyProgress.GetSessionProgress(_session.SessionIndex);
+			_vocabularyListService.UpdateSessionAndSave(_vocabulary.FilePath, _session.SessionIndex, progress.LearnedEntries, progress.TotalEntries);
+		}
 
 		return true;
 	}
@@ -295,8 +297,9 @@ public class LearnService
 				// mark as learned
 				progressEntrySession.IsLearned = true;
 				// update session
+				_session.StudiedEntriesCount++;
 				_session.Exercise.Remove(ruText);
-				// update studied entries count
+				// update vocabulary progress
 				var progress = _vocabularyProgress.GetSessionProgress(_session.SessionIndex);
 				_vocabularyListService.UpdateSessionAndSave(_vocabulary.FilePath, _session.SessionIndex, progress.LearnedEntries, progress.TotalEntries);
 			}

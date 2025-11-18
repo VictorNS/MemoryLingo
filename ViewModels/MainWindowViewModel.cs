@@ -199,7 +199,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	private void StartNextEntryDelay()
 	{
 		IsOverlayVisible = true;
-		_remainingSeconds = 5; // TODO: Get from settings
+		_remainingSeconds = 3; // TODO: Get from settings
 		CountdownMessage = $"Next entry in {_remainingSeconds} seconds...";
 		_nextEntryTimer.Start();
 	}
@@ -240,23 +240,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	{
 		var vocabularies = _learnService.LoadVocabularyList();
 		VocabulariesCollection = new ObservableCollection<VocabularyFile>(vocabularies);
-
-		SelectedTabIndex = 1;
-		/* TODO: restore logic
-		if (_vocabularies.Count == 0)
-		{
-			SelectedTabIndex = 1;
-			return;
-		}
-
-		var vocabulary = _learnService.LoadVocabulary();
-		ShowVocabularyInfo(vocabulary);
-
-		ShowPreviousEntry();
-		_current = _learnService.GetFirstEntry();
-		ShowEntry(isNewEntry: true, showTips: false);
-		ShowSessionInfo(_current.Session);
-		*/
+		SelectedTabIndex = 0;
 	}
 
 	public void ShowSessionInfo(EntryProgress.SessionProgress sessionProgress)
@@ -342,7 +326,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		_current = _learnService.GetFirstEntry();
 		ShowEntry(isNewEntry: true, showTips: false);
 		ShowSessionInfo(_current.Session);
-		SelectedTabIndex = 0;
+		SelectedTabIndex = 1;
 	}
 
 	public void ProcessAnswer(string answer)
@@ -359,14 +343,15 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			_previous = _learnService.SaveEntryProgress(_current.Entry.RuText, isCorrect: isCorrect);
 			ShowEntry(isNewEntry: false, showTips: true);
 			ShowPreviousEntry();
-			ShowSessionInfo(_previous.Session);
-			StartNextEntryDelay();
 
 			if (isCorrect)
 			{
+				ShowSessionInfo(_previous.Session);
 				var vocabularies = _learnService.GetVocabularyList();
 				VocabulariesCollection = new ObservableCollection<VocabularyFile>(vocabularies);
 			}
+
+			StartNextEntryDelay();
 			return;
 		}
 
@@ -394,7 +379,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		if (newEntry is null)
 		{
 			_current = EntryProgress.Empty;
-			SelectedTabIndex = 1;
+			SelectedTabIndex = 0;
 		}
 		else
 		{

@@ -77,7 +77,7 @@
 			<Setter Property="FontSize" Value="14"/>
 		</Style>
 		<Style x:Key="StatusLabelCut" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
-			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="FontSize" Value="14"/>
 			<Setter Property="MaxWidth" Value="200"/>
 			<Setter Property="ContentTemplate">
 				<Setter.Value>
@@ -120,6 +120,98 @@
 	</Window.Resources>
 
 	<TabControl SelectedIndex="{Binding SelectedTabIndex}">
+		<TabItem Header="Vocabularies">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
+
+				<Button Grid.Row="0" Content="Add Vocabulary" Command="{Binding AddVocabularyCommand}"
+						Style="{StaticResource LinkButton}" HorizontalAlignment="Left" Margin="8,4"/>
+				<DataGrid Grid.Row="1" ItemsSource="{Binding VocabulariesCollection}"
+						AutoGenerateColumns="False" CanUserAddRows="False"
+						CanUserDeleteRows="False" SelectionMode="Single">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="File Name" Binding="{Binding FileName, Mode=OneWay}" Width="250">
+							<DataGridTextColumn.ElementStyle>
+								<Style TargetType="TextBlock">
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding HasErrors}" Value="True">
+											<Setter Property="Foreground" Value="Red"/>
+										</DataTrigger>
+									</Style.Triggers>
+									<Setter Property="ToolTip">
+										<Setter.Value>
+											<StackPanel>
+												<TextBlock Text="{Binding FilePath}"/>
+												<TextBlock Text="{Binding ErrorMessage}" Foreground="Red" Visibility="{Binding HasErrors, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+											</StackPanel>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</DataGridTextColumn.ElementStyle>
+						</DataGridTextColumn>
+						<DataGridTextColumn Header="Last Session" Binding="{Binding LastSessionLocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="100"/>
+						<DataGridTemplateColumn Header="Session1" Width="Auto">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<Button Content="{Binding Session1}" Style="{StaticResource SessionButton}"
+											Command="{Binding DataContext.SessionClickCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}">
+										<Button.CommandParameter>
+											<MultiBinding Converter="{StaticResource SessionClickParameterConverter}">
+												<Binding Path="."/>
+												<Binding Source="0"/>
+											</MultiBinding>
+										</Button.CommandParameter>
+									</Button>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn Header="Session2" Width="Auto">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<Button Content="{Binding Session2}" Style="{StaticResource SessionButton}"
+											Command="{Binding DataContext.SessionClickCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}">
+										<Button.CommandParameter>
+											<MultiBinding Converter="{StaticResource SessionClickParameterConverter}">
+												<Binding Path="."/>
+												<Binding Source="1"/>
+											</MultiBinding>
+										</Button.CommandParameter>
+									</Button>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn Header="Session3" Width="Auto">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<Button Content="{Binding Session3}" Style="{StaticResource SessionButton}"
+											Command="{Binding DataContext.SessionClickCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}">
+										<Button.CommandParameter>
+											<MultiBinding Converter="{StaticResource SessionClickParameterConverter}">
+												<Binding Path="."/>
+												<Binding Source="2"/>
+											</MultiBinding>
+										</Button.CommandParameter>
+									</Button>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn Header="Delete" Width="Auto">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<Button Command="{Binding DataContext.DeleteVocabularyCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+											CommandParameter="{Binding}" Background="Transparent" BorderThickness="0">
+										<Image Source="Images/delete-16.png" Width="16" Height="16"/>
+									</Button>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+					</DataGrid.Columns>
+				</DataGrid>
+			</Grid>
+		</TabItem>
 		<TabItem Header="Lesson">
 			<Grid>
 				<Grid.RowDefinitions>
@@ -200,9 +292,9 @@
 					<Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="Silver" Margin="0,2,0,0" Padding="0,2,0,0">
 						<WrapPanel Orientation="Horizontal">
 							<Label Content="{Binding FileName}" Style="{StaticResource StatusFile}"/>
+							<Label Content="{Binding PrevText}" Style="{StaticResource StatusLabelCut}"/>
 							<Image Source="{Binding PrevStatusImage}" Style="{StaticResource StatusImage}"/>
 							<Label Content="{Binding PrevStatus}" Style="{StaticResource StatusLabel}"/>
-							<Label Content="{Binding PrevText}" Style="{StaticResource StatusLabelCut}"/>
 							<Image Source="Images/dyslexia-16.png" Style="{StaticResource StatusImage}"/>
 							<Label Content="{Binding VocabularyStat}" Style="{StaticResource StatusLabel}"/>
 						</WrapPanel>
@@ -217,99 +309,6 @@
 						</StackPanel>
 					</Border>
 				</Grid>
-			</Grid>
-		</TabItem>
-		<TabItem Header="Vocabularies">
-			<Grid>
-				<Grid.RowDefinitions>
-					<RowDefinition Height="Auto"/>
-					<RowDefinition Height="*"/>
-				</Grid.RowDefinitions>
-
-				<Button Grid.Row="0" Content="Add Vocabulary" Command="{Binding AddVocabularyCommand}"
-						Style="{StaticResource LinkButton}" HorizontalAlignment="Left" Margin="8,4"/>
-
-				<DataGrid Grid.Row="1" ItemsSource="{Binding VocabulariesCollection}"
-						AutoGenerateColumns="False" CanUserAddRows="False"
-						CanUserDeleteRows="False" SelectionMode="Single">
-					<DataGrid.Columns>
-						<DataGridTextColumn Header="File Name" Binding="{Binding FileName, Mode=OneWay}" Width="200">
-							<DataGridTextColumn.ElementStyle>
-								<Style TargetType="TextBlock">
-									<Style.Triggers>
-										<DataTrigger Binding="{Binding HasErrors}" Value="True">
-											<Setter Property="Foreground" Value="Red"/>
-										</DataTrigger>
-									</Style.Triggers>
-									<Setter Property="ToolTip">
-										<Setter.Value>
-											<StackPanel>
-												<TextBlock Text="{Binding FilePath}"/>
-												<TextBlock Text="{Binding ErrorMessage}" Foreground="Red" Visibility="{Binding HasErrors, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-											</StackPanel>
-										</Setter.Value>
-									</Setter>
-								</Style>
-							</DataGridTextColumn.ElementStyle>
-						</DataGridTextColumn>
-						<DataGridTextColumn Header="Last Session" Binding="{Binding LastSessionLocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="100"/>
-						<DataGridTemplateColumn Header="Session1" Width="Auto">
-							<DataGridTemplateColumn.CellTemplate>
-								<DataTemplate>
-									<Button Content="{Binding Session1}" Style="{StaticResource SessionButton}"
-											Command="{Binding DataContext.SessionClickCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}">
-										<Button.CommandParameter>
-											<MultiBinding Converter="{StaticResource SessionClickParameterConverter}">
-												<Binding Path="."/>
-												<Binding Source="0"/>
-											</MultiBinding>
-										</Button.CommandParameter>
-									</Button>
-								</DataTemplate>
-							</DataGridTemplateColumn.CellTemplate>
-						</DataGridTemplateColumn>
-						<DataGridTemplateColumn Header="Session2" Width="Auto">
-							<DataGridTemplateColumn.CellTemplate>
-								<DataTemplate>
-									<Button Content="{Binding Session2}" Style="{StaticResource SessionButton}"
-											Command="{Binding DataContext.SessionClickCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}">
-										<Button.CommandParameter>
-											<MultiBinding Converter="{StaticResource SessionClickParameterConverter}">
-												<Binding Path="."/>
-												<Binding Source="1"/>
-											</MultiBinding>
-										</Button.CommandParameter>
-									</Button>
-								</DataTemplate>
-							</DataGridTemplateColumn.CellTemplate>
-						</DataGridTemplateColumn>
-						<DataGridTemplateColumn Header="Session3" Width="Auto">
-							<DataGridTemplateColumn.CellTemplate>
-								<DataTemplate>
-									<Button Content="{Binding Session3}" Style="{StaticResource SessionButton}"
-											Command="{Binding DataContext.SessionClickCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}">
-										<Button.CommandParameter>
-											<MultiBinding Converter="{StaticResource SessionClickParameterConverter}">
-												<Binding Path="."/>
-												<Binding Source="2"/>
-											</MultiBinding>
-										</Button.CommandParameter>
-									</Button>
-								</DataTemplate>
-							</DataGridTemplateColumn.CellTemplate>
-						</DataGridTemplateColumn>
-						<DataGridTemplateColumn Header="Delete" Width="Auto">
-							<DataGridTemplateColumn.CellTemplate>
-								<DataTemplate>
-									<Button Command="{Binding DataContext.DeleteVocabularyCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-											CommandParameter="{Binding}" Background="Transparent" BorderThickness="0">
-										<Image Source="Images/delete-16.png" Width="16" Height="16"/>
-									</Button>
-								</DataTemplate>
-							</DataGridTemplateColumn.CellTemplate>
-						</DataGridTemplateColumn>
-					</DataGrid.Columns>
-				</DataGrid>
 			</Grid>
 		</TabItem>
 	</TabControl>

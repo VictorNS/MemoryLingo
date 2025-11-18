@@ -5,10 +5,12 @@ namespace MemoryLingo.Models;
 public class VocabularyFile
 {
 	public required string FilePath { get; set; }
-	public required string FileName { get; set; }
-	public string ErrorMessage { get; set; } = string.Empty;
 	public List<VocabularyFileSession> Sessions { get; set; } = [];
 	public int SessionIndex { get; set; }
+	[JsonIgnore]
+	public string FileName { get; set; } = string.Empty;
+	[JsonIgnore]
+	public string ErrorMessage { get; set; } = string.Empty;
 	[JsonIgnore]
 	public bool HasErrors => !string.IsNullOrEmpty(ErrorMessage);
 	[JsonIgnore]

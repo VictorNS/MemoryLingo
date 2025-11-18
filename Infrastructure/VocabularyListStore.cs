@@ -22,6 +22,9 @@ public class VocabularyListStore
 				?? [];
 		}
 
+		foreach (var vocabularyFile in _vocabularies)
+			vocabularyFile.FileName = Path.GetFileName(vocabularyFile.FilePath);
+
 		return _vocabularies;
 	}
 
@@ -46,7 +49,7 @@ public class VocabularyListStore
 		_vocabularies.Remove(vocabulary);
 		Save();
 	}
-
+	/* TODO: delete?
 	public void AddErrorAndSave(string filePath, string ErrorMessage)
 	{
 		var vocabulary = _vocabularies.FirstOrDefault(x => x.FilePath == filePath);
@@ -57,7 +60,7 @@ public class VocabularyListStore
 		vocabulary.ErrorMessage = ErrorMessage;
 		Save();
 	}
-
+	*/
 	public void UpdateSessionAndSave(string filePath, int sessionIndex, int learnedEntries, int totalEntries)
 	{
 		var vocabulary = _vocabularies.FirstOrDefault(x => x.FilePath == filePath);
