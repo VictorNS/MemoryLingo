@@ -296,6 +296,8 @@
 							<Image Source="{Binding PrevStatusImage}" Style="{StaticResource StatusImage}"/>
 							<Label Content="{Binding PrevStatus}" Style="{StaticResource StatusLabel}"/>
 							<Image Source="Images/dyslexia-16.png" Style="{StaticResource StatusImage}"/>
+							<Label Content="{Binding QueueStat}" Style="{StaticResource StatusLabel}"/>
+							<Image Source="Images/vocabulary-16.png" Style="{StaticResource StatusImage}"/>
 							<Label Content="{Binding VocabularyStat}" Style="{StaticResource StatusLabel}"/>
 						</WrapPanel>
 					</Border>

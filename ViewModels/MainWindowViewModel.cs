@@ -35,6 +35,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	private string _prevText = string.Empty;
 	private string _prevStatusImage = "Images/question-mark-16.png";
 	private string _prevStatus = string.Empty;
+	private string _queueStat = string.Empty;
 	private string _vocabularyStat = string.Empty;
 	private ObservableCollection<WordCheckResult> _wordResults = [];
 	private bool _hideIncorrectWords = false;
@@ -100,6 +101,11 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	{
 		get => _prevStatus;
 		set => SetProperty(ref _prevStatus, value);
+	}
+	public string QueueStat
+	{
+		get => _queueStat;
+		set => SetProperty(ref _queueStat, value);
 	}
 	public string VocabularyStat
 	{
@@ -243,9 +249,10 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		SelectedTabIndex = 0;
 	}
 
-	public void ShowSessionInfo(EntryProgress.SessionProgress sessionProgress)
+	public void ShowSessionInfo(EntryProgress.CurrentSessionProgress sessionProgress)
 	{
-		VocabularyStat = $"{sessionProgress.StudiedEntriesCount}/{sessionProgress.SessionEntriesCount}/{sessionProgress.TotalEntriesCount}";
+		QueueStat = $"{sessionProgress.QueueIndex + 1}-{sessionProgress.QueueCount}";
+		VocabularyStat = $"{sessionProgress.VocabularyStudiedCount}/{sessionProgress.VocabularyEntriesCount}";
 	}
 
 	public void ShowEntry(bool isNewEntry, bool showTips)

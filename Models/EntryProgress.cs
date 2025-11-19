@@ -7,7 +7,7 @@ public class EntryProgress
 	public bool IsLastAttemptSuccess { get; set; }
 	public required int CorrectAnswers { get; set; }
 	public required int TotalAttempts { get; set; }
-	public required SessionProgress Session { get; set; }
+	public required CurrentSessionProgress Session { get; set; }
 
 	public static EntryProgress Empty { get; } = new()
 	{
@@ -18,16 +18,18 @@ public class EntryProgress
 		TotalAttempts = 0,
 		Session = new()
 		{
-			TotalEntriesCount = 0,
-			SessionEntriesCount = 0,
-			StudiedEntriesCount = 0
+			QueueIndex = 0,
+			QueueCount = 0,
+			VocabularyStudiedCount = 0,
+			VocabularyEntriesCount = 0,
 		}
 	};
 
-	public class SessionProgress
+	public class CurrentSessionProgress
 	{
-		public required int TotalEntriesCount { get; set; }
-		public required int SessionEntriesCount { get; set; }
-		public required int StudiedEntriesCount { get; set; }
+		public required int QueueIndex { get; set; }
+		public required int QueueCount { get; set; }
+		public required int VocabularyStudiedCount { get; set; }
+		public required int VocabularyEntriesCount { get; set; }
 	}
 }

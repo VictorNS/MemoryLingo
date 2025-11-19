@@ -7,6 +7,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseWPF>true</UseWPF>
 		<GenerateProgramFile>false</GenerateProgramFile>
+		<ApplicationIcon>Images\dyslexia-32.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -39,5 +40,6 @@
 		<Resource Include="Images\delete-16.png" />
 		<Resource Include="Images\question-mark-16.png" />
 		<Resource Include="Images\dyslexia-16.png" />
+		<Resource Include="Images\vocabulary-16.png" />
 	</ItemGroup>
 </Project>
