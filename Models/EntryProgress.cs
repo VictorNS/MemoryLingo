@@ -20,7 +20,7 @@ public class EntryProgress
 		{
 			QueueIndex = 0,
 			QueueCount = 0,
-			VocabularyStudiedCount = 0,
+			VocabularyLearnedCount = 0,
 			VocabularyEntriesCount = 0,
 		}
 	};
@@ -29,7 +29,7 @@ public class EntryProgress
 	{
 		public required int QueueIndex { get; set; }
 		public required int QueueCount { get; set; }
-		public required int VocabularyStudiedCount { get; set; }
+		public required int VocabularyLearnedCount { get; set; }
 		public required int VocabularyEntriesCount { get; set; }
 	}
 }

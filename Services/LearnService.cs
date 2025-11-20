@@ -197,6 +197,7 @@ public class LearnService
 			Entries = restEntries,
 			Queue = [.. restEntries.Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)],
 			VocabularyEntriesCount = _vocabularyProgress.Entries.Count,
+			VocabularyLearnedCount = _vocabularyProgress.Entries.Count - restEntries.Count
 		};
 
 		if (isSessionRecreated)
@@ -278,7 +279,7 @@ public class LearnService
 			{
 				QueueIndex = _session.QueueIndex,
 				QueueCount = _session.Queue.Count,
-				VocabularyStudiedCount = _session.VocabularyEntriesCount - _session.Entries.Count,
+				VocabularyLearnedCount = _session.VocabularyLearnedCount,
 				VocabularyEntriesCount = _session.VocabularyEntriesCount,
 			}
 		};
@@ -300,6 +301,7 @@ public class LearnService
 				// mark as learned
 				progressEntrySession.IsLearned = true;
 				// update session
+				_session.VocabularyLearnedCount++;
 				_session.Queue.Remove(ruText);
 				// update vocabulary progress
 				var progress = _vocabularyProgress.GetSessionProgress(_session.SessionIndex);
@@ -320,7 +322,7 @@ public class LearnService
 			{
 				QueueIndex = _session.QueueIndex,
 				QueueCount = _session.Queue.Count,
-				VocabularyStudiedCount = _session.VocabularyEntriesCount - _session.Entries.Count,
+				VocabularyLearnedCount = _session.VocabularyLearnedCount,
 				VocabularyEntriesCount = _session.VocabularyEntriesCount,
 			}
 		};

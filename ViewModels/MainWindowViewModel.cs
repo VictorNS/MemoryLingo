@@ -252,7 +252,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	public void ShowSessionInfo(EntryProgress.CurrentSessionProgress sessionProgress)
 	{
 		QueueStat = $"{sessionProgress.QueueIndex + 1}-{sessionProgress.QueueCount}";
-		VocabularyStat = $"{sessionProgress.VocabularyStudiedCount}/{sessionProgress.VocabularyEntriesCount}";
+		VocabularyStat = $"{sessionProgress.VocabularyLearnedCount}/{sessionProgress.VocabularyEntriesCount}";
 	}
 
 	public void ShowEntry(bool isNewEntry, bool showTips)
