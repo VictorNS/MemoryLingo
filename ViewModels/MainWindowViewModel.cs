@@ -259,6 +259,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	{
 		HideIncorrectWords = false;
 		RuText = _current.Entry.RuText;
+		RuTip = _current.Entry.RuTip;
 
 		if (isNewEntry)
 		{
@@ -268,7 +269,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		if (showTips)
 		{
-			RuTip = _current.Entry.RuTip;
 			Transcription = _current.Entry.Transcription;
 			RuExample = _current.Entry.RuExample;
 			EnExample = _current.Entry.EnExample;
@@ -278,7 +278,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 		else
 		{
-			RuTip = string.Empty;
 			Transcription = string.Empty;
 			RuExample = string.Empty;
 			EnExample = string.Empty;

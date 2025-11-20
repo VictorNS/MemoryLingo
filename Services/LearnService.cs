@@ -121,22 +121,23 @@ public class LearnService
 
 	public void SynchronizeProgressWithVocabulary()
 	{
-		// TODO: try to keep the original order
+		// Create a new dictionary (based on vocabulary entries order)
+		var newEntries = new Dictionary<string, VocabularyProgressEntry>();
 
-		// remove progress entries for removed vocabulary entries
-		var notExistingEntries = _vocabularyProgress.Entries.Keys.Except(_vocabulary.Entries.Select(e => e.RuText)).ToList();
-		foreach (var key in notExistingEntries)
-			_vocabularyProgress.Entries.Remove(key);
-
-		// add progress entries for vocabulary entries
 		foreach (var entry in _vocabulary.Entries)
 		{
-			if (!_vocabularyProgress.Entries.TryGetValue(entry.RuText, out var progressEntry))
-				_vocabularyProgress.Entries.Add(entry.RuText, progressEntry = new VocabularyProgressEntry());
+			var progressEntry = _vocabularyProgress.Entries.TryGetValue(entry.RuText, out var existing)
+				? existing
+				: new VocabularyProgressEntry();
+			newEntries.Add(entry.RuText, progressEntry);
 
+			// Ensure all entries have 3 sessions
 			for (int i = progressEntry.Sessions.Count; i < 3; i++)
 				progressEntry.Sessions.Add(new VocabularyProgressEntrySession());
 		}
+
+		// Replace the old dictionary with the new
+		_vocabularyProgress.Entries = newEntries;
 	}
 
 	public bool LoadSession(int? sessionNumber)
@@ -194,6 +195,7 @@ public class LearnService
 		{
 			SessionIndex = currentSession,
 			QueueIndex = 0,
+			IsLastLearned = false,
 			Entries = restEntries,
 			Queue = [.. restEntries.Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)],
 			VocabularyEntriesCount = _vocabularyProgress.Entries.Count,
@@ -234,21 +236,24 @@ public class LearnService
 
 	public EntryProgress GetFirstEntry()
 	{
-		return GetCurrentEntry();
+		return GetEntryByQueueIndex();
 	}
 
 	public EntryProgress? GetNextEntry()
 	{
-		if (_session.QueueIndex + 1 < _session.Queue.Count)
+		var expectQueueIndex = _session.QueueIndex + (_session.IsLastLearned ? 0 : 1);
+		_session.IsLastLearned = false;
+
+		if (expectQueueIndex < _session.Queue.Count)
 		{
-			_session.QueueIndex++;
-			return GetCurrentEntry();
+			_session.QueueIndex = expectQueueIndex;
+			return GetEntryByQueueIndex();
 		}
 
 		if (_session.Queue.Count > 2)
 		{
 			_session.QueueIndex = 0;
-			return GetCurrentEntry();
+			return GetEntryByQueueIndex();
 		}
 
 		var restEntries = _vocabularyProgress.Entries
@@ -260,10 +265,10 @@ public class LearnService
 
 		_session.Queue = [.. restEntries.Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)];
 		_session.QueueIndex = 0;
-		return GetCurrentEntry();
+		return GetEntryByQueueIndex();
 	}
 
-	private EntryProgress GetCurrentEntry()
+	private EntryProgress GetEntryByQueueIndex()
 	{
 		var ruText = _session.Queue[_session.QueueIndex];
 		var entry = _vocabulary.Entries.First(e => e.RuText == ruText);
@@ -302,6 +307,7 @@ public class LearnService
 				progressEntrySession.IsLearned = true;
 				// update session
 				_session.VocabularyLearnedCount++;
+				_session.IsLastLearned = true;
 				_session.Queue.Remove(ruText);
 				// update vocabulary progress
 				var progress = _vocabularyProgress.GetSessionProgress(_session.SessionIndex);

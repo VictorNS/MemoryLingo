@@ -8,4 +8,5 @@ public class LearnSession
 	public required int SessionIndex { get; set; }
 	public required int QueueIndex { get; set; }
 	public required List<string> Queue { get; set; }
+	public required bool IsLastLearned { get; set; }
 }
