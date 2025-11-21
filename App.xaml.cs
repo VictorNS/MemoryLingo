@@ -1,6 +1,9 @@
 ﻿using System.Windows;
-using MemoryLingo.Infrastructure;
-using MemoryLingo.Services;
+using MemoryLingo.Core.Services;
+using MemoryLingo.Infrastructure.Settings;
+using MemoryLingo.Infrastructure.VocabularyExcel;
+using MemoryLingo.Infrastructure.VocabularyProgress;
+using MemoryLingo.Infrastructure.VocabularyReference;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MemoryLingo;
@@ -13,10 +16,10 @@ public partial class App : Application
 	{
 		var services = new ServiceCollection();
 
-		services.AddTransient<VocabularyListStore>();
-		services.AddTransient<VocabularyProgressStore>();
-		services.AddTransient<SettingsStore>();
-		services.AddTransient<VocabularyStore>();
+		services.AddTransient<ISettingsStore, SettingsStore>();
+		services.AddTransient<IVocabularyReferenceStore, VocabularyReferenceStore>();
+		services.AddTransient<IVocabularyProgressStore, VocabularyProgressStore>();
+		services.AddTransient<IVocabularyExcelReader, VocabularyExcelReader>();
 		services.AddTransient<EntryValidationService>();
 		services.AddTransient<LearnService>();
 		services.AddTransient<MainWindow>();

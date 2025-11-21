@@ -1,0 +1,378 @@
+<Window x:Class="MemoryLingo.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="clr-namespace:MemoryLingo.Presentation.ViewModels"
+		xmlns:converters="clr-namespace:MemoryLingo.Presentation.Converters"
+		Closed="Window_Closed" Loaded="Window_Loaded"
+		Title="Memory Lingo" Height="230" Width="600">
+
+	<Window.Resources>
+		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+		<converters:SessionClickParameterConverter x:Key="SessionClickParameterConverter"/>
+		<converters:BooleanInverterConverter x:Key="BooleanInverterConverter"/>
+
+		<Style TargetType="{x:Type TabControl}">
+			<Setter Property="Background" Value="LightCyan"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Margin" Value="0"/>
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="TabStripPlacement" Value="Top"/>
+		</Style>
+		<Style TargetType="{x:Type TabItem}">
+			<Setter Property="Background" Value="White"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Padding" Value="8,4"/>
+			<Setter Property="Margin" Value="0"/>
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type TabItem}">
+						<Border x:Name="Border"
+								BorderThickness="{TemplateBinding BorderThickness}"
+								BorderBrush="{TemplateBinding BorderBrush}"
+								Background="{TemplateBinding Background}"
+								Padding="{TemplateBinding Padding}">
+							<ContentPresenter x:Name="ContentSite"
+											  VerticalAlignment="Center"
+											  HorizontalAlignment="Center"
+											  ContentSource="Header"/>
+						</Border>
+						<ControlTemplate.Triggers>
+							<Trigger Property="IsSelected" Value="True">
+								<Setter TargetName="Border" Property="BorderThickness" Value="0"/>
+								<Setter TargetName="Border" Property="Background" Value="LightCyan"/>
+							</Trigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+		<Style TargetType="{x:Type Label}">
+			<Setter Property="FontFamily" Value="Verdana"/>
+			<Setter Property="FontSize" Value="18"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Margin" Value="4,0,1,0"/>
+			<Setter Property="Padding" Value="2,1,2,1"/>
+		</Style>
+		<Style x:Key="TipLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+			<Setter Property="FontSize" Value="14"/>
+		</Style>
+		<Style TargetType="{x:Type TextBox}">
+			<Setter Property="FontFamily" Value="Verdana"/>
+			<Setter Property="FontSize" Value="18"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="Margin" Value="1,0,1,0"/>
+			<Setter Property="Padding" Value="2,4,2,4"/>
+		</Style>
+		<Style x:Key="TipText" TargetType="{x:Type ItemsControl}">
+			<Setter Property="Margin" Value="0"/>
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="MinHeight" Value="28"/>
+		</Style>
+		<Style x:Key="StatusLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+			<Setter Property="FontSize" Value="14"/>
+		</Style>
+		<Style x:Key="StatusLabelCut" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="ContentTemplate">
+				<Setter.Value>
+					<DataTemplate>
+						<TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis"/>
+					</DataTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style x:Key="StatusImage" TargetType="{x:Type Image}">
+			<Setter Property="Width" Value="16"/>
+			<Setter Property="Height" Value="16"/>
+			<Setter Property="Margin" Value="0"/>
+		</Style>
+
+		<Style x:Key="LinkButton" TargetType="{x:Type Button}">
+			<Setter Property="FontFamily" Value="Tahoma"/>
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Foreground" Value="Blue"/>
+			<Setter Property="Cursor" Value="Hand"/>
+			<Setter Property="Margin" Value="4,0,1,0"/>
+			<Setter Property="Padding" Value="2,1,2,1"/>
+		</Style>
+		<Style x:Key="SessionButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LinkButton}">
+			<Setter Property="Margin" Value="0"/>
+			<Setter Property="Padding" Value="0"/>
+		</Style>
+		<Style x:Key="RefreshButton" TargetType="{x:Type Button}">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Cursor" Value="Hand"/>
+			<Setter Property="Margin" Value="8,0,0,0"/>
+		</Style>
+		<Style TargetType="{x:Type DataGrid}">
+			<Setter Property="FontFamily" Value="Tahoma"/>
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="Margin" Value="0"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Background" Value="LightCyan"/>
+			<Setter Property="GridLinesVisibility" Value="All"/>
+			<Setter Property="HorizontalGridLinesBrush" Value="Silver"/>
+			<Setter Property="VerticalGridLinesBrush" Value="Silver"/>
+		</Style>
+	</Window.Resources>
+
+	<TabControl SelectedIndex="{Binding SelectedTabIndex}">
+		<TabItem Header="Vocabularies">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="29*"/>
+					<ColumnDefinition Width="121*"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
+
+				<Button Grid.Row="0" Content="Add Vocabulary" Command="{Binding AddVocabularyCommand}"
+						Style="{StaticResource LinkButton}" HorizontalAlignment="Left" Margin="8,4,0,4"/>
+
+				<DataGrid ItemsSource="{Binding VocabulariesCollection}"
+						AutoGenerateColumns="False" CanUserAddRows="False"
+						CanUserDeleteRows="False" SelectionMode="Single" Grid.ColumnSpan="2" Margin="0,24,0,0" Grid.RowSpan="2">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="File Name" Binding="{Binding FileName, Mode=OneWay}" Width="250">
+							<DataGridTextColumn.ElementStyle>
+								<Style TargetType="TextBlock">
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding HasErrors}" Value="True">
+											<Setter Property="Foreground" Value="Red"/>
+										</DataTrigger>
+									</Style.Triggers>
+									<Setter Property="ToolTip">
+										<Setter.Value>
+											<StackPanel>
+												<TextBlock Text="{Binding FilePath}"/>
+												<TextBlock Text="{Binding ErrorMessage}" Foreground="Red" Visibility="{Binding HasErrors, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+											</StackPanel>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</DataGridTextColumn.ElementStyle>
+						</DataGridTextColumn>
+						<DataGridTextColumn Header="Last Session" Binding="{Binding LastSessionLocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="100"/>
+						<DataGridTemplateColumn Header="Session1" Width="Auto">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<StackPanel Orientation="Horizontal">
+										<Button Content="{Binding Session1}" Style="{StaticResource SessionButton}"
+												Command="{Binding DataContext.SessionClickCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+												IsEnabled="{Binding HasErrors, Converter={StaticResource BooleanInverterConverter}}">
+											<Button.CommandParameter>
+												<MultiBinding Converter="{StaticResource SessionClickParameterConverter}">
+													<Binding Path="."/>
+													<Binding Source="0"/>
+												</MultiBinding>
+											</Button.CommandParameter>
+										</Button>
+										<Button Style="{StaticResource RefreshButton}"
+												Command="{Binding DataContext.RefreshSessionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+												ToolTip="Restart Session 1"
+												IsEnabled="{Binding HasErrors, Converter={StaticResource BooleanInverterConverter}}">
+											<Button.CommandParameter>
+												<MultiBinding Converter="{StaticResource SessionClickParameterConverter}">
+													<Binding Path="."/>
+													<Binding Source="0"/>
+												</MultiBinding>
+											</Button.CommandParameter>
+											<Image Source="/Presentation/Assets/Images/refresh-16.png" Width="16" Height="16"/>
+										</Button>
+									</StackPanel>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn Header="Session2" Width="Auto">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<StackPanel Orientation="Horizontal">
+										<Button Content="{Binding Session2}" Style="{StaticResource SessionButton}"
+												Command="{Binding DataContext.SessionClickCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+												IsEnabled="{Binding HasErrors, Converter={StaticResource BooleanInverterConverter}}">
+											<Button.CommandParameter>
+												<MultiBinding Converter="{StaticResource SessionClickParameterConverter}">
+													<Binding Path="."/>
+													<Binding Source="1"/>
+												</MultiBinding>
+											</Button.CommandParameter>
+										</Button>
+										<Button Style="{StaticResource RefreshButton}"
+												Command="{Binding DataContext.RefreshSessionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+												ToolTip="Restart Session 2"
+												IsEnabled="{Binding HasErrors, Converter={StaticResource BooleanInverterConverter}}">
+											<Button.CommandParameter>
+												<MultiBinding Converter="{StaticResource SessionClickParameterConverter}">
+													<Binding Path="."/>
+													<Binding Source="1"/>
+												</MultiBinding>
+											</Button.CommandParameter>
+											<Image Source="/Presentation/Assets/Images/refresh-16.png" Width="16" Height="16"/>
+										</Button>
+									</StackPanel>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn Header="Session3" Width="Auto">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<StackPanel Orientation="Horizontal">
+										<Button Content="{Binding Session3}" Style="{StaticResource SessionButton}"
+												Command="{Binding DataContext.SessionClickCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+												IsEnabled="{Binding HasErrors, Converter={StaticResource BooleanInverterConverter}}">
+											<Button.CommandParameter>
+												<MultiBinding Converter="{StaticResource SessionClickParameterConverter}">
+													<Binding Path="."/>
+													<Binding Source="2"/>
+												</MultiBinding>
+											</Button.CommandParameter>
+										</Button>
+										<Button Style="{StaticResource RefreshButton}"
+												Command="{Binding DataContext.RefreshSessionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+												ToolTip="Restart Session 3"
+												IsEnabled="{Binding HasErrors, Converter={StaticResource BooleanInverterConverter}}">
+											<Button.CommandParameter>
+												<MultiBinding Converter="{StaticResource SessionClickParameterConverter}">
+													<Binding Path="."/>
+													<Binding Source="2"/>
+												</MultiBinding>
+											</Button.CommandParameter>
+											<Image Source="/Presentation/Assets/Images/refresh-16.png" Width="16" Height="16"/>
+										</Button>
+									</StackPanel>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn Header="Delete" Width="Auto">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<Button Command="{Binding DataContext.DeleteVocabularyCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+											CommandParameter="{Binding}" Background="Transparent" BorderThickness="0">
+										<Image Source="/Presentation/Assets/Images/delete-16.png" Width="16" Height="16"/>
+									</Button>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+					</DataGrid.Columns>
+				</DataGrid>
+			</Grid>
+		</TabItem>
+		<TabItem Header="Lesson">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
+
+				<Grid Grid.Row="0">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+					<Label Grid.Row="0" Content="{Binding RuText}"/>
+					<Label Grid.Row="1" Content="{Binding RuTip}" Style="{StaticResource TipLabel}"/>
+					<TextBox Grid.Row="2" Text="{Binding Answer, UpdateSourceTrigger=PropertyChanged}"/>
+					<ItemsControl Grid.Row="3" ItemsSource="{Binding WordResults}" Style="{StaticResource TipText}">
+						<ItemsControl.ItemsPanel>
+							<ItemsPanelTemplate>
+								<WrapPanel Orientation="Horizontal"/>
+							</ItemsPanelTemplate>
+						</ItemsControl.ItemsPanel>
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Label Content="{Binding Text}">
+									<Label.Style>
+										<Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+											<Setter Property="Padding" Value="0,1,0,1"/>
+											<Style.Triggers>
+												<DataTrigger Binding="{Binding IsPunctuation}" Value="False">
+													<Setter Property="Margin" Value="6,0,0,0"/>
+												</DataTrigger>
+												<DataTrigger Binding="{Binding IsPunctuation}" Value="True">
+													<Setter Property="Margin" Value="0,0,0,0"/>
+												</DataTrigger>
+												<DataTrigger Binding="{Binding IsNonWord}" Value="True">
+													<Setter Property="Foreground" Value="Gray"/>
+												</DataTrigger>
+												<DataTrigger Binding="{Binding IsMatch}" Value="False">
+													<Setter Property="Background" Value="Pink"/>
+												</DataTrigger>
+												<MultiDataTrigger>
+													<MultiDataTrigger.Conditions>
+														<Condition Binding="{Binding IsMatch}" Value="False"/>
+														<Condition Binding="{Binding DataContext.HideIncorrectWords, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True"/>
+													</MultiDataTrigger.Conditions>
+													<Setter Property="Foreground" Value="Pink"/>
+												</MultiDataTrigger>
+											</Style.Triggers>
+										</Style>
+									</Label.Style>
+								</Label>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+					<Label Grid.Row="4" Content="{Binding Transcription}" Style="{StaticResource TipLabel}"/>
+				</Grid>
+
+				<Grid Grid.Row="1" Background="LightGray">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="*"/>
+					</Grid.RowDefinitions>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+					<Label Grid.Row="0" Content="{Binding RuExample}" Style="{StaticResource TipLabel}"/>
+					<Label Grid.Row="1" Content="{Binding EnExample}" Style="{StaticResource TipLabel}"/>
+					<Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="Silver" Margin="0,2,0,0" Padding="0,2,0,0">
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="*"/>
+							</Grid.RowDefinitions>
+							<WrapPanel Grid.Row="0" Orientation="Horizontal">
+								<Label Content="{Binding PrevText}" Style="{StaticResource StatusLabelCut}"/>
+								<Image Source="{Binding PrevStatusImage}" Style="{StaticResource StatusImage}"/>
+								<Label Content="{Binding PrevStatus}" Style="{StaticResource StatusLabel}"/>
+								<Image Source="/Presentation/Assets/Images/dyslexia-16.png" Style="{StaticResource StatusImage}"/>
+								<Label Content="{Binding QueueStat}" Style="{StaticResource StatusLabel}"/>
+							</WrapPanel>
+							<WrapPanel Grid.Row="1" Orientation="Horizontal">
+								<Label Content="{Binding FileName}" Style="{StaticResource StatusLabel}"/>
+								<Image Source="/Presentation/Assets/Images/vocabulary-16.png" Style="{StaticResource StatusImage}"/>
+								<Label Content="{Binding VocabularyStat}" Style="{StaticResource StatusLabel}"/>
+							</WrapPanel>
+						</Grid>
+					</Border>
+				</Grid>
+
+				<Grid Grid.Row="0" Grid.RowSpan="2" Visibility="{Binding IsOverlayVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Panel.ZIndex="1000">
+					<Border Background="#80FFFFFF" CornerRadius="4" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="6">
+						<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+							<Label Content="{Binding CountdownMessage}" FontSize="10" HorizontalAlignment="Center" Foreground="DarkGray"/>
+							<Label Content="Press Ctrl, Space, or Enter to skip" FontSize="8" HorizontalAlignment="Center" Foreground="DarkGray" Margin="0,5,0,0"/>
+						</StackPanel>
+					</Border>
+				</Grid>
+			</Grid>
+		</TabItem>
+	</TabControl>
+</Window>

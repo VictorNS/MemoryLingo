@@ -7,7 +7,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseWPF>true</UseWPF>
 		<GenerateProgramFile>false</GenerateProgramFile>
-		<ApplicationIcon>Images\dyslexia-32.ico</ApplicationIcon>
+		<ApplicationIcon>Presentation\Assets\Images\dyslexia-32.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -35,11 +35,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Resource Include="Images\check-16.png" />
-		<Resource Include="Images\decrease-16.png" />
-		<Resource Include="Images\delete-16.png" />
-		<Resource Include="Images\question-mark-16.png" />
-		<Resource Include="Images\dyslexia-16.png" />
-		<Resource Include="Images\vocabulary-16.png" />
+		<Resource Include="Presentation\Assets\Images\check-16.png" />
+		<Resource Include="Presentation\Assets\Images\decrease-16.png" />
+		<Resource Include="Presentation\Assets\Images\delete-16.png" />
+		<Resource Include="Presentation\Assets\Images\dyslexia-16.png" />
+		<Resource Include="Presentation\Assets\Images\dyslexia-32.ico" />
+		<Resource Include="Presentation\Assets\Images\question-mark-16.png" />
+		<Resource Include="Presentation\Assets\Images\refresh-16.png" />
+		<Resource Include="Presentation\Assets\Images\vocabulary-16.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Presentation\Assets\Styles\" />
 	</ItemGroup>
 </Project>

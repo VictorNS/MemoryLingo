@@ -1,0 +1,75 @@
+﻿using System.IO;
+using System.IO.Compression;
+using System.Xml;
+using System.Xml.Serialization;
+
+namespace MemoryLingo.Infrastructure.Excel;
+
+/// <summary>
+/// (c) 2014 Vienna, Dietmar Schoder
+/// https://www.codeproject.com/Tips/801032/Csharp-How-To-Read-xlsx-Excel-File-With-Lines-of
+/// Code Project Open License (CPOL) 1.02
+/// Deals with an Excel worksheet in an xlsx-file
+/// </summary>
+public class Workbook
+{
+	public static sst SharedStrings { get; private set; }
+
+	/// <summary>
+	/// All worksheets in the Excel workbook deserialized
+	/// </summary>
+	/// <param name="ExcelFileName">Full path and filename of the Excel xlsx-file</param>
+	/// <returns></returns>
+	public static IEnumerable<worksheet> Worksheets(string ExcelFileName)
+	{
+		using (ZipArchive zipArchive = ZipFile.Open(ExcelFileName, ZipArchiveMode.Read))
+		{
+			var sharedStrings = GetZipArchiveEntry(zipArchive, @"xl/sharedStrings.xml");
+			if (sharedStrings == null)
+				yield break;
+
+			var deserializedSharedStrings = DeserializedZipEntry<sst>(sharedStrings);
+			if (deserializedSharedStrings == null)
+				yield break;
+
+			SharedStrings = deserializedSharedStrings;
+
+			foreach (var worksheetEntry in WorkSheetFileNames(zipArchive).OrderBy(x => x.FullName))
+			{
+				var ws = DeserializedZipEntry<worksheet>(worksheetEntry);
+				if (ws == null)
+					yield break;
+
+				ws.NumberOfColumns = worksheet.MaxColumnIndex + 1;
+				ws.ExpandRows();
+				yield return ws;
+			}
+		}
+	}
+
+	/// <summary>
+	/// Method converting an Excel cell value to a date
+	/// </summary>
+	/// <param name="ExcelCellValue"></param>
+	/// <returns></returns>
+	public static DateTime DateFromExcelFormat(string ExcelCellValue)
+	{
+		return DateTime.FromOADate(Convert.ToDouble(ExcelCellValue));
+	}
+
+	private static ZipArchiveEntry? GetZipArchiveEntry(ZipArchive ZipArchive, string ZipEntryName)
+	{
+		return ZipArchive.Entries.FirstOrDefault(n => n.FullName.Equals(ZipEntryName));
+	}
+	private static IEnumerable<ZipArchiveEntry> WorkSheetFileNames(ZipArchive ZipArchive)
+	{
+		foreach (var zipEntry in ZipArchive.Entries)
+			if (zipEntry.FullName.StartsWith("xl/worksheets/sheet"))
+				yield return zipEntry;
+	}
+	private static T? DeserializedZipEntry<T>(ZipArchiveEntry ZipArchiveEntry)
+	{
+		using (Stream stream = ZipArchiveEntry.Open())
+			return (T?)new XmlSerializer(typeof(T)).Deserialize(XmlReader.Create(stream));
+	}
+}
