@@ -13,14 +13,14 @@ namespace MemoryLingo.Infrastructure.Excel;
 /// </summary>
 public class Workbook
 {
-	public static sst SharedStrings { get; private set; }
+	public static SharedStringTable? SharedStringTable { get; private set; }
 
 	/// <summary>
 	/// All worksheets in the Excel workbook deserialized
 	/// </summary>
 	/// <param name="ExcelFileName">Full path and filename of the Excel xlsx-file</param>
 	/// <returns></returns>
-	public static IEnumerable<worksheet> Worksheets(string ExcelFileName)
+	public static IEnumerable<WorksheetData> LoadWorksheets(string ExcelFileName)
 	{
 		using (ZipArchive zipArchive = ZipFile.Open(ExcelFileName, ZipArchiveMode.Read))
 		{
@@ -28,19 +28,19 @@ public class Workbook
 			if (sharedStrings == null)
 				yield break;
 
-			var deserializedSharedStrings = DeserializedZipEntry<sst>(sharedStrings);
+			var deserializedSharedStrings = DeserializedZipEntry<SharedStringTable>(sharedStrings);
 			if (deserializedSharedStrings == null)
 				yield break;
 
-			SharedStrings = deserializedSharedStrings;
+			SharedStringTable = deserializedSharedStrings;
 
 			foreach (var worksheetEntry in WorkSheetFileNames(zipArchive).OrderBy(x => x.FullName))
 			{
-				var ws = DeserializedZipEntry<worksheet>(worksheetEntry);
+				var ws = DeserializedZipEntry<WorksheetData>(worksheetEntry);
 				if (ws == null)
 					yield break;
 
-				ws.NumberOfColumns = worksheet.MaxColumnIndex + 1;
+				ws.NumberOfColumns = WorksheetData.MaxColumnIndex + 1;
 				ws.ExpandRows();
 				yield return ws;
 			}

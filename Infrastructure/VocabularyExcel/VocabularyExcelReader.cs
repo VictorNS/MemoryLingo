@@ -32,7 +32,7 @@ public class VocabularyExcelReader : IVocabularyExcelReader
 			};
 
 
-		var worksheet = Workbook.Worksheets(filePath).FirstOrDefault();
+		var worksheet = Workbook.LoadWorksheets(filePath).FirstOrDefault();
 
 		if (worksheet == null)
 			return new VocabularyExcelDto

@@ -25,8 +25,9 @@ public partial class Cell
 		set
 		{
 			ColumnIndex = GetColumnIndex(value);
-			if (ColumnIndex > worksheet.MaxColumnIndex)
-				worksheet.MaxColumnIndex = ColumnIndex;
+
+			if (ColumnIndex > WorksheetData.MaxColumnIndex)
+				WorksheetData.MaxColumnIndex = ColumnIndex;
 		}
 	}
 	[XmlAttribute("t")]
@@ -46,7 +47,13 @@ public partial class Cell
 			_value = value;
 			if (tType.Equals("s"))
 			{
-				Text = Workbook.SharedStrings.si[Convert.ToInt32(_value)].t;
+				if (Workbook.SharedStringTable is null)
+				{
+					Text = string.Empty;
+					return;
+				}
+
+				Text = Workbook.SharedStringTable.SharedStrings[Convert.ToInt32(_value)].Text;
 				return;
 			}
 			if (tType.Equals("str"))
@@ -87,9 +94,9 @@ public partial class Cell
 
 	private string _value = "";
 
-	private static int GetColumnIndex(string CellReference)
+	private static int GetColumnIndex(string cellReference)
 	{
-		string colLetter = ColumnLetterRegex().Match(CellReference).Value.ToUpper();
+		string colLetter = ColumnLetterRegex().Match(cellReference).Value.ToUpper();
 		int colIndex = 0;
 
 		for (int i = 0; i < colLetter.Length; i++)

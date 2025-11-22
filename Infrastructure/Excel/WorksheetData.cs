@@ -11,17 +11,15 @@ namespace MemoryLingo.Infrastructure.Excel;
 [Serializable()]
 [XmlType(Namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main")]
 [XmlRoot("worksheet", Namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main")]
-#pragma warning disable IDE1006 // Naming Styles
-public class worksheet
-#pragma warning restore IDE1006 // Naming Styles
+public class WorksheetData
 {
 	[XmlArray("sheetData")]
 	[XmlArrayItem("row")]
-	public Row[] Rows;
+	public Row[] Rows = [];
 	[XmlIgnore]
 	public int NumberOfColumns; // Total number of columns in this worksheet
 
-	public static int MaxColumnIndex = 0; // Temporary variable for import
+	public static int MaxColumnIndex { get; set; } = 0; // Temporary variable for import
 
 	public void ExpandRows()
 	{

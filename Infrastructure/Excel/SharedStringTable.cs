@@ -12,20 +12,18 @@ namespace MemoryLingo.Infrastructure.Excel;
 [Serializable()]
 [XmlType(Namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main")]
 [XmlRoot("sst", Namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main")]
-public class sst
+public class SharedStringTable
 {
-	[XmlAttribute]
-	public string uniqueCount;
-	[XmlAttribute]
-	public string count;
+	[XmlAttribute("uniqueCount")]
+	public string UniqueCount = string.Empty;
+	[XmlAttribute("count")]
+	public string Count = string.Empty;
 	[XmlElement("si")]
-	public SharedString[] si;
-
-	public sst()
-	{
-	}
+	public SharedString[] SharedStrings = [];
 }
+
 public class SharedString
 {
-	public string t;
+	[XmlElement("t")]
+	public string Text = string.Empty;
 }
