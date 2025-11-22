@@ -38,8 +38,8 @@ public class LearnService
 		{
 			var checkResult = LoadAndCheckVocabularyFile(vocabularyFile.FilePath);
 
-			if (checkResult.vocabularyFile.HasErrors)
-				vocabularyFile.ErrorMessage = checkResult.vocabularyFile.ErrorMessage;
+			if (checkResult.VocabularyFile.HasErrors)
+				vocabularyFile.ErrorMessage = checkResult.VocabularyFile.ErrorMessage;
 		}
 
 		return vocabularies;
@@ -48,8 +48,17 @@ public class LearnService
 	public VocabularyReferenceDto AddVocabularyFile(string filePath)
 	{
 		var checkResult = LoadAndCheckVocabularyFile(filePath);
-		_vocabularyListService.AddAndSave(checkResult.vocabularyFile);
-		return checkResult.vocabularyFile;
+		var vocabularyFile = checkResult.VocabularyFile;
+		var vocabularyProgress = _vocabularyProgressStore.Load(filePath);
+
+		for (int i = 0; i < vocabularyProgress.Sessions.Count; i++)
+		{
+			var src = vocabularyProgress.Sessions[i];
+			vocabularyFile.Sessions[i].Update(src.LastUpdated, src.LearnedEntries, src.TotalEntries);
+		}
+
+		_vocabularyListService.AddAndSave(vocabularyFile);
+		return vocabularyFile;
 	}
 
 	public void RemoveVocabularyFile(string filePath)
@@ -57,7 +66,7 @@ public class LearnService
 		_vocabularyListService.RemoveAndSave(filePath);
 	}
 
-	private (VocabularyExcelDto vocabulary, VocabularyReferenceDto vocabularyFile) LoadAndCheckVocabularyFile(string filePath)
+	private (VocabularyExcelDto Vocabulary, VocabularyReferenceDto VocabularyFile) LoadAndCheckVocabularyFile(string filePath)
 	{
 		var vocabulary = _vocabularyService.LoadVocabulary(filePath);
 		var vocabularyFile = new VocabularyReferenceDto
@@ -101,21 +110,21 @@ public class LearnService
 	}
 	#endregion VocabularyList
 
-	public VocabularyExcelDto? StartVocabularySession(string filePath, int sessionNumber, bool continueSession)
+	public VocabularyExcelDto? StartVocabularySession(string filePath, int sessionIndex, bool continueSession)
 	{
 		var checkResult = LoadAndCheckVocabularyFile(filePath);
 
-		if (checkResult.vocabularyFile.HasErrors)
+		if (checkResult.VocabularyFile.HasErrors)
 		{
 			return null;
 		}
 
-		_vocabulary = checkResult.vocabulary;
+		_vocabulary = checkResult.Vocabulary;
 		_vocabularyProgress = _vocabularyProgressStore.Load(_vocabulary.FilePath);
 		SynchronizeProgressWithVocabulary();
-		_vocabularyProgressStore.Save(_vocabulary.FilePath, _vocabularyProgress);
+		_vocabularyProgressStore.Save(_vocabulary.FilePath, sessionIndex, _vocabularyProgress);
 
-		if (!LoadSession(sessionNumber, continueSession))
+		if (!LoadSession(sessionIndex, continueSession))
 			return null;
 
 		return _vocabulary;
@@ -132,20 +141,16 @@ public class LearnService
 				? existing
 				: new VocabularyProgressEntry();
 			newEntries.Add(entry.RuText, progressEntry);
-
-			// Ensure all entries have 3 sessions
-			for (int i = progressEntry.Sessions.Count; i < 3; i++)
-				progressEntry.Sessions.Add(new VocabularyProgressEntrySession());
 		}
 
 		// Replace the old dictionary with the new
 		_vocabularyProgress.Entries = newEntries;
 	}
 
-	internal bool LoadSession(int currentSession, bool continueSession)
+	internal bool LoadSession(int sessionIndex, bool continueSession)
 	{
 
-		if (currentSession < 0 || currentSession > 2)
+		if (sessionIndex < 0 || sessionIndex > 2)
 			return false;
 
 		Dictionary<string, VocabularyProgressEntry> restEntries;
@@ -153,20 +158,17 @@ public class LearnService
 		if (continueSession)
 		{
 			restEntries = _vocabularyProgress.Entries
-				.Where(kv => !kv.Value.Sessions[currentSession].IsSkipped && !kv.Value.Sessions[currentSession].IsLearned)
+				.Where(kv => !kv.Value.Sessions[sessionIndex].IsSkipped && !kv.Value.Sessions[sessionIndex].IsLearned)
 				.ToDictionary(kv => kv.Key, kv => kv.Value);
 		}
 		else
 		{
 			foreach (var valuePair in _vocabularyProgress.Entries.Values)
-			{
-				valuePair.Sessions[currentSession].IsSkipped = false;
-				valuePair.Sessions[currentSession].IsLearned = false;
-			}
+				valuePair.Sessions[sessionIndex].Reset();
 
-			if (currentSession > 0)
+			if (sessionIndex > 0)
 			{
-				var prevSession = currentSession - 1;
+				var prevSession = sessionIndex - 1;
 
 				var prevSkippedEntries = _vocabularyProgress.Entries
 					.Where(kv => kv.Value.Sessions[prevSession].IsSkipped)
@@ -174,30 +176,33 @@ public class LearnService
 					.ToList();
 
 				for (int i = 0; i < prevSkippedEntries.Count; i++)
-					_vocabularyProgress.Entries[prevSkippedEntries[i]].Sessions[currentSession].IsSkipped = true;
+					_vocabularyProgress.Entries[prevSkippedEntries[i]].Sessions[sessionIndex].IsSkipped = true;
 
 				var prevEntries = _vocabularyProgress.Entries
 					.Where(kv => !kv.Value.Sessions[prevSession].IsSkipped)
 					.OrderByDescending(kv => kv.Value.Sessions[prevSession].TotalAttempts)
 					.Select(kv => kv.Key)
 					.ToList();
-				var percent = currentSession == 1
+				var percent = sessionIndex == 1
 					? _settings.Learn.DifficultEntriesSession2Percent
 					: _settings.Learn.DifficultEntriesSession3Percent;
 				var takeCount = (int)(prevEntries.Count * percent / 100.0);
 
 				for (int i = 0; i < prevEntries.Count; i++)
-					_vocabularyProgress.Entries[prevEntries[i]].Sessions[currentSession].IsSkipped = (i + 1 > takeCount);
+					_vocabularyProgress.Entries[prevEntries[i]].Sessions[sessionIndex].IsSkipped = (i + 1 > takeCount);
 			}
 
 			restEntries = _vocabularyProgress.Entries
-				.Where(kv => !kv.Value.Sessions[currentSession].IsSkipped)
+				.Where(kv => !kv.Value.Sessions[sessionIndex].IsSkipped)
 				.ToDictionary(kv => kv.Key, kv => kv.Value);
 		}
 
+		if (restEntries.Count == 0)
+			return false;
+
 		_session = new LearnSession
 		{
-			SessionIndex = currentSession,
+			SessionIndex = sessionIndex,
 			QueueIndex = 0,
 			IsLastLearned = false,
 			Entries = restEntries,
@@ -209,7 +214,7 @@ public class LearnService
 		if (!continueSession)
 		{
 			// update vocabulary progress
-			_vocabularyProgressStore.Save(_vocabulary.FilePath, _vocabularyProgress);
+			_vocabularyProgressStore.Save(_vocabulary.FilePath, _session.SessionIndex, _vocabularyProgress);
 			var progress = _vocabularyProgress.GetSessionProgress(_session.SessionIndex);
 			_vocabularyListService.UpdateSessionAndSave(_vocabulary.FilePath, _session.SessionIndex, progress.LearnedEntries, progress.TotalEntries);
 		}
@@ -303,7 +308,7 @@ public class LearnService
 			}
 		}
 
-		_vocabularyProgressStore.Save(_vocabulary.FilePath, _vocabularyProgress);
+		_vocabularyProgressStore.Save(_vocabulary.FilePath, _session.SessionIndex, _vocabularyProgress);
 
 		return new EntryProgress
 		{

@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using MemoryLingo.Core.Models;
 using MemoryLingo.Core.Services;
+using MemoryLingo.Infrastructure.Settings;
 using MemoryLingo.Infrastructure.VocabularyReference;
 using MemoryLingo.Presentation.Commands;
 using Microsoft.Win32;
@@ -17,6 +18,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	#region logic properties
 	private readonly EntryValidationService _entryValidationService;
 	private readonly LearnService _learnService;
+	private SettingsDto? _settings;
 	private EntryProgress _current = EntryProgress.Empty;
 	private EntryProgress _previous = EntryProgress.Empty;
 	private bool _tipsUsedForCurrentEntry;
@@ -208,7 +210,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	private void StartNextEntryDelay()
 	{
 		IsOverlayVisible = true;
-		_remainingSeconds = 3; // TODO: Get from settings
+		_remainingSeconds = _settings is null ? 3 : _settings.Learn.NextEntryDelaySeconds;
 		CountdownMessage = $"Next entry in {_remainingSeconds} seconds...";
 		_nextEntryTimer.Start();
 	}
@@ -253,8 +255,9 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	}
 	#endregion events
 
-	public void Initialize()
+	public void Initialize(SettingsDto settings)
 	{
+		_settings = settings;
 		var vocabularies = _learnService.LoadVocabularyList();
 		VocabulariesCollection = new ObservableCollection<VocabularyReferenceDto>(vocabularies);
 		SelectedTabIndex = 0;
@@ -332,9 +335,9 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		VocabulariesCollection.Remove(vocabularyFile);
 	}
 
-	private void StartVocabularySession(VocabularyReferenceDto vocabularyFile, int sessionNumber, bool continueSession)
+	private void StartVocabularySession(VocabularyReferenceDto vocabularyFile, int sessionIndex, bool continueSession)
 	{
-		var vocabulary = _learnService.StartVocabularySession(vocabularyFile.FilePath, sessionNumber, continueSession);
+		var vocabulary = _learnService.StartVocabularySession(vocabularyFile.FilePath, sessionIndex, continueSession);
 		if (vocabulary is null)
 			return;
 

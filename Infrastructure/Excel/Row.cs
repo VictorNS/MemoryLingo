@@ -11,20 +11,29 @@ namespace MemoryLingo.Infrastructure.Excel;
 public class Row
 {
 	[XmlElement("c")]
-	public Cell[] FilledCells;
+	public Cell[]? FilledCells;
 	[XmlIgnore]
-	public Cell[] Cells;
+	public Cell[] Cells= [];
 
 	public void ExpandCells(int NumberOfColumns)
 	{
 		Cells = new Cell[NumberOfColumns];
-		foreach (var cell in FilledCells)
-			Cells[cell.ColumnIndex] = cell;
+
+		if (FilledCells is not null)
+		{
+			foreach (var cell in FilledCells)
+				Cells[cell.ColumnIndex] = cell;
+		}
+
 		FilledCells = null;
 	}
 
 	public string GetText(int index)
 	{
-		return Cells[index] == null ? "" : Cells[index].Text;
+		if (index < 0 || index >= Cells.Length)
+			return "";
+
+		var cell = Cells[index];
+		return cell is null ? "" : cell.Text;
 	}
 }

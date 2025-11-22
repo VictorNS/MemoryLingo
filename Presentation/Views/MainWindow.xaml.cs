@@ -26,7 +26,7 @@ public partial class MainWindow : Window
 		Height = settings.Window.Height;
 		Width = settings.Window.Width;
 
-		ViewModel.Initialize();
+		ViewModel.Initialize(settings);
 		DataContext = ViewModel;
 
 		// Add KeyDown event handler for F1 key

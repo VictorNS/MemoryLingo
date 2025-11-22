@@ -47,7 +47,7 @@ public class VocabularyExcelReader : IVocabularyExcelReader
 
 		foreach (var excelRow in worksheet.Rows)
 		{
-			entries.Add(new Entry
+			var entry = new Entry
 			{
 				RuText = excelRow.GetText(0),
 				RuTip = excelRow.GetText(1),
@@ -55,7 +55,12 @@ public class VocabularyExcelReader : IVocabularyExcelReader
 				EnText = excelRow.GetText(3),
 				RuExample = excelRow.GetText(4),
 				EnExample = excelRow.GetText(5)
-			});
+			};
+
+			if (string.IsNullOrWhiteSpace(entry.RuText) && string.IsNullOrWhiteSpace(entry.EnText))
+				continue;
+
+			entries.Add(entry);
 		}
 
 		return new VocabularyExcelDto

@@ -32,7 +32,10 @@ public class VocabularyReferenceStore : IVocabularyReferenceStore
 		}
 
 		foreach (var vocabularyFile in _vocabularies)
+		{
 			vocabularyFile.FileName = Path.GetFileName(vocabularyFile.FilePath);
+			vocabularyFile.EnsureValid();
+		}
 
 		return _vocabularies;
 	}
@@ -66,15 +69,9 @@ public class VocabularyReferenceStore : IVocabularyReferenceStore
 		if (vocabulary is null)
 			return;
 
-		if (vocabulary.Sessions.Count <= sessionIndex)
-		{
-			for (int i = vocabulary.Sessions.Count; i <= sessionIndex; i++)
-				vocabulary.Sessions.Add(new VocabularyFileSession());
-		}
-
-		vocabulary.SessionIndex = sessionIndex;
+		vocabulary.EnsureValid();
 		var session = vocabulary.Sessions[sessionIndex];
-		session.SessionDate = DateTime.UtcNow;
+		session.LastUpdated = DateTime.UtcNow;
 		session.LearnedEntries = learnedEntries;
 		session.TotalEntries = totalEntries;
 
