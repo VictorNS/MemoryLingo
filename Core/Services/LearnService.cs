@@ -85,13 +85,6 @@ public class LearnService
 			return (vocabulary, vocabularyFile);
 		}
 
-		var existNotEmptyEntries = vocabulary.Entries.Any(x => !string.IsNullOrWhiteSpace(x.RuText) && !string.IsNullOrWhiteSpace(x.EnText));
-		if (!existNotEmptyEntries)
-		{
-			vocabularyFile.ErrorMessage = "Contains no valid entries.";
-			return (vocabulary, vocabularyFile);
-		}
-
 		var duplicates = vocabulary.Entries.GroupBy(x => x.RuText).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
 		if (duplicates.Count > 0)
 		{

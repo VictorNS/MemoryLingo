@@ -10,42 +10,12 @@ namespace MemoryLingo.Core.Services;
 
 public class LearnServiceTests
 {
+	#region LoadSession
 	[Fact]
 	public void LoadSession0_WithContinueTrue_CopiesFiveEntriesFromVocabularyProgress()
 	{
 		// Arrange
-		var settingsStore = Substitute.For<ISettingsStore>();
-		var vocabularyProgressStore = Substitute.For<IVocabularyProgressStore>();
-		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceStore>();
-		var vocabularyExcelReader = Substitute.For<IVocabularyExcelReader>();
-
-		// Create test settings
-		var settings = new SettingsDto
-		{
-			Learn = new LearnSettings
-			{
-				ExerciseSize = 5,
-				CorrectAnswersToLearn = 2
-			}
-		};
-		settingsStore.Load().Returns(settings);
-
-		// Create test vocabulary
-		var vocabulary = new VocabularyExcelDto
-		{
-			FileName = "test.xlsx",
-			FilePath = "test.xlsx",
-			Entries = [
-				new Entry { RuText = "word1", EnText = "translation1" },
-				new Entry { RuText = "word2", EnText = "translation2" },
-				new Entry { RuText = "word3", EnText = "translation3" },
-				new Entry { RuText = "word4", EnText = "translation4" },
-				new Entry { RuText = "word5", EnText = "translation5" },
-				new Entry { RuText = "word6", EnText = "translation6" },
-			],
-			ErrorMessage = ""
-		};
-		vocabularyExcelReader.LoadVocabulary("test.xlsx").Returns(vocabulary);
+		var (settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader) = CreateMocksForLoadSession();
 
 		// Create test progress with 5 unlearned entries and 1 learned entry for session 0
 		var vocabularyProgress = new VocabularyProgressDto
@@ -112,38 +82,7 @@ public class LearnServiceTests
 	public void LoadSession1_WithContinueTrue_CopiesFiveEntriesFromVocabularyProgress()
 	{
 		// Arrange
-		var settingsStore = Substitute.For<ISettingsStore>();
-		var vocabularyProgressStore = Substitute.For<IVocabularyProgressStore>();
-		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceStore>();
-		var vocabularyExcelReader = Substitute.For<IVocabularyExcelReader>();
-
-		// Create test settings
-		var settings = new SettingsDto
-		{
-			Learn = new LearnSettings
-			{
-				ExerciseSize = 5,
-				CorrectAnswersToLearn = 2
-			}
-		};
-		settingsStore.Load().Returns(settings);
-
-		// Create test vocabulary
-		var vocabulary = new VocabularyExcelDto
-		{
-			FileName = "test.xlsx",
-			FilePath = "test.xlsx",
-			Entries = [
-				new Entry { RuText = "word1", EnText = "translation1" },
-				new Entry { RuText = "word2", EnText = "translation2" },
-				new Entry { RuText = "word3", EnText = "translation3" },
-				new Entry { RuText = "word4", EnText = "translation4" },
-				new Entry { RuText = "word5", EnText = "translation5" },
-				new Entry { RuText = "word6", EnText = "translation6" },
-			],
-			ErrorMessage = ""
-		};
-		vocabularyExcelReader.LoadVocabulary("test.xlsx").Returns(vocabulary);
+		var (settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader) = CreateMocksForLoadSession();
 
 		// Create test progress with 3 sessions for each entry
 		var vocabularyProgress = new VocabularyProgressDto
@@ -234,40 +173,7 @@ public class LearnServiceTests
 	public void LoadSession1_WithContinueFalse_Filters30PercentFromPreviousSession()
 	{
 		// Arrange
-		var settingsStore = Substitute.For<ISettingsStore>();
-		var vocabularyProgressStore = Substitute.For<IVocabularyProgressStore>();
-		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceStore>();
-		var vocabularyExcelReader = Substitute.For<IVocabularyExcelReader>();
-
-		// Create test settings with default 30% for session 2
-		var settings = new SettingsDto
-		{
-			Learn = new LearnSettings
-			{
-				ExerciseSize = 5,
-				CorrectAnswersToLearn = 2,
-				DifficultEntriesSession2Percent = 30
-			}
-		};
-		settingsStore.Load().Returns(settings);
-
-		// Create test vocabulary with 7 entries
-		var vocabulary = new VocabularyExcelDto
-		{
-			FileName = "test.xlsx",
-			FilePath = "test.xlsx",
-			Entries = [
-				new Entry { RuText = "word1", EnText = "translation1" },
-				new Entry { RuText = "word2", EnText = "translation2" },
-				new Entry { RuText = "word3", EnText = "translation3" },
-				new Entry { RuText = "word4", EnText = "translation4" },
-				new Entry { RuText = "word5", EnText = "translation5" },
-				new Entry { RuText = "word6", EnText = "translation6" },
-				new Entry { RuText = "word7", EnText = "translation7" },
-			],
-			ErrorMessage = ""
-		};
-		vocabularyExcelReader.LoadVocabulary("test.xlsx").Returns(vocabulary);
+		var (settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader) = CreateMocksForLoadSession(entryCount: 7);
 
 		// Create test progress with different TotalAttempts in session 0 to test ordering
 		var vocabularyProgress = new VocabularyProgressDto
@@ -363,39 +269,7 @@ public class LearnServiceTests
 	public void LoadSession2_WithContinueFalse_Filters50PercentIgnoringSkippedEntries()
 	{
 		// Arrange
-		var settingsStore = Substitute.For<ISettingsStore>();
-		var vocabularyProgressStore = Substitute.For<IVocabularyProgressStore>();
-		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceStore>();
-		var vocabularyExcelReader = Substitute.For<IVocabularyExcelReader>();
-
-		// Create test settings with 50% for session 3
-		var settings = new SettingsDto
-		{
-			Learn = new LearnSettings
-			{
-				ExerciseSize = 5,
-				CorrectAnswersToLearn = 2,
-				DifficultEntriesSession3Percent = 50
-			}
-		};
-		settingsStore.Load().Returns(settings);
-
-		// Create test vocabulary with 6 entries
-		var vocabulary = new VocabularyExcelDto
-		{
-			FileName = "test.xlsx",
-			FilePath = "test.xlsx",
-			Entries = [
-				new Entry { RuText = "word1", EnText = "translation1" },
-				new Entry { RuText = "word2", EnText = "translation2" },
-				new Entry { RuText = "word3", EnText = "translation3" },
-				new Entry { RuText = "word4", EnText = "translation4" },
-				new Entry { RuText = "word5", EnText = "translation5" },
-				new Entry { RuText = "word6", EnText = "translation6" },
-			],
-			ErrorMessage = ""
-		};
-		vocabularyExcelReader.LoadVocabulary("test.xlsx").Returns(vocabulary);
+		var (settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader) = CreateMocksForLoadSession();
 
 		// Create test progress where the two highest-rated entries in session 1 are skipped
 		var vocabularyProgress = new VocabularyProgressDto
@@ -484,4 +358,205 @@ public class LearnServiceTests
 		Assert.DoesNotContain("word5", entriesInQueue); // Should be skipped (excluded by percentage)
 		Assert.DoesNotContain("word6", entriesInQueue); // Should be skipped (excluded by percentage)
 	}
+
+	static (ISettingsStore, IVocabularyProgressStore, IVocabularyReferenceStore, IVocabularyExcelReader) CreateMocksForLoadSession(int entryCount = 6)
+	{
+		int session2Percent = 30;
+		int session3Percent = 50;
+		int exerciseSize = 5;
+		int correctAnswersToLearn = 2;
+		
+		var settingsStore = Substitute.For<ISettingsStore>();
+		var vocabularyProgressStore = Substitute.For<IVocabularyProgressStore>();
+		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceStore>();
+		var vocabularyExcelReader = Substitute.For<IVocabularyExcelReader>();
+
+		var settings = new SettingsDto
+		{
+			Learn = new LearnSettings
+			{
+				ExerciseSize = exerciseSize,
+				CorrectAnswersToLearn = correctAnswersToLearn,
+				DifficultEntriesSession2Percent = session2Percent,
+				DifficultEntriesSession3Percent = session3Percent
+			}
+		};
+		settingsStore.Load().Returns(settings);
+
+		var entries = new List<Entry>();
+		for (int i = 1; i <= entryCount; i++)
+		{
+			entries.Add(new Entry { RuText = $"word{i}", EnText = $"translation{i}" });
+		}
+
+		var vocabulary = new VocabularyExcelDto
+		{
+			FileName = "test.xlsx",
+			FilePath = "test.xlsx",
+			Entries = entries,
+			ErrorMessage = ""
+		};
+		vocabularyExcelReader.LoadVocabulary("test.xlsx").Returns(vocabulary);
+
+		return (settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader);
+	}
+	#endregion LoadSession
+
+	#region AddVocabularyFile
+	[Fact]
+	public void AddVocabularyFile_WithValidFile_ReturnsVocabularyReferenceWithUpdatedSessions()
+	{
+		// Arrange
+		var (settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader) = CreateMocksForAddVocabularyFile();
+
+		var vocabulary = new VocabularyExcelDto
+		{
+			FileName = "test.xlsx",
+			FilePath = "c:\\test.xlsx",
+			Entries = [
+				new Entry { RuText = "word1", EnText = "translation1" },
+				new Entry { RuText = "word2", EnText = "translation2" }
+			],
+			ErrorMessage = ""
+		};
+		vocabularyExcelReader.LoadVocabulary("c:\\test.xlsx").Returns(vocabulary);
+
+		var vocabularyProgress = new VocabularyProgressDto
+		{
+			Sessions = [
+				new VocabularyProgressSession { LastUpdated = DateTime.Now, LearnedEntries = 5, TotalEntries = 10 },
+				new VocabularyProgressSession { LastUpdated = DateTime.Now, LearnedEntries = 3, TotalEntries = 8 },
+				new VocabularyProgressSession { LastUpdated = DateTime.Now, LearnedEntries = 2, TotalEntries = 6 }
+			]
+		};
+		vocabularyProgressStore.Load("c:\\test.xlsx").Returns(vocabularyProgress);
+
+		var learnService = new LearnService(settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader);
+
+		// Act
+		var result = learnService.AddVocabularyFile("c:\\test.xlsx");
+
+		// Assert
+		Assert.NotNull(result);
+		Assert.Equal("test.xlsx", result.FileName);
+		Assert.Equal("c:\\test.xlsx", result.FilePath);
+		Assert.Empty(result.ErrorMessage);
+		Assert.Equal(3, result.Sessions.Count);
+		Assert.Equal(5, result.Sessions[0].LearnedEntries);
+		Assert.Equal(10, result.Sessions[0].TotalEntries);
+		vocabularyReferenceStore.Received(1).AddAndSave(Arg.Any<VocabularyReferenceDto>());
+	}
+
+	[Fact]
+	public void AddVocabularyFile_WithExcelLoadingError_ReturnsVocabularyReferenceWithErrorMessage()
+	{
+		// Arrange
+		var (settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader) = CreateMocksForAddVocabularyFile();
+
+		var vocabulary = new VocabularyExcelDto
+		{
+			FileName = "test.xlsx",
+			FilePath = "c:\\test.xlsx",
+			Entries = [],
+			ErrorMessage = "Failed to load Excel file"
+		};
+		vocabularyExcelReader.LoadVocabulary("c:\\test.xlsx").Returns(vocabulary);
+
+		var learnService = new LearnService(settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader);
+
+		// Act
+		var result = learnService.AddVocabularyFile("c:\\test.xlsx");
+
+		// Assert
+		Assert.NotNull(result);
+		Assert.Equal("Failed to load Excel file", result.ErrorMessage);
+		vocabularyReferenceStore.Received(1).AddAndSave(Arg.Any<VocabularyReferenceDto>());
+	}
+
+	[Fact]
+	public void AddVocabularyFile_WithNoEntries_ReturnsVocabularyReferenceWithErrorMessage()
+	{
+		// Arrange
+		var (settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader) = CreateMocksForAddVocabularyFile();
+
+		var vocabulary = new VocabularyExcelDto
+		{
+			FileName = "test.xlsx",
+			FilePath = "c:\\test.xlsx",
+			Entries = [],
+			ErrorMessage = ""
+		};
+		vocabularyExcelReader.LoadVocabulary("c:\\test.xlsx").Returns(vocabulary);
+
+		var learnService = new LearnService(settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader);
+
+		// Act
+		var result = learnService.AddVocabularyFile("c:\\test.xlsx");
+
+		// Assert
+		Assert.NotNull(result);
+		Assert.Equal("Contains no entries.", result.ErrorMessage);
+		vocabularyReferenceStore.Received(1).AddAndSave(Arg.Any<VocabularyReferenceDto>());
+	}
+
+	[Fact]
+	public void AddVocabularyFile_WithDuplicateEntries_ReturnsVocabularyReferenceWithErrorMessage()
+	{
+		// Arrange
+		var (settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader) = CreateMocksForAddVocabularyFile();
+
+		var vocabulary = new VocabularyExcelDto
+		{
+			FileName = "test.xlsx",
+			FilePath = "c:\\test.xlsx",
+			Entries = [
+				new Entry { RuText = "word1", EnText = "translation1" },
+				new Entry { RuText = "word2", EnText = "translation2" },
+				new Entry { RuText = "word1", EnText = "translation3" }
+			],
+			ErrorMessage = ""
+		};
+		vocabularyExcelReader.LoadVocabulary("c:\\test.xlsx").Returns(vocabulary);
+
+		var learnService = new LearnService(settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader);
+
+		// Act
+		var result = learnService.AddVocabularyFile("c:\\test.xlsx");
+
+		// Assert
+		Assert.NotNull(result);
+		Assert.Equal("Duplicates: word1", result.ErrorMessage);
+		vocabularyReferenceStore.Received(1).AddAndSave(Arg.Any<VocabularyReferenceDto>());
+	}
+
+	static (ISettingsStore, IVocabularyProgressStore, IVocabularyReferenceStore, IVocabularyExcelReader) CreateMocksForAddVocabularyFile()
+	{
+		var settingsStore = Substitute.For<ISettingsStore>();
+		var vocabularyProgressStore = Substitute.For<IVocabularyProgressStore>();
+		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceStore>();
+		var vocabularyExcelReader = Substitute.For<IVocabularyExcelReader>();
+
+		var settings = new SettingsDto
+		{
+			Learn = new LearnSettings
+			{
+				ExerciseSize = 5,
+				CorrectAnswersToLearn = 2
+			}
+		};
+		settingsStore.Load().Returns(settings);
+
+		var defaultProgress = new VocabularyProgressDto
+		{
+			Sessions = [
+				new VocabularyProgressSession(),
+				new VocabularyProgressSession(),
+				new VocabularyProgressSession()
+			]
+		};
+		vocabularyProgressStore.Load(Arg.Any<string>()).Returns(defaultProgress);
+
+		return (settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader);
+	}
+	#endregion AddVocabularyFile
 }
