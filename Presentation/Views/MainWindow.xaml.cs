@@ -18,7 +18,7 @@ public partial class MainWindow : Window
 		ViewModel = new MainWindowViewModel(entryValidationService, learnService);
 	}
 
-	private void Window_Loaded(object sender, RoutedEventArgs e)
+	void Window_Loaded(object sender, RoutedEventArgs e)
 	{
 		var settings = _settingsService.Load();
 		Top = settings.Window.Top;
@@ -33,7 +33,7 @@ public partial class MainWindow : Window
 		KeyDown += MainWindow_KeyDown;
 	}
 
-	private void Window_Closed(object sender, EventArgs e)
+	void Window_Closed(object sender, EventArgs e)
 	{
 		var settings = _settingsService.Load();
 		settings.Window.Top = Top;
@@ -43,7 +43,7 @@ public partial class MainWindow : Window
 		_settingsService.Save(settings);
 	}
 
-	private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+	void MainWindow_KeyDown(object sender, KeyEventArgs e)
 	{
 		if (ViewModel.IsOverlayVisible && (e.Key == Key.Space || e.Key == Key.Enter))
 		{

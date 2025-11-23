@@ -10,7 +10,7 @@ namespace MemoryLingo;
 
 public partial class App : Application
 {
-	private ServiceProvider? _serviceProvider;
+	ServiceProvider? _serviceProvider;
 
 	protected override void OnStartup(StartupEventArgs e)
 	{

@@ -4,8 +4,8 @@ namespace MemoryLingo.Presentation.Commands;
 
 public class ParameterizedRelayCommand<T> : ICommand
 {
-    private readonly Action<T?> _execute;
-    private readonly Func<T?, bool>? _canExecute;
+    readonly Action<T?> _execute;
+    readonly Func<T?, bool>? _canExecute;
 
     public ParameterizedRelayCommand(Action<T?> execute, Func<T?, bool>? canExecute = null)
     {

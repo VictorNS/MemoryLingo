@@ -57,17 +57,17 @@ public class Workbook
 		return DateTime.FromOADate(Convert.ToDouble(ExcelCellValue));
 	}
 
-	private static ZipArchiveEntry? GetZipArchiveEntry(ZipArchive ZipArchive, string ZipEntryName)
+	static ZipArchiveEntry? GetZipArchiveEntry(ZipArchive ZipArchive, string ZipEntryName)
 	{
 		return ZipArchive.Entries.FirstOrDefault(n => n.FullName.Equals(ZipEntryName));
 	}
-	private static IEnumerable<ZipArchiveEntry> WorkSheetFileNames(ZipArchive ZipArchive)
+	static IEnumerable<ZipArchiveEntry> WorkSheetFileNames(ZipArchive ZipArchive)
 	{
 		foreach (var zipEntry in ZipArchive.Entries)
 			if (zipEntry.FullName.StartsWith("xl/worksheets/sheet"))
 				yield return zipEntry;
 	}
-	private static T? DeserializedZipEntry<T>(ZipArchiveEntry ZipArchiveEntry)
+	static T? DeserializedZipEntry<T>(ZipArchiveEntry ZipArchiveEntry)
 	{
 		using (Stream stream = ZipArchiveEntry.Open())
 			return (T?)new XmlSerializer(typeof(T)).Deserialize(XmlReader.Create(stream));

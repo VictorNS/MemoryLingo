@@ -14,11 +14,10 @@ public class LearnService
 	readonly IVocabularyReferenceStore _vocabularyListService;
 	readonly IVocabularyExcelReader _vocabularyService;
 	readonly SettingsDto _settings;
-	VocabularyExcelDto _vocabulary;
-	VocabularyProgressDto _vocabularyProgress;
-	LearnSession _session;
+	VocabularyExcelDto? _vocabulary;
+	VocabularyProgressDto? _vocabularyProgress;
+	LearnSession? _session;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 	public LearnService(ISettingsStore settingsService, IVocabularyProgressStore vocabularyProgressStore, IVocabularyReferenceStore vocabularyListService, IVocabularyExcelReader vocabularyService)
 	{
 		_settingsService = settingsService;
@@ -27,7 +26,6 @@ public class LearnService
 		_vocabularyService = vocabularyService;
 		_settings = _settingsService.Load();
 	}
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
 	#region VocabularyList
 	public IReadOnlyList<VocabularyReferenceDto> LoadVocabularyList()
@@ -66,7 +64,7 @@ public class LearnService
 		_vocabularyListService.RemoveAndSave(filePath);
 	}
 
-	private (VocabularyExcelDto Vocabulary, VocabularyReferenceDto VocabularyFile) LoadAndCheckVocabularyFile(string filePath)
+	(VocabularyExcelDto Vocabulary, VocabularyReferenceDto VocabularyFile) LoadAndCheckVocabularyFile(string filePath)
 	{
 		var vocabulary = _vocabularyService.LoadVocabulary(filePath);
 		var vocabularyFile = new VocabularyReferenceDto
@@ -132,6 +130,9 @@ public class LearnService
 
 	public void SynchronizeProgressWithVocabulary()
 	{
+		if (_vocabulary is null || _vocabularyProgress is null)
+			return;
+
 		// Create a new dictionary (based on vocabulary entries order)
 		var newEntries = new Dictionary<string, VocabularyProgressEntry>();
 
@@ -149,6 +150,8 @@ public class LearnService
 
 	internal bool LoadSession(int sessionIndex, bool continueSession)
 	{
+		if (_vocabulary is null || _vocabularyProgress is null)
+			return false;
 
 		if (sessionIndex < 0 || sessionIndex > 2)
 			return false;
@@ -222,7 +225,7 @@ public class LearnService
 		return true;
 	}
 
-	internal LearnSession GetCurrentSession()
+	internal LearnSession? GetCurrentSession()
 	{
 		return _session;
 	}
@@ -234,6 +237,9 @@ public class LearnService
 
 	public EntryProgress? GetNextEntry()
 	{
+		if (_vocabularyProgress is null || _session is null)
+			return null;
+
 		var expectQueueIndex = _session.QueueIndex + (_session.IsLastLearned ? 0 : 1);
 		_session.IsLastLearned = false;
 
@@ -261,8 +267,11 @@ public class LearnService
 		return GetEntryByQueueIndex();
 	}
 
-	private EntryProgress GetEntryByQueueIndex()
+	EntryProgress GetEntryByQueueIndex()
 	{
+		if (_vocabulary is null || _session is null)
+			return EntryProgress.Empty;
+
 		var ruText = _session.Queue[_session.QueueIndex];
 		var entry = _vocabulary.Entries.First(e => e.RuText == ruText);
 		var progress = _session.Entries[ruText].Sessions[_session.SessionIndex];
@@ -285,6 +294,9 @@ public class LearnService
 
 	public EntryProgress SaveEntryProgress(string ruText, bool isCorrect)
 	{
+		if (_vocabulary is null || _vocabularyProgress is null || _session is null)
+			return EntryProgress.Empty;
+
 		var entry = _vocabulary.Entries.FirstOrDefault(e => e.RuText == ruText)
 			?? throw new InvalidDataException($"Entry with RuText '{ruText}' not found in vocabulary.");
 		var progressEntrySession = _session.Entries[ruText].Sessions[_session.SessionIndex];

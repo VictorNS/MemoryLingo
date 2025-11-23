@@ -15,8 +15,8 @@ public interface IVocabularyReferenceStore
 
 public class VocabularyReferenceStore : IVocabularyReferenceStore
 {
-	readonly private string _filePath;
-	private List<VocabularyReferenceDto> _vocabularies = [];
+	readonly string _filePath;
+	List<VocabularyReferenceDto> _vocabularies = [];
 
 	public VocabularyReferenceStore()
 	{

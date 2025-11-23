@@ -125,12 +125,12 @@ public class EntryValidationService
 		return words;
 	}
 
-	private static bool IsPunctuation(char c)
+	static bool IsPunctuation(char c)
 	{
 		return c == ',' || c == '.' || c == ';' || c == '!' || c == '?' || c == '-';
 	}
 
-	private static bool IsTip(string word)
+	static bool IsTip(string word)
 	{
 		return word.StartsWith('(') && word.EndsWith(')');
 	}

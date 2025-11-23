@@ -20,7 +20,7 @@ public class VocabularyExcelReader : IVocabularyExcelReader
 		return _vocabulary;
 	}
 
-	private static VocabularyExcelDto ReadDataFromFile(string filePath)
+	static VocabularyExcelDto ReadDataFromFile(string filePath)
 	{
 		if (!File.Exists(filePath))
 			return new VocabularyExcelDto

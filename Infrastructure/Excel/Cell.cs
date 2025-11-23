@@ -92,9 +92,9 @@ public partial class Cell
 	[XmlIgnore]
 	public bool IsAmount;
 
-	private string _value = "";
+	string _value = "";
 
-	private static int GetColumnIndex(string cellReference)
+	static int GetColumnIndex(string cellReference)
 	{
 		string colLetter = ColumnLetterRegex().Match(cellReference).Value.ToUpper();
 		int colIndex = 0;

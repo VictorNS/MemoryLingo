@@ -16,136 +16,18 @@ namespace MemoryLingo.Presentation.ViewModels;
 public class MainWindowViewModel : INotifyPropertyChanged
 {
 	#region logic properties
-	private readonly EntryValidationService _entryValidationService;
-	private readonly LearnService _learnService;
-	private SettingsDto? _settings;
-	private EntryProgress _current = EntryProgress.Empty;
-	private EntryProgress _previous = EntryProgress.Empty;
-	private bool _tipsUsedForCurrentEntry;
-	private int _remainingSeconds;
-	private readonly DispatcherTimer _validationTimer = new();
-	private readonly DispatcherTimer _nextEntryTimer = new();
+	readonly EntryValidationService _entryValidationService;
+	readonly LearnService _learnService;
+	SettingsDto? _settings;
+	EntryProgress _current = EntryProgress.Empty;
+	EntryProgress _previous = EntryProgress.Empty;
+	bool _tipsUsedForCurrentEntry;
+	int _remainingSeconds;
+	readonly DispatcherTimer _validationTimer = new();
+	readonly DispatcherTimer _nextEntryTimer = new();
 	#endregion logic properties
 
 	#region UI properties
-	private string _ruText = string.Empty;
-	private string _ruTip = string.Empty;
-	private string _transcription = string.Empty;
-	private string _answer = string.Empty;
-	private string _ruExample = string.Empty;
-	private string _enExample = string.Empty;
-	private string _fileName = string.Empty;
-	private string _prevText = string.Empty;
-	private string _prevStatusImage = "/Presentation/Assets/Images/question-mark-16.png";
-	private string _prevStatus = string.Empty;
-	private string _queueStat = string.Empty;
-	private string _vocabularyStat = string.Empty;
-	private ObservableCollection<WordCheckResult> _wordResults = [];
-	private bool _hideIncorrectWords = false;
-	private bool _isOverlayVisible = false;
-	private string _countdownMessage = string.Empty;
-	private int _selectedTabIndex = 0;
-	private ObservableCollection<VocabularyReferenceDto> _vocabulariesCollection = [];
-
-	public string RuText
-	{
-		get => _ruText;
-		set => SetProperty(ref _ruText, value);
-	}
-	public string RuTip
-	{
-		get => _ruTip;
-		set => SetProperty(ref _ruTip, value);
-	}
-	public string Transcription
-	{
-		get => _transcription;
-		set => SetProperty(ref _transcription, value);
-	}
-	public string Answer
-	{
-		get => _answer;
-		set
-		{
-			if (SetProperty(ref _answer, value))
-			{
-				if (string.IsNullOrWhiteSpace(_answer))
-					return;
-				RestartValidationTimer();
-			}
-		}
-	}
-	public string RuExample
-	{
-		get => _ruExample;
-		set => SetProperty(ref _ruExample, value);
-	}
-	public string EnExample
-	{
-		get => _enExample;
-		set => SetProperty(ref _enExample, value);
-	}
-	public string FileName
-	{
-		get => _fileName;
-		set => SetProperty(ref _fileName, value);
-	}
-	public string PrevText
-	{
-		get => _prevText;
-		set => SetProperty(ref _prevText, value);
-	}
-	public string PrevStatusImage
-	{
-		get => _prevStatusImage;
-		set => SetProperty(ref _prevStatusImage, value);
-	}
-	public string PrevStatus
-	{
-		get => _prevStatus;
-		set => SetProperty(ref _prevStatus, value);
-	}
-	public string QueueStat
-	{
-		get => _queueStat;
-		set => SetProperty(ref _queueStat, value);
-	}
-	public string VocabularyStat
-	{
-		get => _vocabularyStat;
-		set => SetProperty(ref _vocabularyStat, value);
-	}
-	public ObservableCollection<WordCheckResult> WordResults
-	{
-		get => _wordResults;
-		set => SetProperty(ref _wordResults, value);
-	}
-	public bool HideIncorrectWords
-	{
-		get => _hideIncorrectWords;
-		set => SetProperty(ref _hideIncorrectWords, value);
-	}
-	public bool IsOverlayVisible
-	{
-		get => _isOverlayVisible;
-		set => SetProperty(ref _isOverlayVisible, value);
-	}
-	public string CountdownMessage
-	{
-		get => _countdownMessage;
-		set => SetProperty(ref _countdownMessage, value);
-	}
-	public int SelectedTabIndex
-	{
-		get => _selectedTabIndex;
-		set => SetProperty(ref _selectedTabIndex, value);
-	}
-	public ObservableCollection<VocabularyReferenceDto> VocabulariesCollection
-	{
-		get => _vocabulariesCollection;
-		set => SetProperty(ref _vocabulariesCollection, value);
-	}
-
 	public event PropertyChangedEventHandler? PropertyChanged;
 
 	protected virtual bool SetProperty<T>(ref T backingStore, T value, [CallerMemberName] string propertyName = "")
@@ -161,6 +43,140 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = "")
 	{
 		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+	}
+
+	string _ruText = string.Empty;
+	public string RuText
+	{
+		get => _ruText;
+		set => SetProperty(ref _ruText, value);
+	}
+
+	string _ruTip = string.Empty;
+	public string RuTip
+	{
+		get => _ruTip;
+		set => SetProperty(ref _ruTip, value);
+	}
+
+	string _transcription = string.Empty;
+	public string Transcription
+	{
+		get => _transcription;
+		set => SetProperty(ref _transcription, value);
+	}
+
+	string _answer = string.Empty;
+	public string Answer
+	{
+		get => _answer;
+		set
+		{
+			if (SetProperty(ref _answer, value))
+			{
+				if (string.IsNullOrWhiteSpace(_answer))
+					return;
+				RestartValidationTimer();
+			}
+		}
+	}
+
+	string _ruExample = string.Empty;
+	public string RuExample
+	{
+		get => _ruExample;
+		set => SetProperty(ref _ruExample, value);
+	}
+
+	string _enExample = string.Empty;
+	public string EnExample
+	{
+		get => _enExample;
+		set => SetProperty(ref _enExample, value);
+	}
+
+	string _fileName = string.Empty;
+	public string FileName
+	{
+		get => _fileName;
+		set => SetProperty(ref _fileName, value);
+	}
+
+	string _prevText = string.Empty;
+	public string PrevText
+	{
+		get => _prevText;
+		set => SetProperty(ref _prevText, value);
+	}
+
+	string _prevStatusImage = "/Presentation/Assets/Images/question-mark-16.png";
+	public string PrevStatusImage
+	{
+		get => _prevStatusImage;
+		set => SetProperty(ref _prevStatusImage, value);
+	}
+
+	string _prevStatus = string.Empty;
+	public string PrevStatus
+	{
+		get => _prevStatus;
+		set => SetProperty(ref _prevStatus, value);
+	}
+
+	string _queueStat = string.Empty;
+	public string QueueStat
+	{
+		get => _queueStat;
+		set => SetProperty(ref _queueStat, value);
+	}
+
+	string _vocabularyStat = string.Empty;
+	public string VocabularyStat
+	{
+		get => _vocabularyStat;
+		set => SetProperty(ref _vocabularyStat, value);
+	}
+
+	ObservableCollection<WordCheckResult> _wordResults = [];
+	public ObservableCollection<WordCheckResult> WordResults
+	{
+		get => _wordResults;
+		set => SetProperty(ref _wordResults, value);
+	}
+
+	bool _hideIncorrectWords = false;
+	public bool HideIncorrectWords
+	{
+		get => _hideIncorrectWords;
+		set => SetProperty(ref _hideIncorrectWords, value);
+	}
+
+	bool _isOverlayVisible = false;
+	public bool IsOverlayVisible
+	{
+		get => _isOverlayVisible;
+		set => SetProperty(ref _isOverlayVisible, value);
+	}
+
+	string _countdownMessage = string.Empty;
+	public string CountdownMessage
+	{
+		get => _countdownMessage;
+		set => SetProperty(ref _countdownMessage, value);
+	}
+
+	int _selectedTabIndex = 0;
+	public int SelectedTabIndex
+	{
+		get => _selectedTabIndex;
+		set => SetProperty(ref _selectedTabIndex, value);
+	}
+
+	ObservableCollection<VocabularyReferenceDto> _vocabulariesCollection = [];
+	public ObservableCollection<VocabularyReferenceDto> VocabulariesCollection
+	{
+		get => _vocabulariesCollection;
+		set => SetProperty(ref _vocabulariesCollection, value);
 	}
 	#endregion UI properties
 
@@ -195,19 +211,19 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	public ICommand SessionClickCommand { get; }
 	public ICommand RefreshSessionCommand { get; }
 
-	private void ShowTips()
+	void ShowTips()
 	{
 		_tipsUsedForCurrentEntry = true;
 		ShowEntry(isNewEntry: false, showTips: true);
 	}
 
-	private void RestartValidationTimer()
+	void RestartValidationTimer()
 	{
 		_validationTimer.Stop();
 		_validationTimer.Start();
 	}
 
-	private void StartNextEntryDelay()
+	void StartNextEntryDelay()
 	{
 		IsOverlayVisible = true;
 		_remainingSeconds = _settings is null ? 3 : _settings.Learn.NextEntryDelaySeconds;
@@ -215,7 +231,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		_nextEntryTimer.Start();
 	}
 
-	private void OnNextEntryTimerTick(object? sender, EventArgs e)
+	void OnNextEntryTimerTick(object? sender, EventArgs e)
 	{
 		_remainingSeconds--;
 
@@ -229,7 +245,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	}
 
-	private void OnSessionClick(SessionClickParameter? sessionParam)
+	void OnSessionClick(SessionClickParameter? sessionParam)
 	{
 		if (sessionParam == null)
 			return;
@@ -237,7 +253,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		StartVocabularySession(sessionParam.VocabularyFile, sessionParam.SessionIndex, true);
 	}
 
-	private void OnRefreshSessionClick(SessionClickParameter? sessionParam)
+	void OnRefreshSessionClick(SessionClickParameter? sessionParam)
 	{
 		if (sessionParam == null)
 			return;
@@ -310,7 +326,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		PrevStatus = $"{_previous.CorrectAnswers}/{_previous.TotalAttempts}";
 	}
 
-	private void AddVocabulary()
+	void AddVocabulary()
 	{
 		var openFileDialog = new OpenFileDialog
 		{
@@ -326,7 +342,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	}
 
-	private void DeleteVocabulary(VocabularyReferenceDto? vocabularyFile)
+	void DeleteVocabulary(VocabularyReferenceDto? vocabularyFile)
 	{
 		if (vocabularyFile == null)
 			return;
@@ -335,7 +351,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		VocabulariesCollection.Remove(vocabularyFile);
 	}
 
-	private void StartVocabularySession(VocabularyReferenceDto vocabularyFile, int sessionIndex, bool continueSession)
+	void StartVocabularySession(VocabularyReferenceDto vocabularyFile, int sessionIndex, bool continueSession)
 	{
 		var vocabulary = _learnService.StartVocabularySession(vocabularyFile.FilePath, sessionIndex, continueSession);
 		if (vocabulary is null)

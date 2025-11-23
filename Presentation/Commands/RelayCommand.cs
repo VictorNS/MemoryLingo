@@ -4,8 +4,8 @@ namespace MemoryLingo.Presentation.Commands;
 
 public class RelayCommand : ICommand
 {
-	private readonly Action _execute;
-	private readonly Func<bool>? _canExecute;
+	readonly Action _execute;
+	readonly Func<bool>? _canExecute;
 
 	public RelayCommand(Action execute, Func<bool>? canExecute = null)
 	{

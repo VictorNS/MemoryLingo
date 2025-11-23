@@ -97,6 +97,7 @@ public class LearnServiceTests
 		Assert.NotNull(vocabularyResult);
 
 		var currentSession = learnService.GetCurrentSession();
+		Assert.NotNull(currentSession);
 		var entriesInQueue = currentSession.Entries.Keys.ToList();
 		Assert.Equal(4, entriesInQueue.Count);
 		Assert.Contains("word1", entriesInQueue);
@@ -218,6 +219,7 @@ public class LearnServiceTests
 		Assert.NotNull(vocabularyResult);
 
 		var currentSession = learnService.GetCurrentSession();
+		Assert.NotNull(currentSession);
 		var entriesInQueue = currentSession.Entries.Keys.ToList();
 		Assert.Equal(4, entriesInQueue.Count);
 		Assert.Contains("word1", entriesInQueue);
@@ -343,6 +345,7 @@ public class LearnServiceTests
 		Assert.NotNull(vocabularyResult);
 
 		var currentSession = learnService.GetCurrentSession();
+		Assert.NotNull(currentSession);
 		var entriesInQueue = currentSession.Entries.Keys.ToList();
 
 		// With 30% of 7 entries = 2 entries (the most difficult ones from session 0)
@@ -468,6 +471,7 @@ public class LearnServiceTests
 		Assert.NotNull(vocabularyResult);
 
 		var currentSession = learnService.GetCurrentSession();
+		Assert.NotNull(currentSession);
 		var entriesInQueue = currentSession.Entries.Keys.ToList();
 
 		// Only non-skipped entries from session 1 are considered: word3, word4, word5, word6 (4 entries)
