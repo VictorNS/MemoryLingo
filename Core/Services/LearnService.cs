@@ -196,15 +196,17 @@ public class LearnService
 		if (restEntries.Count == 0)
 			return false;
 
+		var skippedCount = _vocabularyProgress.Entries.Count(kv => kv.Value.Sessions[sessionIndex].IsSkipped);
+
 		_session = new LearnSession
 		{
 			SessionIndex = sessionIndex,
 			QueueIndex = 0,
 			IsLastLearned = false,
 			Entries = restEntries,
-			Queue = [.. restEntries.Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)],
-			VocabularyEntriesCount = _vocabularyProgress.Entries.Count,
-			VocabularyLearnedCount = _vocabularyProgress.Entries.Count - restEntries.Count
+			Queue = BuildQueue(restEntries),
+			VocabularyEntriesCount = _vocabularyProgress.Entries.Count - skippedCount,
+			VocabularyLearnedCount = _vocabularyProgress.Entries.Count - restEntries.Count - skippedCount,
 		};
 
 		if (!continueSession)
@@ -255,7 +257,7 @@ public class LearnService
 		if (restEntries.Count == 0)
 			return null;
 
-		_session.Queue = [.. restEntries.Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)];
+		_session.Queue = BuildQueue(restEntries);
 		_session.QueueIndex = 0;
 		return GetEntryByQueueIndex();
 	}
@@ -283,6 +285,14 @@ public class LearnService
 				VocabularyEntriesCount = _session.VocabularyEntriesCount,
 			}
 		};
+	}
+
+	List<string> BuildQueue(Dictionary<string, VocabularyProgressEntry> entries)
+	{
+		if (_settings.Learn.RandomizeQueue)
+			return [.. entries.OrderBy(x => Random.Shared.Next()).Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)];
+
+		return [.. entries.Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)];
 	}
 
 	public EntryProgress SaveEntryProgress(string ruText, bool isCorrect)

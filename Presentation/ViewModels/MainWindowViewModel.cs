@@ -350,6 +350,18 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	}
 
+	public void HideEntry()
+	{
+		HideIncorrectWords = false;
+		RuText = string.Empty;
+		RuTip = string.Empty;
+		Answer = string.Empty;
+		Transcription = string.Empty;
+		RuExample = string.Empty;
+		EnExample = string.Empty;
+		WordResults.Clear();
+	}
+
 	public void ShowPreviousEntry()
 	{
 		PrevRuText = _previous.Entry.RuText;
@@ -419,7 +431,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			bool isCorrect = !_tipsUsedForCurrentEntry;
 
 			_previous = _learnService.SaveEntryProgress(_current.Entry.RuText, isCorrect: isCorrect);
-			ShowEntry(isNewEntry: false, showTips: true);
+			HideEntry();
 			ShowPreviousEntry();
 
 			if (isCorrect)

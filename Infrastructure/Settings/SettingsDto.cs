@@ -19,7 +19,7 @@ public class LearnSettings
 	/// <summary>
 	/// Number of entries per exercise
 	/// </summary>
-	public int ExerciseSize { get; set; } = 13;
+	public int ExerciseSize { get; set; } = 17;
 	/// <summary>
 	/// Number of correct answers required to learn an entry
 	/// </summary>
@@ -35,5 +35,10 @@ public class LearnSettings
 	/// <summary>
 	/// Delay in seconds before automatically advancing to the next entry
 	/// </summary>
-	public int NextEntryDelaySeconds { get; set; } = 2;
+	public int NextEntryDelaySeconds { get; set; } = 1;
+	/// <summary>
+	/// Randomize the order of entries in the session queue
+	/// </summary>	
+	public bool RandomizeQueue { get; set; } = true;
+
 }
