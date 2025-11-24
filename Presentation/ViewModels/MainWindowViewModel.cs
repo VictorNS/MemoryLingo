@@ -102,11 +102,46 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		set => SetProperty(ref _fileName, value);
 	}
 
-	string _prevText = string.Empty;
-	public string PrevText
+	string _prevRuText = string.Empty;
+	public string PrevRuText
 	{
-		get => _prevText;
-		set => SetProperty(ref _prevText, value);
+		get => _prevRuText;
+		set => SetProperty(ref _prevRuText, value);
+	}
+
+	string _prevRuTip = string.Empty;
+	public string PrevRuTip
+	{
+		get => _prevRuTip;
+		set => SetProperty(ref _prevRuTip, value);
+	}
+
+	string _prevTranscription = string.Empty;
+	public string PrevTranscription
+	{
+		get => _prevTranscription;
+		set => SetProperty(ref _prevTranscription, value);
+	}
+
+	string _prevEnText = string.Empty;
+	public string PrevEnText
+	{
+		get => _prevEnText;
+		set => SetProperty(ref _prevEnText, value);
+	}
+
+	string _prevRuExample= string.Empty;
+	public string PrevRuExample
+	{
+		get => _prevRuExample;
+		set => SetProperty(ref _prevRuExample, value);
+	}
+
+	string _prevEnExample = string.Empty;
+	public string PrevEnExample
+	{
+		get => _prevEnExample;
+		set => SetProperty(ref _prevEnExample, value);
 	}
 
 	string _prevStatusImage = "/Presentation/Assets/Images/question-mark-16.png";
@@ -299,7 +334,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		if (showTips)
 		{
-			Transcription = _current.Entry.Transcription;
+			Transcription = WrapTranscription(_current.Entry.Transcription);
 			RuExample = _current.Entry.RuExample;
 			EnExample = _current.Entry.EnExample;
 
@@ -317,7 +352,12 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 	public void ShowPreviousEntry()
 	{
-		PrevText = _previous.Entry.RuText;
+		PrevRuText = _previous.Entry.RuText;
+		PrevRuTip = _previous.Entry.RuTip;
+		PrevEnText = _previous.Entry.EnText;
+		PrevTranscription = WrapTranscription(_previous.Entry.Transcription);
+		PrevRuExample = _previous.Entry.RuExample;
+		PrevEnExample = _previous.Entry.EnExample;
 		PrevStatusImage = $"/Presentation/Assets/Images/{(_previous.CorrectAnswers == 0 && _previous.TotalAttempts == 0
 			? "question-mark-16.png"
 			: _previous.IsLastAttemptSuccess
@@ -325,6 +365,8 @@ public class MainWindowViewModel : INotifyPropertyChanged
 				: "decrease-16.png")}";
 		PrevStatus = $"{_previous.CorrectAnswers}/{_previous.TotalAttempts}";
 	}
+
+	static string WrapTranscription(string t) => t.StartsWith('[') ? t : $"[{t}]";
 
 	void AddVocabulary()
 	{

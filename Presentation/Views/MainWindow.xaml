@@ -282,6 +282,8 @@
 						<RowDefinition Height="Auto"/>
 						<RowDefinition Height="Auto"/>
 						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
 					</Grid.RowDefinitions>
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*"/>
@@ -329,10 +331,16 @@
 						</ItemsControl.ItemTemplate>
 					</ItemsControl>
 					<Label Grid.Row="4" Content="{Binding Transcription}" Style="{StaticResource TipLabel}"/>
+					<Label Grid.Row="5" Content="{Binding RuExample}" Style="{StaticResource TipLabel}"/>
+					<Label Grid.Row="6" Content="{Binding EnExample}" Style="{StaticResource TipLabel}"/>
 				</Grid>
 
 				<Grid Grid.Row="1" Background="LightGray">
 					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
 						<RowDefinition Height="Auto"/>
 						<RowDefinition Height="Auto"/>
 						<RowDefinition Height="*"/>
@@ -340,27 +348,23 @@
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*"/>
 					</Grid.ColumnDefinitions>
-					<Label Grid.Row="0" Content="{Binding RuExample}" Style="{StaticResource TipLabel}"/>
-					<Label Grid.Row="1" Content="{Binding EnExample}" Style="{StaticResource TipLabel}"/>
-					<Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="Silver" Margin="0,2,0,0" Padding="0,2,0,0">
-						<Grid>
-							<Grid.RowDefinitions>
-								<RowDefinition Height="Auto"/>
-								<RowDefinition Height="*"/>
-							</Grid.RowDefinitions>
-							<WrapPanel Grid.Row="0" Orientation="Horizontal">
-								<Label Content="{Binding PrevText}" Style="{StaticResource StatusLabelCut}"/>
-								<Image Source="{Binding PrevStatusImage}" Style="{StaticResource StatusImage}"/>
-								<Label Content="{Binding PrevStatus}" Style="{StaticResource StatusLabel}"/>
-								<Image Source="/Presentation/Assets/Images/dyslexia-16.png" Style="{StaticResource StatusImage}"/>
-								<Label Content="{Binding QueueStat}" Style="{StaticResource StatusLabel}"/>
-							</WrapPanel>
-							<WrapPanel Grid.Row="1" Orientation="Horizontal">
-								<Label Content="{Binding FileName}" Style="{StaticResource StatusLabel}"/>
-								<Image Source="/Presentation/Assets/Images/vocabulary-16.png" Style="{StaticResource StatusImage}"/>
-								<Label Content="{Binding VocabularyStat}" Style="{StaticResource StatusLabel}"/>
-							</WrapPanel>
-						</Grid>
+
+					<Label Grid.Row="0" Content="{Binding PrevRuText}"/>
+					<Label Grid.Row="1" Content="{Binding PrevRuTip}" Style="{StaticResource TipLabel}"/>
+					<Label Grid.Row="2" Content="{Binding PrevEnText}"/>
+					<Label Grid.Row="3" Content="{Binding PrevTranscription}" Style="{StaticResource TipLabel}"/>
+					<Label Grid.Row="4" Content="{Binding PrevRuExample}" Style="{StaticResource TipLabel}"/>
+					<Label Grid.Row="5" Content="{Binding PrevEnExample}" Style="{StaticResource TipLabel}"/>
+					<Border Grid.Row="6" BorderThickness="0,1,0,0" BorderBrush="Silver" Margin="0,2,0,0" Padding="2,2,0,0">
+						<WrapPanel Orientation="Horizontal">
+							<Image Source="{Binding PrevStatusImage}" Style="{StaticResource StatusImage}"/>
+							<Label Content="{Binding PrevStatus}" Style="{StaticResource StatusLabel}"/>
+							<Image Source="/Presentation/Assets/Images/dyslexia-16.png" Style="{StaticResource StatusImage}"/>
+							<Label Content="{Binding QueueStat}" Style="{StaticResource StatusLabel}"/>
+							<Label Content="{Binding FileName}" Style="{StaticResource StatusLabel}"/>
+							<Image Source="/Presentation/Assets/Images/vocabulary-16.png" Style="{StaticResource StatusImage}"/>
+							<Label Content="{Binding VocabularyStat}" Style="{StaticResource StatusLabel}"/>
+						</WrapPanel>
 					</Border>
 				</Grid>
 
