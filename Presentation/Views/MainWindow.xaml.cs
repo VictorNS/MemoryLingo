@@ -1,20 +1,22 @@
 ﻿using System.Windows;
-using System.Windows.Input;
 using MemoryLingo.Core.Services;
 using MemoryLingo.Infrastructure.Settings;
 using MemoryLingo.Presentation.ViewModels;
+using SWI = System.Windows.Input;
 
 namespace MemoryLingo;
 
 public partial class MainWindow : Window
 {
 	readonly ISettingsStore _settingsService;
+	readonly ITrayService _trayService;
 	public MainWindowViewModel ViewModel { get; }
 
-	public MainWindow(ISettingsStore settingsService, EntryValidationService entryValidationService, LearnService learnService)
+	public MainWindow(ISettingsStore settingsService, ITrayService trayService, EntryValidationService entryValidationService, LearnService learnService)
 	{
 		InitializeComponent();
 		_settingsService = settingsService;
+		_trayService = trayService;
 		ViewModel = new MainWindowViewModel(entryValidationService, learnService);
 	}
 
@@ -26,6 +28,8 @@ public partial class MainWindow : Window
 		Height = settings.Window.Height;
 		Width = settings.Window.Width;
 
+		_trayService.Initialize(this);
+
 		ViewModel.Initialize(settings);
 		DataContext = ViewModel;
 
@@ -35,6 +39,7 @@ public partial class MainWindow : Window
 
 	void Window_Closed(object sender, EventArgs e)
 	{
+		_trayService.Dispose();
 		var settings = _settingsService.Load();
 		settings.Window.Top = Top;
 		settings.Window.Left = Left;
@@ -43,14 +48,22 @@ public partial class MainWindow : Window
 		_settingsService.Save(settings);
 	}
 
-	void MainWindow_KeyDown(object sender, KeyEventArgs e)
+	void Window_StateChanged(object sender, EventArgs e)
 	{
-		if (ViewModel.IsOverlayVisible && (e.Key == Key.Space || e.Key == Key.Enter))
+		var settings = _settingsService.Load();
+
+		if (settings.Behavior.MinimizeToTray && WindowState == WindowState.Minimized)
+			_trayService.HideWindow();
+	}
+
+	void MainWindow_KeyDown(object sender, SWI.KeyEventArgs e)
+	{
+		if (ViewModel.IsOverlayVisible && (e.Key == SWI.Key.Space || e.Key == SWI.Key.Enter))
 		{
 			ViewModel.InitializeNextEntry();
 			e.Handled = true;
 		}
-		else if (e.Key == Key.F1)
+		else if (e.Key == SWI.Key.F1)
 		{
 			ViewModel.ShowTipsCommand.Execute(null);
 			e.Handled = true;

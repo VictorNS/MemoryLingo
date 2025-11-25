@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using MemoryLingo.Core.Models;
@@ -9,7 +8,7 @@ using MemoryLingo.Core.Services;
 using MemoryLingo.Infrastructure.Settings;
 using MemoryLingo.Infrastructure.VocabularyReference;
 using MemoryLingo.Presentation.Commands;
-using Microsoft.Win32;
+using SW = System.Windows;
 
 namespace MemoryLingo.Presentation.ViewModels;
 
@@ -261,7 +260,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	void StartNextEntryDelay()
 	{
 		IsOverlayVisible = true;
-		_remainingSeconds = _settings is null ? 3 : _settings.Learn.NextEntryDelaySeconds;
+		_remainingSeconds = _settings is null ? 3 : _settings.Behavior.NextEntryDelaySeconds;
 		CountdownMessage = $"Next entry in {_remainingSeconds} seconds...";
 		_nextEntryTimer.Start();
 	}
@@ -295,11 +294,11 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		var vocabularyFile = sessionParam.VocabularyFile;
 
-		if (MessageBoxResult.Yes != MessageBox.Show(
+		if (SW.MessageBoxResult.Yes != SW.MessageBox.Show(
 			$"Restart session {sessionParam.SessionIndex + 1} for '{vocabularyFile.FileName}'?",
 			"Confirm Session Restart",
-			MessageBoxButton.YesNo,
-			MessageBoxImage.Question))
+			SW.MessageBoxButton.YesNo,
+			SW.MessageBoxImage.Question))
 			return;
 
 		StartVocabularySession(vocabularyFile, sessionParam.SessionIndex, false);
@@ -382,7 +381,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 	void AddVocabulary()
 	{
-		var openFileDialog = new OpenFileDialog
+		var openFileDialog = new Microsoft.Win32.OpenFileDialog
 		{
 			Filter = "Excel files (*.xlsx)|*.xlsx",
 			FilterIndex = 1,

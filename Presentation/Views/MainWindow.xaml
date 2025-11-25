@@ -3,7 +3,7 @@
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:vm="clr-namespace:MemoryLingo.Presentation.ViewModels"
 		xmlns:converters="clr-namespace:MemoryLingo.Presentation.Converters"
-		Closed="Window_Closed" Loaded="Window_Loaded"
+		Closed="Window_Closed" Loaded="Window_Loaded" StateChanged="Window_StateChanged"
 		Title="Memory Lingo" Height="230" Width="600">
 
 	<Window.Resources>

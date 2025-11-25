@@ -289,7 +289,7 @@ public class LearnService
 
 	List<string> BuildQueue(Dictionary<string, VocabularyProgressEntry> entries)
 	{
-		if (_settings.Learn.RandomizeQueue)
+		if (_settings.Behavior.RandomizeQueue)
 			return [.. entries.OrderBy(x => Random.Shared.Next()).Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)];
 
 		return [.. entries.Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)];

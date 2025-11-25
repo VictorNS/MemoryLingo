@@ -1,11 +1,11 @@
 using System.Globalization;
-using System.Windows.Data;
 using MemoryLingo.Infrastructure.VocabularyReference;
 using MemoryLingo.Presentation.Commands;
+using SWD = System.Windows.Data;
 
 namespace MemoryLingo.Presentation.Converters;
 
-public class SessionClickParameterConverter : IMultiValueConverter
+public class SessionClickParameterConverter : SWD.IMultiValueConverter
 {
 	public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
 	{
@@ -23,7 +23,7 @@ public class SessionClickParameterConverter : IMultiValueConverter
 			}
 			else
 			{
-				return Binding.DoNothing;
+				return SWD.Binding.DoNothing;
 			}
 
 			return new SessionClickParameter
@@ -32,7 +32,7 @@ public class SessionClickParameterConverter : IMultiValueConverter
 				SessionIndex = sessionIndex
 			};
 		}
-		return Binding.DoNothing;
+		return SWD.Binding.DoNothing;
 	}
 
 	public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
