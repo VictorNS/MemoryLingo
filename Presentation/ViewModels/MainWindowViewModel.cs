@@ -222,6 +222,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		ShowTipsCommand = new RelayCommand(ShowTips);
 		SkipToNextEntryCommand = new RelayCommand(InitializeNextEntry);
 		AddVocabularyCommand = new RelayCommand(AddVocabulary);
+		ReloadVocabulariesCommand = new RelayCommand(ReloadVocabularies);
 		DeleteVocabularyCommand = new ParameterizedRelayCommand<VocabularyReferenceDto>(DeleteVocabulary);
 		SessionClickCommand = new ParameterizedRelayCommand<SessionClickParameter>(OnSessionClick);
 		RefreshSessionCommand = new ParameterizedRelayCommand<SessionClickParameter>(OnRefreshSessionClick);
@@ -241,6 +242,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	public ICommand ShowTipsCommand { get; }
 	public ICommand SkipToNextEntryCommand { get; }
 	public ICommand AddVocabularyCommand { get; }
+	public ICommand ReloadVocabulariesCommand { get; }
 	public ICommand DeleteVocabularyCommand { get; }
 	public ICommand SessionClickCommand { get; }
 	public ICommand RefreshSessionCommand { get; }
@@ -393,6 +395,12 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			var vocabularyFile = _learnService.AddVocabularyFile(openFileDialog.FileName);
 			VocabulariesCollection.Add(vocabularyFile);
 		}
+	}
+
+	void ReloadVocabularies()
+	{
+		var vocabularies = _learnService.LoadVocabularyList(forceReloadSession: true);
+		VocabulariesCollection = new ObservableCollection<VocabularyReferenceDto>(vocabularies);
 	}
 
 	void DeleteVocabulary(VocabularyReferenceDto? vocabularyFile)

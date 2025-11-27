@@ -28,7 +28,7 @@ public class LearnService
 	}
 
 	#region VocabularyList
-	public IReadOnlyList<VocabularyReferenceDto> LoadVocabularyList()
+	public IReadOnlyList<VocabularyReferenceDto> LoadVocabularyList(bool forceReloadSession = false)
 	{
 		var vocabularies = _vocabularyListService.Load();
 
@@ -38,6 +38,17 @@ public class LearnService
 
 			if (checkResult.VocabularyFile.HasErrors)
 				vocabularyFile.ErrorMessage = checkResult.VocabularyFile.ErrorMessage;
+
+			if (forceReloadSession)
+			{
+				var vocabularyProgress = _vocabularyProgressStore.Load(vocabularyFile.FilePath);
+
+				for (int i = 0; i < vocabularyProgress.Sessions.Count; i++)
+				{
+					var src = vocabularyProgress.Sessions[i];
+					vocabularyFile.Sessions[i].Update(src.LastUpdated, src.LearnedEntries, src.TotalEntries);
+				}
+			}
 		}
 
 		return vocabularies;

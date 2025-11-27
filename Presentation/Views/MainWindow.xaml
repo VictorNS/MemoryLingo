@@ -47,6 +47,11 @@
 			</Setter>
 		</Style>
 
+		<Style x:Key="BaseImageButton" TargetType="{x:Type Button}">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Cursor" Value="Hand"/>
+		</Style>
 		<Style TargetType="{x:Type Label}">
 			<Setter Property="FontFamily" Value="Verdana"/>
 			<Setter Property="FontSize" Value="18"/>
@@ -104,10 +109,10 @@
 			<Setter Property="Margin" Value="0"/>
 			<Setter Property="Padding" Value="0"/>
 		</Style>
-		<Style x:Key="RefreshButton" TargetType="{x:Type Button}">
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Cursor" Value="Hand"/>
+		<Style x:Key="ToolbarImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseImageButton}">
+			<Setter Property="Margin" Value="4,0,0,0"/>
+		</Style>
+		<Style x:Key="RefreshButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseImageButton}">
 			<Setter Property="Margin" Value="8,0,0,0"/>
 		</Style>
 		<Style TargetType="{x:Type DataGrid}">
@@ -134,8 +139,15 @@
 					<RowDefinition Height="*"/>
 				</Grid.RowDefinitions>
 
-				<Button Grid.Row="0" Content="Add Vocabulary" Command="{Binding AddVocabularyCommand}"
-						Style="{StaticResource LinkButton}" HorizontalAlignment="Left" Margin="8,4,0,4"/>
+				<WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,2,0,2">
+					<Button Content="Add Vocabulary" Command="{Binding AddVocabularyCommand}"
+							Style="{StaticResource LinkButton}"/>
+					<Button Command="{Binding ReloadVocabulariesCommand}"
+							Style="{StaticResource ToolbarImageButton}"							
+							ToolTip="Reload all sessions">
+						<Image Source="/Presentation/Assets/Images/refresh-16.png" Width="16" Height="16"/>
+					</Button>
+				</WrapPanel>
 
 				<DataGrid ItemsSource="{Binding VocabulariesCollection}"
 						AutoGenerateColumns="False" CanUserAddRows="False"
