@@ -246,6 +246,9 @@ public class LearnService
 		if (_vocabularyProgress is null || _session is null)
 			return null;
 
+		if (_session.Queue.Count == 0) // it's possible when all entries are learned
+			return null;
+
 		var expectQueueIndex = _session.QueueIndex + (_session.IsLastLearned ? 0 : 1);
 		_session.IsLastLearned = false;
 

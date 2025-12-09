@@ -5,6 +5,7 @@ public class SettingsDto
 	public WindowSettings Window { get; set; } = new();
 	public BehaviorSettings Behavior { get; set; } = new();
 	public LearnSettings Learn { get; set; } = new();
+	public Dictionary<string, SpeechLangSettings> Speech { get; set; } = [];
 }
 
 public class WindowSettings
@@ -18,10 +19,6 @@ public class WindowSettings
 public class BehaviorSettings
 {
 	public bool MinimizeToTray { get; set; } = true;
-	/// <summary>
-	/// Delay in seconds before automatically advancing to the next entry
-	/// </summary>
-	public int NextEntryDelaySeconds { get; set; } = 1;
 	/// <summary>
 	/// Randomize the order of entries in the session queue
 	/// </summary>
@@ -46,4 +43,11 @@ public class LearnSettings
 	/// Percentage of difficult entries we will repeat in a third session
 	/// </summary>
 	public int DifficultEntriesSession3Percent { get; set; } = 50;
+}
+
+public class SpeechLangSettings
+{
+    public required string Voice { get; set; }
+	public required int Rate { get; set; }
+	public bool IsActive { get; set; }
 }

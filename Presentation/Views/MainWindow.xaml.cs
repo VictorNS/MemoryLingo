@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using MemoryLingo.Core.Services;
 using MemoryLingo.Infrastructure.Settings;
+using MemoryLingo.Infrastructure.SpeechSynthesis;
 using MemoryLingo.Presentation.ViewModels;
 using SWI = System.Windows.Input;
 
@@ -12,12 +13,12 @@ public partial class MainWindow : Window
 	readonly ITrayService _trayService;
 	public MainWindowViewModel ViewModel { get; }
 
-	public MainWindow(ISettingsStore settingsService, ITrayService trayService, EntryValidationService entryValidationService, LearnService learnService)
+	public MainWindow(ISettingsStore settingsService, ITrayService trayService, EntryValidationService entryValidationService, LearnService learnService, ISpeechService speechService)
 	{
 		InitializeComponent();
 		_settingsService = settingsService;
 		_trayService = trayService;
-		ViewModel = new MainWindowViewModel(entryValidationService, learnService);
+		ViewModel = new MainWindowViewModel(entryValidationService, learnService, speechService);
 	}
 
 	void Window_Loaded(object sender, RoutedEventArgs e)
@@ -28,9 +29,16 @@ public partial class MainWindow : Window
 		Height = settings.Window.Height;
 		Width = settings.Window.Width;
 
+		if (settings.Speech.Count == 0)
+		{
+			settings.Speech.Add("en", new SpeechLangSettings { IsActive = true, Voice = "Microsoft David Desktop", Rate = -2 });
+			settings.Speech.Add("bg", new SpeechLangSettings { IsActive = true, Voice = "Microsoft Ivan", Rate = -2 });
+			_settingsService.Save(settings);
+		}
+
 		_trayService.Initialize(this);
 
-		ViewModel.Initialize(settings);
+		ViewModel.Initialize();
 		DataContext = ViewModel;
 
 		// Add KeyDown event handler for F1 key
@@ -39,7 +47,6 @@ public partial class MainWindow : Window
 
 	void Window_Closed(object sender, EventArgs e)
 	{
-		_trayService.Dispose();
 		var settings = _settingsService.Load();
 		settings.Window.Top = Top;
 		settings.Window.Left = Left;

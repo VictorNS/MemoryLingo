@@ -14,8 +14,9 @@ public class TrayService : ITrayService, IDisposable
 {
     private NotifyIcon? _notifyIcon;
     private SW.Window? _window;
+	private bool disposedValue;
 
-    public void Initialize(SW.Window window)
+	public void Initialize(SW.Window window)
     {
         _window = window;
 
@@ -50,8 +51,23 @@ public class TrayService : ITrayService, IDisposable
         _window?.Hide();
     }
 
-    public void Dispose()
-    {
-        _notifyIcon?.Dispose();
-    }
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			if (disposing)
+			{
+				_notifyIcon?.Dispose();
+			}
+
+			disposedValue = true;
+		}
+	}
+
+	public void Dispose()
+	{
+		// Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
+	}
 }

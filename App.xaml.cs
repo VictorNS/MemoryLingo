@@ -1,5 +1,6 @@
 ﻿using MemoryLingo.Core.Services;
 using MemoryLingo.Infrastructure.Settings;
+using MemoryLingo.Infrastructure.SpeechSynthesis;
 using MemoryLingo.Infrastructure.VocabularyExcel;
 using MemoryLingo.Infrastructure.VocabularyProgress;
 using MemoryLingo.Infrastructure.VocabularyReference;
@@ -16,14 +17,15 @@ public partial class App : SW.Application
 	{
 		var services = new ServiceCollection();
 
-		services.AddTransient<ISettingsStore, SettingsStore>();
-		services.AddTransient<IVocabularyReferenceStore, VocabularyReferenceStore>();
-		services.AddTransient<IVocabularyProgressStore, VocabularyProgressStore>();
-		services.AddTransient<IVocabularyExcelReader, VocabularyExcelReader>();
-		services.AddTransient<ITrayService, TrayService>();
-		services.AddTransient<EntryValidationService>();
-		services.AddTransient<LearnService>();
-		services.AddTransient<MainWindow>();
+		services.AddSingleton<ISettingsStore, SettingsStore>();
+		services.AddSingleton<IVocabularyReferenceStore, VocabularyReferenceStore>();
+		services.AddSingleton<IVocabularyProgressStore, VocabularyProgressStore>();
+		services.AddSingleton<IVocabularyExcelReader, VocabularyExcelReader>();
+		services.AddSingleton<ITrayService, TrayService>();
+		services.AddSingleton<ISpeechService, SpeechService>();
+		services.AddSingleton<EntryValidationService>();
+		services.AddSingleton<LearnService>();
+		services.AddSingleton<MainWindow>();
 
 		_serviceProvider = services.BuildServiceProvider();
 

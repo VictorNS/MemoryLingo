@@ -143,7 +143,7 @@
 					<Button Content="Add Vocabulary" Command="{Binding AddVocabularyCommand}"
 							Style="{StaticResource LinkButton}"/>
 					<Button Command="{Binding ReloadVocabulariesCommand}"
-							Style="{StaticResource ToolbarImageButton}"							
+							Style="{StaticResource ToolbarImageButton}"
 							ToolTip="Reload all sessions">
 						<Image Source="/Presentation/Assets/Images/refresh-16.png" Width="16" Height="16"/>
 					</Button>
@@ -380,12 +380,9 @@
 					</Border>
 				</Grid>
 
-				<Grid Grid.Row="0" Grid.RowSpan="2" Visibility="{Binding IsOverlayVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Panel.ZIndex="1000">
-					<Border Background="#80FFFFFF" CornerRadius="4" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="6">
-						<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-							<Label Content="{Binding CountdownMessage}" FontSize="10" HorizontalAlignment="Center" Foreground="DarkGray"/>
-							<Label Content="Press Ctrl, Space, or Enter to skip" FontSize="8" HorizontalAlignment="Center" Foreground="DarkGray" Margin="0,5,0,0"/>
-						</StackPanel>
+				<Grid Grid.Row="0" Panel.ZIndex="1000" Background="#80FFFFFF" Visibility="{Binding IsOverlayVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+					<Border VerticalAlignment="Top">
+						<Label Content="wait..." Padding="10" HorizontalAlignment="Center" Foreground="Gray"/>
 					</Border>
 				</Grid>
 			</Grid>
