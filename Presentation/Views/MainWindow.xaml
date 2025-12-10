@@ -172,7 +172,8 @@
 								</Style>
 							</DataGridTextColumn.ElementStyle>
 						</DataGridTextColumn>
-						<DataGridTextColumn Header="Last Session" Binding="{Binding LastSessionLocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="100" SortDirection="Descending"/>
+						<DataGridTextColumn Header="Last Session" Binding="{Binding LastSessionLocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}"
+							Width="Auto" MinWidth="100" SortDirection="Descending"/>
 						<DataGridTemplateColumn Header="Session1" Width="Auto">
 							<DataGridTemplateColumn.CellTemplate>
 								<DataTemplate>

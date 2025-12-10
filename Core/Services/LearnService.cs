@@ -28,7 +28,7 @@ public class LearnService
 	}
 
 	#region VocabularyList
-	public IReadOnlyList<VocabularyReferenceDto> LoadVocabularyList(bool forceReloadSession = false)
+	public IReadOnlyList<VocabularyReferenceDto> LoadVocabularyList(bool forceReloadSession)
 	{
 		var vocabularies = _vocabularyListService.Load();
 

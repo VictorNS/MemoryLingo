@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using MemoryLingo.Core.Models;
@@ -277,12 +278,25 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 	public void Initialize()
 	{
-		var vocabularies = _learnService.LoadVocabularyList();
-		VocabulariesCollection = new ObservableCollection<VocabularyReferenceDto>(vocabularies);
+		LoadVocabularyList(forceReloadSession: false);
 		SelectedTabIndex = 0;
 	}
 
 	#region VocabularyList
+	void ReloadVocabularies()
+	{
+		LoadVocabularyList(forceReloadSession: true);
+	}
+
+	void LoadVocabularyList(bool forceReloadSession)
+	{
+		var vocabularies = _learnService.LoadVocabularyList(forceReloadSession);
+		VocabulariesCollection = new ObservableCollection<VocabularyReferenceDto>(vocabularies);
+		var view = CollectionViewSource.GetDefaultView(VocabulariesCollection);
+		view.SortDescriptions.Clear();
+		view.SortDescriptions.Add(new SortDescription("LastSessionLocalTime", ListSortDirection.Descending));
+	}
+
 	void AddVocabulary()
 	{
 		var openFileDialog = new Microsoft.Win32.OpenFileDialog
@@ -296,13 +310,9 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		{
 			var vocabularyFile = _learnService.AddVocabularyFile(openFileDialog.FileName);
 			VocabulariesCollection.Add(vocabularyFile);
+			var view = CollectionViewSource.GetDefaultView(VocabulariesCollection);
+			view.Refresh();
 		}
-	}
-
-	void ReloadVocabularies()
-	{
-		var vocabularies = _learnService.LoadVocabularyList(forceReloadSession: true);
-		VocabulariesCollection = new ObservableCollection<VocabularyReferenceDto>(vocabularies);
 	}
 
 	void DeleteVocabulary(VocabularyReferenceDto? vocabularyFile)
@@ -384,8 +394,10 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		if (string.IsNullOrWhiteSpace(_vocabularyLanguage))
 			return;
 
+		// TODO Delete all text in parentheses
 		_speechService.Speak(_vocabularyLanguage, _previous.Entry.EnText);
 
+		// TODO Only if example is different from the text
 		if (!string.IsNullOrWhiteSpace(_previous.Entry.EnExample))
 			_speechService.Speak(_vocabularyLanguage, _previous.Entry.EnExample);
 	}
