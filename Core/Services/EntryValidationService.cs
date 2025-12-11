@@ -134,4 +134,47 @@ public class EntryValidationService
 	{
 		return word.StartsWith('(') && word.EndsWith(')');
 	}
+
+	public string RemoveTextInBrackets(string text)
+	{
+		if (string.IsNullOrWhiteSpace(text))
+			return text;
+
+		var result = new StringBuilder();
+		int i = 0;
+
+		while (i < text.Length)
+		{
+			if (text[i] == '(')
+			{
+				// Skip to the closing bracket
+				while (i < text.Length && text[i] != ')')
+				{
+					i++;
+				}
+				if (i < text.Length) // Skip the closing bracket
+				{
+					i++;
+				}
+
+				// Remove trailing space after bracket if present
+				if (i < text.Length && text[i] == ' ')
+				{
+					i++;
+				}
+			}
+			else if (text[i] == ' ' && i + 1 < text.Length && text[i + 1] == '(')
+			{
+				// Skip space before opening bracket
+				i++;
+			}
+			else
+			{
+				result.Append(text[i]);
+				i++;
+			}
+		}
+
+		return result.ToString().Trim();
+	}
 }

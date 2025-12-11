@@ -212,4 +212,60 @@ public class EntryValidationServiceTests
 		Assert.True(actual[5].IsTip);
 		Assert.True(actual[5].IsNonWord);
 	}
+
+	[Fact]
+	public void RemoveTextInBrackets_WithBracketsAtStartAndEnd_RemovesBothWithSpaces()
+	{
+		// Arrange
+		var service = new EntryValidationService();
+		var input = "(asd) fgh jkl (qwert).";
+
+		// Act
+		var actual = service.RemoveTextInBrackets(input);
+
+		// Assert
+		Assert.Equal("fgh jkl.", actual);
+	}
+
+	[Fact]
+	public void RemoveTextInBrackets_WithBracketsAtEnd_RemovesBracketsAndSpace()
+	{
+		// Arrange
+		var service = new EntryValidationService();
+		var input = "fgh jkl (qwert).";
+
+		// Act
+		var actual = service.RemoveTextInBrackets(input);
+
+		// Assert
+		Assert.Equal("fgh jkl.", actual);
+	}
+
+	[Fact]
+	public void RemoveTextInBrackets_WithBracketsAtStart_RemovesBracketsAndSpace()
+	{
+		// Arrange
+		var service = new EntryValidationService();
+		var input = "(asd) fgh jkl.";
+
+		// Act
+		var actual = service.RemoveTextInBrackets(input);
+
+		// Assert
+		Assert.Equal("fgh jkl.", actual);
+	}
+
+	[Fact]
+	public void RemoveTextInBrackets_WithBracketsNoSpaces_RemovesBracketsOnly()
+	{
+		// Arrange
+		var service = new EntryValidationService();
+		var input = "(asd)fgh jkl!(qwert)";
+
+		// Act
+		var actual = service.RemoveTextInBrackets(input);
+
+		// Assert
+		Assert.Equal("fgh jkl!", actual);
+	}
 }
