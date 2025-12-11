@@ -1,6 +1,6 @@
 using SW = System.Windows;
 
-namespace MemoryLingo.Core.Services;
+namespace MemoryLingo.Infrastructure.WindowsIntegration;
 
 public interface ITrayService
 {

@@ -2,6 +2,7 @@
 using MemoryLingo.Core.Services;
 using MemoryLingo.Infrastructure.Settings;
 using MemoryLingo.Infrastructure.SpeechSynthesis;
+using MemoryLingo.Infrastructure.WindowsIntegration;
 using MemoryLingo.Presentation.ViewModels;
 using SWI = System.Windows.Input;
 
@@ -65,12 +66,7 @@ public partial class MainWindow : Window
 
 	void MainWindow_KeyDown(object sender, SWI.KeyEventArgs e)
 	{
-		if (ViewModel.IsOverlayVisible && (e.Key == SWI.Key.Space || e.Key == SWI.Key.Enter))
-		{
-			ViewModel.InitializeNextEntry();
-			e.Handled = true;
-		}
-		else if (e.Key == SWI.Key.F1)
+		if (e.Key == SWI.Key.F1)
 		{
 			ViewModel.ShowTipsCommand.Execute(null);
 			e.Handled = true;

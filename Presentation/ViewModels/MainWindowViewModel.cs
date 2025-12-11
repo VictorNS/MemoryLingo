@@ -205,6 +205,8 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		get => _vocabulariesCollection;
 		set => SetProperty(ref _vocabulariesCollection, value);
 	}
+
+	static string WrapTranscription(string t) => t.StartsWith('[') ? t : $"[{t}]";
 	#endregion UI properties
 
 	public MainWindowViewModel(EntryValidationService entryValidationService, LearnService learnService, ISpeechService speechService)
@@ -214,7 +216,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		_speechService = speechService;
 
 		ShowTipsCommand = new RelayCommand(ShowTips);
-		SkipToNextEntryCommand = new RelayCommand(InitializeNextEntry);
 		AddVocabularyCommand = new RelayCommand(AddVocabulary);
 		ReloadVocabulariesCommand = new RelayCommand(ReloadVocabularies);
 		DeleteVocabularyCommand = new ParameterizedRelayCommand<VocabularyReferenceDto>(DeleteVocabulary);
@@ -229,9 +230,14 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		};
 	}
 
+	public void Initialize()
+	{
+		LoadVocabularyList(forceReloadSession: false);
+		SelectedTabIndex = 0;
+	}
+
 	#region events
 	public ICommand ShowTipsCommand { get; }
-	public ICommand SkipToNextEntryCommand { get; }
 	public ICommand AddVocabularyCommand { get; }
 	public ICommand ReloadVocabulariesCommand { get; }
 	public ICommand DeleteVocabularyCommand { get; }
@@ -276,12 +282,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	}
 	#endregion events
 
-	public void Initialize()
-	{
-		LoadVocabularyList(forceReloadSession: false);
-		SelectedTabIndex = 0;
-	}
-
 	#region VocabularyList
 	void ReloadVocabularies()
 	{
@@ -325,13 +325,14 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	}
 	#endregion VocabularyList
 
-	public void ShowSessionInfo(EntryProgress.CurrentSessionProgress sessionProgress)
+	#region Show/Hide UI elements
+	void ShowSessionInfo(EntryProgress.CurrentSessionProgress sessionProgress)
 	{
 		QueueStat = $"{sessionProgress.QueueIndex + 1}-{sessionProgress.QueueCount}";
 		VocabularyStat = $"{sessionProgress.VocabularyLearnedCount}/{sessionProgress.VocabularyEntriesCount}";
 	}
 
-	public void ShowEntry(bool isNewEntry, bool showTips)
+	void ShowEntry(bool isNewEntry, bool showTips)
 	{
 		HideIncorrectWords = false;
 		RuText = _current.Entry.RuText;
@@ -361,7 +362,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	}
 
-	public void HideEntry()
+	void HideEntry()
 	{
 		HideIncorrectWords = false;
 		RuText = string.Empty;
@@ -373,7 +374,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		WordResults.Clear();
 	}
 
-	public void ShowPreviousEntry()
+	void ShowPreviousEntry()
 	{
 		PrevRuText = _previous.Entry.RuText;
 		PrevRuTip = _previous.Entry.RuTip;
@@ -388,21 +389,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 				: "decrease-16.png")}";
 		PrevStatus = $"{_previous.CorrectAnswers}/{_previous.TotalAttempts}";
 	}
-
-	public void SpeakPreviousEntry()
-	{
-		if (string.IsNullOrWhiteSpace(_vocabularyLanguage))
-			return;
-
-		// TODO Delete all text in parentheses
-		_speechService.Speak(_vocabularyLanguage, _previous.Entry.EnText);
-
-		// TODO Only if example is different from the text
-		if (!string.IsNullOrWhiteSpace(_previous.Entry.EnExample))
-			_speechService.Speak(_vocabularyLanguage, _previous.Entry.EnExample);
-	}
-
-	static string WrapTranscription(string t) => t.StartsWith('[') ? t : $"[{t}]";
+	#endregion Show/Hide UI elements
 
 	void StartVocabularySession(VocabularyReferenceDto vocabularyFile, int sessionIndex, bool continueSession)
 	{
@@ -419,7 +406,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		SelectedTabIndex = 1;
 	}
 
-	public void ProcessAnswer(string answer)
+	void ProcessAnswer(string answer)
 	{
 		ShowEntry(isNewEntry: false, showTips: false);
 
@@ -464,12 +451,28 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	{
 		IsOverlayVisible = true;
 		await Task.Delay(TimeSpan.FromMilliseconds(100));
-		SpeakPreviousEntry();
+		await SpeakPreviousEntry();
 		await Task.Delay(TimeSpan.FromMilliseconds(100));
 		InitializeNextEntry();
 	}
 
-	public void InitializeNextEntry()
+	async Task SpeakPreviousEntry()
+	{
+		if (string.IsNullOrWhiteSpace(_vocabularyLanguage))
+			return;
+
+		var enText = _entryValidationService.RemoveTextInBrackets(_previous.Entry.EnText);
+		_speechService.Speak(_vocabularyLanguage, enText);
+
+		var enExample = _entryValidationService.RemoveTextInBrackets(_previous.Entry.EnExample);
+		if (!string.IsNullOrWhiteSpace(enExample) && !enExample.Equals(enText, StringComparison.OrdinalIgnoreCase))
+		{
+			await Task.Delay(TimeSpan.FromMilliseconds(300));
+			_speechService.Speak(_vocabularyLanguage, _previous.Entry.EnExample);
+		}
+	}
+
+	void InitializeNextEntry()
 	{
 		var newEntry = _learnService.GetNextEntry();
 

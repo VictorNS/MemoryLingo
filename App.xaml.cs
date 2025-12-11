@@ -4,6 +4,7 @@ using MemoryLingo.Infrastructure.SpeechSynthesis;
 using MemoryLingo.Infrastructure.VocabularyExcel;
 using MemoryLingo.Infrastructure.VocabularyProgress;
 using MemoryLingo.Infrastructure.VocabularyReference;
+using MemoryLingo.Infrastructure.WindowsIntegration;
 using Microsoft.Extensions.DependencyInjection;
 using SW = System.Windows;
 
