@@ -7,7 +7,20 @@ using MemoryLingo.Infrastructure.VocabularyReference;
 
 namespace MemoryLingo.Core.Services;
 
-public class LearnService
+public interface ILearnService
+{
+	IReadOnlyList<VocabularyReferenceDto> LoadVocabularyList(bool forceReloadSession);
+	IReadOnlyList<VocabularyReferenceDto> GetVocabularyList();
+	VocabularyReferenceDto AddVocabularyFile(string filePath);
+	void RemoveVocabularyFile(string filePath);
+
+	VocabularyExcelDto? StartVocabularySession(string filePath, int sessionIndex, bool continueSession);
+	EntryProgress GetFirstEntry();
+	EntryProgress? GetNextEntry();
+	EntryProgress SaveEntryProgress(string ruText, bool isCorrect);
+}
+
+public class LearnService : ILearnService
 {
 	readonly ISettingsStore _settingsService;
 	readonly IVocabularyProgressStore _vocabularyProgressStore;
@@ -132,7 +145,7 @@ public class LearnService
 		return _vocabulary;
 	}
 
-	public void SynchronizeProgressWithVocabulary()
+	void SynchronizeProgressWithVocabulary()
 	{
 		if (_vocabulary is null || _vocabularyProgress is null)
 			return;

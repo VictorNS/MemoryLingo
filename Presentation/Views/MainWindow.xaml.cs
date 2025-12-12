@@ -14,7 +14,7 @@ public partial class MainWindow : Window
 	readonly ITrayService _trayService;
 	public MainWindowViewModel ViewModel { get; }
 
-	public MainWindow(ISettingsStore settingsService, ITrayService trayService, EntryValidationService entryValidationService, LearnService learnService, ISpeechService speechService)
+	public MainWindow(ISettingsStore settingsService, ITrayService trayService, EntryValidationService entryValidationService, ILearnService learnService, ISpeechService speechService)
 	{
 		InitializeComponent();
 		_settingsService = settingsService;

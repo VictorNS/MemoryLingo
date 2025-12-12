@@ -47,20 +47,12 @@
 			</Setter>
 		</Style>
 
-		<Style x:Key="BaseImageButton" TargetType="{x:Type Button}">
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Cursor" Value="Hand"/>
-		</Style>
 		<Style TargetType="{x:Type Label}">
 			<Setter Property="FontFamily" Value="Verdana"/>
 			<Setter Property="FontSize" Value="18"/>
 			<Setter Property="BorderThickness" Value="0"/>
 			<Setter Property="Margin" Value="4,0,1,0"/>
 			<Setter Property="Padding" Value="2,1,2,1"/>
-		</Style>
-		<Style x:Key="TipLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
-			<Setter Property="FontSize" Value="14"/>
 		</Style>
 		<Style TargetType="{x:Type TextBox}">
 			<Setter Property="FontFamily" Value="Verdana"/>
@@ -70,6 +62,51 @@
 			<Setter Property="BorderThickness" Value="1"/>
 			<Setter Property="Margin" Value="1,0,1,0"/>
 			<Setter Property="Padding" Value="2,4,2,4"/>
+		</Style>
+
+		<Style x:Key="BaseImageButton" TargetType="{x:Type Button}">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Cursor" Value="Hand"/>
+		</Style>
+		<Style x:Key="LinkButton" TargetType="{x:Type Button}">
+			<Setter Property="FontFamily" Value="Tahoma"/>
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Foreground" Value="Blue"/>
+			<Setter Property="Cursor" Value="Hand"/>
+			<Setter Property="Margin" Value="4,0,1,0"/>
+			<Setter Property="Padding" Value="2,1,2,1"/>
+		</Style>
+
+		<Style x:Key="ToolbarImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseImageButton}">
+			<Setter Property="Margin" Value="4,0,0,0"/>
+		</Style>
+		<Style x:Key="RefreshButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseImageButton}">
+			<Setter Property="Margin" Value="8,0,0,0"/>
+		</Style>
+		<Style x:Key="SessionButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LinkButton}">
+			<Setter Property="Margin" Value="0"/>
+			<Setter Property="Padding" Value="0"/>
+		</Style>
+		<Style TargetType="{x:Type DataGrid}">
+			<Setter Property="FontFamily" Value="Tahoma"/>
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="Margin" Value="0"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Background" Value="LightCyan"/>
+			<Setter Property="GridLinesVisibility" Value="All"/>
+			<Setter Property="HorizontalGridLinesBrush" Value="Silver"/>
+			<Setter Property="VerticalGridLinesBrush" Value="Silver"/>
+		</Style>
+		<Style x:Key="DataGridTextBlockStyle" TargetType="TextBlock">
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Padding" Value="2,0,2,0"/>
+		</Style>
+
+		<Style x:Key="TipLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+			<Setter Property="FontSize" Value="14"/>
 		</Style>
 		<Style x:Key="TipText" TargetType="{x:Type ItemsControl}">
 			<Setter Property="Margin" Value="0"/>
@@ -93,37 +130,6 @@
 			<Setter Property="Width" Value="16"/>
 			<Setter Property="Height" Value="16"/>
 			<Setter Property="Margin" Value="0"/>
-		</Style>
-
-		<Style x:Key="LinkButton" TargetType="{x:Type Button}">
-			<Setter Property="FontFamily" Value="Tahoma"/>
-			<Setter Property="FontSize" Value="12"/>
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Foreground" Value="Blue"/>
-			<Setter Property="Cursor" Value="Hand"/>
-			<Setter Property="Margin" Value="4,0,1,0"/>
-			<Setter Property="Padding" Value="2,1,2,1"/>
-		</Style>
-		<Style x:Key="SessionButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LinkButton}">
-			<Setter Property="Margin" Value="0"/>
-			<Setter Property="Padding" Value="0"/>
-		</Style>
-		<Style x:Key="ToolbarImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseImageButton}">
-			<Setter Property="Margin" Value="4,0,0,0"/>
-		</Style>
-		<Style x:Key="RefreshButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseImageButton}">
-			<Setter Property="Margin" Value="8,0,0,0"/>
-		</Style>
-		<Style TargetType="{x:Type DataGrid}">
-			<Setter Property="FontFamily" Value="Tahoma"/>
-			<Setter Property="FontSize" Value="12"/>
-			<Setter Property="Margin" Value="0"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Background" Value="LightCyan"/>
-			<Setter Property="GridLinesVisibility" Value="All"/>
-			<Setter Property="HorizontalGridLinesBrush" Value="Silver"/>
-			<Setter Property="VerticalGridLinesBrush" Value="Silver"/>
 		</Style>
 	</Window.Resources>
 
@@ -155,12 +161,7 @@
 					<DataGrid.Columns>
 						<DataGridTextColumn Header="File Name" Binding="{Binding FileName, Mode=OneWay}" Width="250">
 							<DataGridTextColumn.ElementStyle>
-								<Style TargetType="TextBlock">
-									<Style.Triggers>
-										<DataTrigger Binding="{Binding HasErrors}" Value="True">
-											<Setter Property="Foreground" Value="Red"/>
-										</DataTrigger>
-									</Style.Triggers>
+								<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}">
 									<Setter Property="ToolTip">
 										<Setter.Value>
 											<StackPanel>
@@ -169,11 +170,25 @@
 											</StackPanel>
 										</Setter.Value>
 									</Setter>
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding HasErrors}" Value="True">
+											<Setter Property="Foreground" Value="Red"/>
+										</DataTrigger>
+									</Style.Triggers>
 								</Style>
 							</DataGridTextColumn.ElementStyle>
 						</DataGridTextColumn>
 						<DataGridTextColumn Header="Last Session" Binding="{Binding LastSessionLocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}"
-							Width="Auto" MinWidth="100" SortDirection="Descending"/>
+							Width="Auto" MinWidth="100" SortDirection="Descending">
+							<DataGridTextColumn.ElementStyle>
+								<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}"/>
+							</DataGridTextColumn.ElementStyle>
+						</DataGridTextColumn>
+						<DataGridTextColumn Header="Session1" Binding="{Binding Session1LocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="100">
+							<DataGridTextColumn.ElementStyle>
+								<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}"/>
+							</DataGridTextColumn.ElementStyle>
+						</DataGridTextColumn>
 						<DataGridTemplateColumn Header="Session1" Width="Auto">
 							<DataGridTemplateColumn.CellTemplate>
 								<DataTemplate>
@@ -204,6 +219,17 @@
 								</DataTemplate>
 							</DataGridTemplateColumn.CellTemplate>
 						</DataGridTemplateColumn>
+						<DataGridTextColumn Header="Session2" Binding="{Binding Session2LocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="100">
+							<DataGridTextColumn.ElementStyle>
+								<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}">
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding Session2Outdated}" Value="True">
+											<Setter Property="Foreground" Value="Red"/>
+										</DataTrigger>
+									</Style.Triggers>
+								</Style>
+							</DataGridTextColumn.ElementStyle>
+						</DataGridTextColumn>
 						<DataGridTemplateColumn Header="Session2" Width="Auto">
 							<DataGridTemplateColumn.CellTemplate>
 								<DataTemplate>
@@ -234,6 +260,17 @@
 								</DataTemplate>
 							</DataGridTemplateColumn.CellTemplate>
 						</DataGridTemplateColumn>
+						<DataGridTextColumn Header="Session3" Binding="{Binding Session3LocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="100">
+							<DataGridTextColumn.ElementStyle>
+								<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}">
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding Session3Outdated}" Value="True">
+											<Setter Property="Foreground" Value="Red"/>
+										</DataTrigger>
+									</Style.Triggers>
+								</Style>
+							</DataGridTextColumn.ElementStyle>
+						</DataGridTextColumn>
 						<DataGridTemplateColumn Header="Session3" Width="Auto">
 							<DataGridTemplateColumn.CellTemplate>
 								<DataTemplate>

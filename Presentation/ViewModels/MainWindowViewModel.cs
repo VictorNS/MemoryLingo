@@ -17,7 +17,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 {
 	#region logic properties
 	readonly EntryValidationService _entryValidationService;
-	readonly LearnService _learnService;
+	readonly ILearnService _learnService;
 	readonly ISpeechService _speechService;
 	EntryProgress _current = EntryProgress.Empty;
 	EntryProgress _previous = EntryProgress.Empty;
@@ -209,7 +209,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	static string WrapTranscription(string t) => t.StartsWith('[') ? t : $"[{t}]";
 	#endregion UI properties
 
-	public MainWindowViewModel(EntryValidationService entryValidationService, LearnService learnService, ISpeechService speechService)
+	public MainWindowViewModel(EntryValidationService entryValidationService, ILearnService learnService, ISpeechService speechService)
 	{
 		_entryValidationService = entryValidationService;
 		_learnService = learnService;

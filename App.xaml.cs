@@ -25,7 +25,7 @@ public partial class App : SW.Application
 		services.AddSingleton<ITrayService, TrayService>();
 		services.AddSingleton<ISpeechService, SpeechService>();
 		services.AddSingleton<EntryValidationService>();
-		services.AddSingleton<LearnService>();
+		services.AddSingleton<ILearnService, LearnService>();
 		services.AddSingleton<MainWindow>();
 
 		_serviceProvider = services.BuildServiceProvider();

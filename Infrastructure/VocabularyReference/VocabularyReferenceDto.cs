@@ -14,13 +14,23 @@ public class VocabularyReferenceDto
 	[JsonIgnore]
 	public bool HasErrors => !string.IsNullOrEmpty(ErrorMessage);
 	[JsonIgnore]
-	public string Session1 => $"{Sessions[0].LearnedEntries}/{Sessions[0].TotalEntries}";
+	public string Session1 => Sessions[0].LastUpdated is null ? "-/-" : $"{Sessions[0].LearnedEntries}/{Sessions[0].TotalEntries}";
 	[JsonIgnore]
-	public string Session2 => $"{Sessions[1].LearnedEntries}/{Sessions[1].TotalEntries}";
+	public string Session2 => Sessions[1].LastUpdated is null ? "-/-" : $"{Sessions[1].LearnedEntries}/{Sessions[1].TotalEntries}";
 	[JsonIgnore]
-	public string Session3 => $"{Sessions[2].LearnedEntries}/{Sessions[2].TotalEntries}";
+	public string Session3 => Sessions[2].LastUpdated is null ? "-/-" : $"{Sessions[0].LearnedEntries}/{Sessions[0].TotalEntries}";
+	[JsonIgnore]
+	public DateTime? Session1LocalTime => Sessions[0].LastUpdated?.ToLocalTime();
+	[JsonIgnore]
+	public DateTime? Session2LocalTime => Sessions[1].LastUpdated?.ToLocalTime();
+	[JsonIgnore]
+	public DateTime? Session3LocalTime => Sessions[2].LastUpdated?.ToLocalTime();
 	[JsonIgnore]
 	public DateTime? LastSessionLocalTime => Sessions.Max(s => s.LastUpdated)?.ToLocalTime();
+	[JsonIgnore]
+	public bool Session2Outdated => (Sessions[0].LastUpdated ?? DateTime.MinValue) > (Sessions[1].LastUpdated ?? DateTime.MinValue);
+	[JsonIgnore]
+	public bool Session3Outdated => (Sessions[1].LastUpdated ?? DateTime.MinValue) > (Sessions[2].LastUpdated ?? DateTime.MinValue);
 
 	public VocabularyReferenceDto()
 	{
