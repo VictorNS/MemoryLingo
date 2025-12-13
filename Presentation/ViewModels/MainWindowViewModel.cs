@@ -533,9 +533,11 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		PrevEnExample = _previous.Entry.EnExample;
 		PrevStatusImage = $"/Presentation/Assets/Images/{(_previous.CorrectAnswers == 0 && _previous.TotalAttempts == 0
 			? "question-mark-16.png"
-			: _previous.IsLastAttemptSuccess
+			: _previous.IsLearned
 				? "check-16.png"
-				: "decrease-16.png")}";
+				: _previous.IsLastAttemptSuccess
+					? "increase-16.png"
+					: "decrease-16.png")}";
 		PrevStatus = $"{_previous.CorrectAnswers}/{_previous.TotalAttempts}";
 	}
 	#endregion Show/Hide UI elements

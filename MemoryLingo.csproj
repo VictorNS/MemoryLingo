@@ -42,6 +42,7 @@
 		<Resource Include="Presentation\Assets\Images\delete-16.png" />
 		<Resource Include="Presentation\Assets\Images\dyslexia-16.png" />
 		<Resource Include="Presentation\Assets\Images\dyslexia-32.ico" />
+		<Resource Include="Presentation\Assets\Images\increase-16.png" />
 		<Resource Include="Presentation\Assets\Images\question-mark-16.png" />
 		<Resource Include="Presentation\Assets\Images\refresh-16.png" />
 		<Resource Include="Presentation\Assets\Images\vocabulary-16.png" />

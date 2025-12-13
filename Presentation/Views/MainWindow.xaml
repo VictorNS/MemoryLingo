@@ -409,11 +409,13 @@
 						<WrapPanel Orientation="Horizontal">
 							<Image Source="{Binding PrevStatusImage}" Style="{StaticResource StatusImage}"/>
 							<Label Content="{Binding PrevStatus}" Style="{StaticResource StatusLabel}"/>
+
 							<Image Source="/Presentation/Assets/Images/dyslexia-16.png" Style="{StaticResource StatusImage}"/>
 							<Label Content="{Binding QueueStat}" Style="{StaticResource StatusLabel}"/>
-							<Label Content="{Binding FileName}" Style="{StaticResource StatusLabel}"/>
+
 							<Image Source="/Presentation/Assets/Images/vocabulary-16.png" Style="{StaticResource StatusImage}"/>
 							<Label Content="{Binding VocabularyStat}" Style="{StaticResource StatusLabel}"/>
+							<Label Content="{Binding FileName}" Style="{StaticResource StatusLabel}"/>
 						</WrapPanel>
 					</Border>
 				</Grid>
