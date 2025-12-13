@@ -29,182 +29,300 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	#region UI properties
 	public event PropertyChangedEventHandler? PropertyChanged;
 
-	protected virtual bool SetProperty<T>(ref T backingStore, T value, [CallerMemberName] string propertyName = "")
-	{
-		if (EqualityComparer<T>.Default.Equals(backingStore, value))
-			return false;
-
-		backingStore = value;
-		OnPropertyChanged(propertyName);
-		return true;
-	}
-
 	protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = "")
 	{
 		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 	}
 
-	string _ruText = string.Empty;
 	public string RuText
 	{
-		get => _ruText;
-		set => SetProperty(ref _ruText, value);
-	}
-
-	string _ruTip = string.Empty;
-	public string RuTip
-	{
-		get => _ruTip;
-		set => SetProperty(ref _ruTip, value);
-	}
-
-	string _transcription = string.Empty;
-	public string Transcription
-	{
-		get => _transcription;
-		set => SetProperty(ref _transcription, value);
-	}
-
-	string _answer = string.Empty;
-	public string Answer
-	{
-		get => _answer;
+		get => field;
 		set
 		{
-			if (SetProperty(ref _answer, value))
+			if (field != value)
 			{
-				if (string.IsNullOrWhiteSpace(_answer))
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
+
+	public string RuTip
+	{
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
+
+	public string Transcription
+	{
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
+
+	public string Answer
+	{
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+
+				if (string.IsNullOrWhiteSpace(field))
 					return;
 				RestartValidationTimer();
 			}
 		}
-	}
+	} = string.Empty;
 
-	string _ruExample = string.Empty;
 	public string RuExample
 	{
-		get => _ruExample;
-		set => SetProperty(ref _ruExample, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
 
-	string _enExample = string.Empty;
 	public string EnExample
 	{
-		get => _enExample;
-		set => SetProperty(ref _enExample, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
 
-	string _fileName = string.Empty;
 	public string FileName
 	{
-		get => _fileName;
-		set => SetProperty(ref _fileName, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
 
-	string _prevRuText = string.Empty;
 	public string PrevRuText
 	{
-		get => _prevRuText;
-		set => SetProperty(ref _prevRuText, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
 
-	string _prevRuTip = string.Empty;
 	public string PrevRuTip
 	{
-		get => _prevRuTip;
-		set => SetProperty(ref _prevRuTip, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
 
-	string _prevTranscription = string.Empty;
 	public string PrevTranscription
 	{
-		get => _prevTranscription;
-		set => SetProperty(ref _prevTranscription, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
 
-	string _prevEnText = string.Empty;
 	public string PrevEnText
 	{
-		get => _prevEnText;
-		set => SetProperty(ref _prevEnText, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
 
-	string _prevRuExample = string.Empty;
 	public string PrevRuExample
 	{
-		get => _prevRuExample;
-		set => SetProperty(ref _prevRuExample, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
 
-	string _prevEnExample = string.Empty;
 	public string PrevEnExample
 	{
-		get => _prevEnExample;
-		set => SetProperty(ref _prevEnExample, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
 
-	string _prevStatusImage = "/Presentation/Assets/Images/question-mark-16.png";
 	public string PrevStatusImage
 	{
-		get => _prevStatusImage;
-		set => SetProperty(ref _prevStatusImage, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = "/Presentation/Assets/Images/question-mark-16.png";
 
-	string _prevStatus = string.Empty;
 	public string PrevStatus
 	{
-		get => _prevStatus;
-		set => SetProperty(ref _prevStatus, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
 
-	string _queueStat = string.Empty;
 	public string QueueStat
 	{
-		get => _queueStat;
-		set => SetProperty(ref _queueStat, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
 
-	string _vocabularyStat = string.Empty;
 	public string VocabularyStat
 	{
-		get => _vocabularyStat;
-		set => SetProperty(ref _vocabularyStat, value);
-	}
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = string.Empty;
 
-	ObservableCollection<WordCheckResult> _wordResults = [];
 	public ObservableCollection<WordCheckResult> WordResults
 	{
-		get => _wordResults;
-		set => SetProperty(ref _wordResults, value);
-	}
+		get => field;
+		set
+		{
+			if (!ReferenceEquals(field, value))
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = [];
 
-	bool _hideIncorrectWords = false;
 	public bool HideIncorrectWords
 	{
-		get => _hideIncorrectWords;
-		set => SetProperty(ref _hideIncorrectWords, value);
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
 	}
 
-	bool _isOverlayVisible = false;
 	public bool IsOverlayVisible
 	{
-		get => _isOverlayVisible;
-		set => SetProperty(ref _isOverlayVisible, value);
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
 	}
 
-	int _selectedTabIndex = 0;
 	public int SelectedTabIndex
 	{
-		get => _selectedTabIndex;
-		set => SetProperty(ref _selectedTabIndex, value);
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
 	}
 
-	ObservableCollection<VocabularyReferenceDto> _vocabulariesCollection = [];
 	public ObservableCollection<VocabularyReferenceDto> VocabulariesCollection
 	{
-		get => _vocabulariesCollection;
-		set => SetProperty(ref _vocabulariesCollection, value);
-	}
+		get => field;
+		set
+		{
+			if (!ReferenceEquals(field, value))
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	} = [];
 
 	static string WrapTranscription(string t) => t.StartsWith('[') ? t : $"[{t}]";
 	#endregion UI properties
@@ -226,13 +344,13 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		_validationTimer.Tick += (s, e) =>
 		{
 			_validationTimer.Stop();
-			ProcessAnswer(_answer);
+			ProcessAnswer(Answer);
 		};
 	}
 
 	public void Initialize()
 	{
-		LoadVocabularyList(forceReloadSession: false);
+		LoadVocabularyList(true);
 		SelectedTabIndex = 0;
 	}
 
@@ -285,16 +403,24 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	#region VocabularyList
 	void ReloadVocabularies()
 	{
-		LoadVocabularyList(forceReloadSession: true);
+		LoadVocabularyList(false);
 	}
 
-	void LoadVocabularyList(bool forceReloadSession)
+	void LoadVocabularyList(bool initialLoad)
 	{
-		var vocabularies = _learnService.LoadVocabularyList(forceReloadSession);
-		VocabulariesCollection = new ObservableCollection<VocabularyReferenceDto>(vocabularies);
-		var view = CollectionViewSource.GetDefaultView(VocabulariesCollection);
-		view.SortDescriptions.Clear();
-		view.SortDescriptions.Add(new SortDescription("LastSessionLocalTime", ListSortDirection.Descending));
+		var vocabularies = _learnService.LoadVocabularyList(forceReloadSession: !initialLoad);
+
+		if (initialLoad)
+		{
+			VocabulariesCollection = new ObservableCollection<VocabularyReferenceDto>(vocabularies);
+			var view = CollectionViewSource.GetDefaultView(VocabulariesCollection);
+			view.SortDescriptions.Clear();
+			view.SortDescriptions.Add(new SortDescription("LastSessionLocalTime", ListSortDirection.Descending));
+		}
+		else
+		{
+			UpdateVocabulariesCollectionPreserveSort(vocabularies);
+		}
 	}
 
 	void AddVocabulary()
@@ -322,6 +448,29 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		_learnService.RemoveVocabularyFile(vocabularyFile.FilePath);
 		VocabulariesCollection.Remove(vocabularyFile);
+	}
+
+	void UpdateVocabulariesCollectionPreserveSort(IEnumerable<VocabularyReferenceDto> vocabularies)
+	{
+		var view = CollectionViewSource.GetDefaultView(VocabulariesCollection);
+		var savedSort = new SortDescriptionCollection();
+
+		if (view?.SortDescriptions.Count > 0)
+		{
+			foreach (var sortDesc in view.SortDescriptions)
+				savedSort.Add(sortDesc);
+		}
+
+		VocabulariesCollection.Clear();
+		foreach (var vocab in vocabularies)
+			VocabulariesCollection.Add(vocab);
+
+		if (savedSort.Count > 0)
+		{
+			view?.SortDescriptions.Clear();
+			foreach (var sortDesc in savedSort)
+				view?.SortDescriptions.Add(sortDesc);
+		}
 	}
 	#endregion VocabularyList
 
@@ -358,7 +507,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			Transcription = string.Empty;
 			RuExample = string.Empty;
 			EnExample = string.Empty;
-			WordResults.Clear();
+			WordResults = [];
 		}
 	}
 
@@ -371,7 +520,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		Transcription = string.Empty;
 		RuExample = string.Empty;
 		EnExample = string.Empty;
-		WordResults.Clear();
+		WordResults = [];
 	}
 
 	void ShowPreviousEntry()
@@ -425,7 +574,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			{
 				ShowSessionInfo(_previous.Session);
 				var vocabularies = _learnService.GetVocabularyList();
-				VocabulariesCollection = new ObservableCollection<VocabularyReferenceDto>(vocabularies);
+				UpdateVocabulariesCollectionPreserveSort(vocabularies);
 			}
 
 			SpeakPreviousEntryThenInitializeNext();
