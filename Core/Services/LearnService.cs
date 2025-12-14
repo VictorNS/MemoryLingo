@@ -278,7 +278,7 @@ public class LearnService : ILearnService
 		}
 
 		var restEntries = _vocabularyProgress.Entries
-			.Where(kv => !kv.Value.Sessions[_session.SessionIndex].IsLearned)
+			.Where(kv => !kv.Value.Sessions[_session.SessionIndex].IsSkipped && !kv.Value.Sessions[_session.SessionIndex].IsLearned)
 			.ToDictionary(kv => kv.Key, kv => kv.Value);
 
 		if (restEntries.Count == 0)
