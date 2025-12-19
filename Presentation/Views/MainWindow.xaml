@@ -83,13 +83,6 @@
 		<Style x:Key="ToolbarImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseImageButton}">
 			<Setter Property="Margin" Value="4,0,0,0"/>
 		</Style>
-		<Style x:Key="RefreshButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseImageButton}">
-			<Setter Property="Margin" Value="8,0,0,0"/>
-		</Style>
-		<Style x:Key="SessionButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LinkButton}">
-			<Setter Property="Margin" Value="0"/>
-			<Setter Property="Padding" Value="0"/>
-		</Style>
 		<Style TargetType="{x:Type DataGrid}">
 			<Setter Property="FontFamily" Value="Tahoma"/>
 			<Setter Property="FontSize" Value="12"/>
@@ -103,6 +96,18 @@
 		<Style x:Key="DataGridTextBlockStyle" TargetType="TextBlock">
 			<Setter Property="VerticalAlignment" Value="Center"/>
 			<Setter Property="Padding" Value="2,0,2,0"/>
+		</Style>
+		<Style x:Key="SessionButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LinkButton}">
+			<Setter Property="Margin" Value="0"/>
+			<Setter Property="Padding" Value="0"/>
+		</Style>
+		<Style x:Key="SessionLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+			<Setter Property="FontSize" Value="10"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+		</Style>
+		<Style x:Key="SessionRefreshButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseImageButton}">
+			<Setter Property="Margin" Value="0,0,0,0"/>
 		</Style>
 
 		<Style x:Key="TipLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
@@ -184,6 +189,7 @@
 								<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}"/>
 							</DataGridTextColumn.ElementStyle>
 						</DataGridTextColumn>
+
 						<DataGridTextColumn Header="Session1" Binding="{Binding Session1LocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="100">
 							<DataGridTextColumn.ElementStyle>
 								<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}"/>
@@ -203,7 +209,9 @@
 												</MultiBinding>
 											</Button.CommandParameter>
 										</Button>
-										<Button Style="{StaticResource RefreshButton}"
+										<Label Content="{Binding Session1AverageAttempts}" Style="{StaticResource SessionLabel}">
+										</Label>
+										<Button Style="{StaticResource SessionRefreshButton}"
 												Command="{Binding DataContext.RefreshSessionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
 												ToolTip="Restart Session 1"
 												IsEnabled="{Binding HasErrors, Converter={StaticResource BooleanInverterConverter}}">
@@ -219,6 +227,7 @@
 								</DataTemplate>
 							</DataGridTemplateColumn.CellTemplate>
 						</DataGridTemplateColumn>
+
 						<DataGridTextColumn Header="Session2" Binding="{Binding Session2LocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="100">
 							<DataGridTextColumn.ElementStyle>
 								<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}">
@@ -244,7 +253,9 @@
 												</MultiBinding>
 											</Button.CommandParameter>
 										</Button>
-										<Button Style="{StaticResource RefreshButton}"
+										<Label Content="{Binding Session2AverageAttempts}" Style="{StaticResource SessionLabel}">
+										</Label>
+										<Button Style="{StaticResource SessionRefreshButton}"
 												Command="{Binding DataContext.RefreshSessionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
 												ToolTip="Restart Session 2"
 												IsEnabled="{Binding HasErrors, Converter={StaticResource BooleanInverterConverter}}">
@@ -285,7 +296,9 @@
 												</MultiBinding>
 											</Button.CommandParameter>
 										</Button>
-										<Button Style="{StaticResource RefreshButton}"
+										<Label Content="{Binding Session3AverageAttempts}" Style="{StaticResource SessionLabel}">
+										</Label>
+										<Button Style="{StaticResource SessionRefreshButton}"
 												Command="{Binding DataContext.RefreshSessionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
 												ToolTip="Restart Session 3"
 												IsEnabled="{Binding HasErrors, Converter={StaticResource BooleanInverterConverter}}">
@@ -301,6 +314,7 @@
 								</DataTemplate>
 							</DataGridTemplateColumn.CellTemplate>
 						</DataGridTemplateColumn>
+
 						<DataGridTemplateColumn Header="Delete" Width="Auto">
 							<DataGridTemplateColumn.CellTemplate>
 								<DataTemplate>

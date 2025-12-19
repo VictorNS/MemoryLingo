@@ -43,44 +43,57 @@ public class LearnService : ILearnService
 	#region VocabularyList
 	public IReadOnlyList<VocabularyReferenceDto> LoadVocabularyList(bool forceReloadSession)
 	{
-		var vocabularies = _vocabularyListService.Load();
+		var vocabularieReferences = _vocabularyListService.Load();
 
-		foreach (var vocabularyFile in vocabularies)
+		foreach (var vr in vocabularieReferences)
 		{
-			var checkResult = LoadAndCheckVocabularyFile(vocabularyFile.FilePath);
+			var result = LoadAndCheckVocabularyFile(vr.FilePath);
 
-			if (checkResult.VocabularyFile.HasErrors)
-				vocabularyFile.ErrorMessage = checkResult.VocabularyFile.ErrorMessage;
+			if (result.CheckResult.HasErrors)
+				vr.ErrorMessage = result.CheckResult.ErrorMessage;
 
 			if (forceReloadSession)
 			{
-				var vocabularyProgress = _vocabularyProgressStore.Load(vocabularyFile.FilePath);
+				var vocabularyProgress = _vocabularyProgressStore.Load(vr.FilePath);
 
-				for (int i = 0; i < vocabularyProgress.Sessions.Count; i++)
+				for (int sessionIndex = 0; sessionIndex < 3; sessionIndex++)
 				{
-					var src = vocabularyProgress.Sessions[i];
-					vocabularyFile.Sessions[i].Update(src.LastUpdated, src.LearnedEntries, src.TotalEntries);
+					var s = vocabularyProgress.Sessions[sessionIndex];
+					var avg = vocabularyProgress.Entries.Values
+						.Where(x=> x.Sessions[sessionIndex].IsLearned)
+						.Average(x => (decimal?)x.Sessions[sessionIndex].TotalAttempts);
+					vr.Sessions[sessionIndex].Update(s.LastUpdated, s.LearnedEntries, s.TotalEntries, avg);
 				}
 			}
 		}
 
-		return vocabularies;
+		_vocabularyListService.Save();
+		return _vocabularyListService.GetVocabularyList();
 	}
 
 	public VocabularyReferenceDto AddVocabularyFile(string filePath)
 	{
-		var checkResult = LoadAndCheckVocabularyFile(filePath);
-		var vocabularyFile = checkResult.VocabularyFile;
+		var result = LoadAndCheckVocabularyFile(filePath);
 		var vocabularyProgress = _vocabularyProgressStore.Load(filePath);
 
-		for (int i = 0; i < vocabularyProgress.Sessions.Count; i++)
+		var vr = new VocabularyReferenceDto
 		{
-			var src = vocabularyProgress.Sessions[i];
-			vocabularyFile.Sessions[i].Update(src.LastUpdated, src.LearnedEntries, src.TotalEntries);
+			FilePath = result.CheckResult.FilePath,
+			FileName = result.CheckResult.FileName,
+			ErrorMessage = result.CheckResult.ErrorMessage,
+		};
+
+		for (int sessionIndex = 0; sessionIndex < 3; sessionIndex++)
+		{
+			var s = vocabularyProgress.Sessions[sessionIndex];
+			var avg = vocabularyProgress.Entries.Values
+				.Where(x => x.Sessions[sessionIndex].IsLearned)
+				.Average(x => (decimal)x.Sessions[sessionIndex].TotalAttempts);
+			vr.Sessions[sessionIndex].Update(s.LastUpdated, s.LearnedEntries, s.TotalEntries, avg);
 		}
 
-		_vocabularyListService.AddAndSave(vocabularyFile);
-		return vocabularyFile;
+		_vocabularyListService.AddAndSave(vr);
+		return vr;
 	}
 
 	public void RemoveVocabularyFile(string filePath)
@@ -88,35 +101,35 @@ public class LearnService : ILearnService
 		_vocabularyListService.RemoveAndSave(filePath);
 	}
 
-	(VocabularyExcelDto Vocabulary, VocabularyReferenceDto VocabularyFile) LoadAndCheckVocabularyFile(string filePath)
+	(VocabularyExcelDto Vocabulary, VocabularyCheckResult CheckResult) LoadAndCheckVocabularyFile(string filePath)
 	{
 		var vocabulary = _vocabularyService.LoadVocabulary(filePath);
-		var vocabularyFile = new VocabularyReferenceDto
+		var vocabularyReference = new VocabularyCheckResult
 		{
 			FileName = vocabulary.FileName,
 			FilePath = vocabulary.FilePath,
+			ErrorMessage = vocabulary.ErrorMessage
 		};
 
-		if (!string.IsNullOrEmpty(vocabulary.ErrorMessage))
+		if (!string.IsNullOrEmpty(vocabularyReference.ErrorMessage))
 		{
-			vocabularyFile.ErrorMessage = vocabulary.ErrorMessage;
-			return (vocabulary, vocabularyFile);
+			return (vocabulary, vocabularyReference);
 		}
 
 		if (vocabulary.Entries.Count == 0)
 		{
-			vocabularyFile.ErrorMessage = "Contains no entries.";
-			return (vocabulary, vocabularyFile);
+			vocabularyReference.ErrorMessage = "Contains no entries.";
+			return (vocabulary, vocabularyReference);
 		}
 
 		var duplicates = vocabulary.Entries.GroupBy(x => x.RuText).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
 		if (duplicates.Count > 0)
 		{
-			vocabularyFile.ErrorMessage = $"Duplicates: {string.Join(", ", duplicates)}";
-			return (vocabulary, vocabularyFile);
+			vocabularyReference.ErrorMessage = $"Duplicates: {string.Join(", ", duplicates)}";
+			return (vocabulary, vocabularyReference);
 		}
 
-		return (vocabulary, vocabularyFile);
+		return (vocabulary, vocabularyReference);
 	}
 
 	public IReadOnlyList<VocabularyReferenceDto> GetVocabularyList()
@@ -127,14 +140,14 @@ public class LearnService : ILearnService
 
 	public VocabularyExcelDto? StartVocabularySession(string filePath, int sessionIndex, bool continueSession)
 	{
-		var checkResult = LoadAndCheckVocabularyFile(filePath);
+		var result = LoadAndCheckVocabularyFile(filePath);
 
-		if (checkResult.VocabularyFile.HasErrors)
+		if (result.CheckResult.HasErrors)
 		{
 			return null;
 		}
 
-		_vocabulary = checkResult.Vocabulary;
+		_vocabulary = result.Vocabulary;
 		_vocabularyProgress = _vocabularyProgressStore.Load(_vocabulary.FilePath);
 		SynchronizeProgressWithVocabulary();
 		_vocabularyProgressStore.Save(_vocabulary.FilePath, sessionIndex, _vocabularyProgress);

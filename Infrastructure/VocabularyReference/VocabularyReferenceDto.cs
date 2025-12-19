@@ -28,6 +28,18 @@ public class VocabularyReferenceDto
 	[JsonIgnore]
 	public DateTime? LastSessionLocalTime => Sessions.Max(s => s.LastUpdated)?.ToLocalTime();
 	[JsonIgnore]
+	public string Session1AverageAttempts => Sessions[0].AverageAttempts.GetValueOrDefault() == 0
+		? ""
+		: Sessions[0].AverageAttempts.GetValueOrDefault().ToString("0.##");
+	[JsonIgnore]
+	public string Session2AverageAttempts => Sessions[1].AverageAttempts.GetValueOrDefault() == 0
+		? ""
+		: Sessions[1].AverageAttempts.GetValueOrDefault().ToString("0.##");
+	[JsonIgnore]
+	public string Session3AverageAttempts => Sessions[2].AverageAttempts.GetValueOrDefault() == 0
+		? ""
+		: Sessions[2].AverageAttempts.GetValueOrDefault().ToString("0.##");
+	[JsonIgnore]
 	public bool Session2Outdated => (Sessions[0].LastUpdated ?? DateTime.MinValue) > (Sessions[1].LastUpdated ?? DateTime.MinValue);
 	[JsonIgnore]
 	public bool Session3Outdated => (Sessions[1].LastUpdated ?? DateTime.MinValue) > (Sessions[2].LastUpdated ?? DateTime.MinValue);
@@ -52,11 +64,13 @@ public class VocabularyFileSession
 	public DateTime? LastUpdated { get; set; }
 	public int LearnedEntries { get; set; }
 	public int TotalEntries { get; set; }
+	public decimal? AverageAttempts { get; set; }
 
-	public void Update(DateTime? lastUpdated, int learnedEntries, int totalEntries)
+	public void Update(DateTime? lastUpdated, int learnedEntries, int totalEntries, decimal? averageAttempts)
 	{
 		LastUpdated = lastUpdated;
 		LearnedEntries = learnedEntries;
 		TotalEntries = totalEntries;
+		AverageAttempts = averageAttempts;
 	}
 }
