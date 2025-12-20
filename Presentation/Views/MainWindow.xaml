@@ -97,6 +97,9 @@
 			<Setter Property="VerticalAlignment" Value="Center"/>
 			<Setter Property="Padding" Value="2,0,2,0"/>
 		</Style>
+		<Style x:Key="LocalTimeColumn" TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}">
+			<Setter Property="FontSize" Value="10"/>
+		</Style>
 		<Style x:Key="SessionButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LinkButton}">
 			<Setter Property="Margin" Value="0"/>
 			<Setter Property="Padding" Value="0"/>
@@ -190,12 +193,12 @@
 							</DataGridTextColumn.ElementStyle>
 						</DataGridTextColumn>
 
-						<DataGridTextColumn Header="Session1" Binding="{Binding Session1LocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="100">
+						<DataGridTextColumn Header="Session 1" Binding="{Binding Session1LocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="80">
 							<DataGridTextColumn.ElementStyle>
-								<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}"/>
+								<Style TargetType="TextBlock" BasedOn="{StaticResource LocalTimeColumn}"/>
 							</DataGridTextColumn.ElementStyle>
 						</DataGridTextColumn>
-						<DataGridTemplateColumn Header="Session1" Width="Auto">
+						<DataGridTemplateColumn Header="➡️Status" Width="Auto">
 							<DataGridTemplateColumn.CellTemplate>
 								<DataTemplate>
 									<StackPanel Orientation="Horizontal">
@@ -228,9 +231,9 @@
 							</DataGridTemplateColumn.CellTemplate>
 						</DataGridTemplateColumn>
 
-						<DataGridTextColumn Header="Session2" Binding="{Binding Session2LocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="100">
+						<DataGridTextColumn Header="Session 2" Binding="{Binding Session2LocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="80">
 							<DataGridTextColumn.ElementStyle>
-								<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}">
+								<Style TargetType="TextBlock" BasedOn="{StaticResource LocalTimeColumn}">
 									<Style.Triggers>
 										<DataTrigger Binding="{Binding Session2Outdated}" Value="True">
 											<Setter Property="Foreground" Value="Red"/>
@@ -239,7 +242,7 @@
 								</Style>
 							</DataGridTextColumn.ElementStyle>
 						</DataGridTextColumn>
-						<DataGridTemplateColumn Header="Session2" Width="Auto">
+						<DataGridTemplateColumn Header="➡️Status" Width="Auto">
 							<DataGridTemplateColumn.CellTemplate>
 								<DataTemplate>
 									<StackPanel Orientation="Horizontal">
@@ -271,9 +274,10 @@
 								</DataTemplate>
 							</DataGridTemplateColumn.CellTemplate>
 						</DataGridTemplateColumn>
-						<DataGridTextColumn Header="Session3" Binding="{Binding Session3LocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="100">
+
+						<DataGridTextColumn Header="Session 3" Binding="{Binding Session3LocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}" Width="Auto" MinWidth="80">
 							<DataGridTextColumn.ElementStyle>
-								<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}">
+								<Style TargetType="TextBlock" BasedOn="{StaticResource LocalTimeColumn}">
 									<Style.Triggers>
 										<DataTrigger Binding="{Binding Session3Outdated}" Value="True">
 											<Setter Property="Foreground" Value="Red"/>
@@ -282,7 +286,7 @@
 								</Style>
 							</DataGridTextColumn.ElementStyle>
 						</DataGridTextColumn>
-						<DataGridTemplateColumn Header="Session3" Width="Auto">
+						<DataGridTemplateColumn Header="➡️Status" Width="Auto">
 							<DataGridTemplateColumn.CellTemplate>
 								<DataTemplate>
 									<StackPanel Orientation="Horizontal">
