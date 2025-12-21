@@ -364,6 +364,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 	void ShowTips()
 	{
+		_validationTimer.Stop();
 		_tipsUsedForCurrentEntry = true;
 		ShowEntry(isNewEntry: false, showTips: true);
 	}
