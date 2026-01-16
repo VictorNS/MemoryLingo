@@ -311,7 +311,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	}
 
-	public ObservableCollection<VocabularyReferenceDto> VocabulariesCollection
+	public ObservableCollection<VocabularyReferenceModel> VocabulariesCollection
 	{
 		get => field;
 		set
@@ -336,7 +336,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		ShowTipsCommand = new RelayCommand(ShowTips);
 		AddVocabularyCommand = new RelayCommand(AddVocabulary);
 		ReloadVocabulariesCommand = new RelayCommand(ReloadVocabularies);
-		DeleteVocabularyCommand = new ParameterizedRelayCommand<VocabularyReferenceDto>(DeleteVocabulary);
+		DeleteVocabularyCommand = new ParameterizedRelayCommand<VocabularyReferenceModel>(DeleteVocabulary);
 		SessionClickCommand = new ParameterizedRelayCommand<SessionClickParameter>(OnSessionClick);
 		RefreshSessionCommand = new ParameterizedRelayCommand<SessionClickParameter>(OnRefreshSessionClick);
 
@@ -413,7 +413,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		if (initialLoad)
 		{
-			VocabulariesCollection = new ObservableCollection<VocabularyReferenceDto>(vocabularies);
+			VocabulariesCollection = new ObservableCollection<VocabularyReferenceModel>(vocabularies);
 			var view = CollectionViewSource.GetDefaultView(VocabulariesCollection);
 			view.SortDescriptions.Clear();
 			view.SortDescriptions.Add(new SortDescription("LastSessionLocalTime", ListSortDirection.Descending));
@@ -442,7 +442,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	}
 
-	void DeleteVocabulary(VocabularyReferenceDto? vocabularyFile)
+	void DeleteVocabulary(VocabularyReferenceModel? vocabularyFile)
 	{
 		if (vocabularyFile == null)
 			return;
@@ -451,7 +451,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		VocabulariesCollection.Remove(vocabularyFile);
 	}
 
-	void UpdateVocabulariesCollectionPreserveSort(IEnumerable<VocabularyReferenceDto> vocabularies)
+	void UpdateVocabulariesCollectionPreserveSort(IEnumerable<VocabularyReferenceModel> vocabularies)
 	{
 		var view = CollectionViewSource.GetDefaultView(VocabulariesCollection);
 		var savedSort = new SortDescriptionCollection();
@@ -543,7 +543,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	}
 	#endregion Show/Hide UI elements
 
-	void StartVocabularySession(VocabularyReferenceDto vocabularyFile, int sessionIndex, bool continueSession)
+	void StartVocabularySession(VocabularyReferenceModel vocabularyFile, int sessionIndex, bool continueSession)
 	{
 		var vocabulary = _learnService.StartVocabularySession(vocabularyFile.FilePath, sessionIndex, continueSession);
 		if (vocabulary is null)

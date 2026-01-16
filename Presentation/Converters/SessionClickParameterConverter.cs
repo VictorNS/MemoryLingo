@@ -9,7 +9,7 @@ public class SessionClickParameterConverter : SWD.IMultiValueConverter
 {
 	public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
 	{
-		if (values.Length >= 2 && values[0] is VocabularyReferenceDto vocabularyFile)
+		if (values.Length >= 2 && values[0] is VocabularyReferenceModel vocabularyFile)
 		{
 			// Handle both string and int session index values
 			int sessionIndex;

@@ -359,16 +359,16 @@ public class LearnServiceTests
 		Assert.DoesNotContain("word6", entriesInQueue); // Should be skipped (excluded by percentage)
 	}
 
-	static (ISettingsStore, IVocabularyProgressStore, IVocabularyReferenceStore, IVocabularyExcelReader) CreateMocksForLoadSession(int entryCount = 6)
+	static (ISettingsStore, IVocabularyProgressStore, IVocabularyReferenceService, IVocabularyExcelReader) CreateMocksForLoadSession(int entryCount = 6)
 	{
 		int session2Percent = 30;
 		int session3Percent = 50;
 		int exerciseSize = 5;
 		int correctAnswersToLearn = 2;
-		
+
 		var settingsStore = Substitute.For<ISettingsStore>();
 		var vocabularyProgressStore = Substitute.For<IVocabularyProgressStore>();
-		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceStore>();
+		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceService>();
 		var vocabularyExcelReader = Substitute.For<IVocabularyExcelReader>();
 
 		var settings = new SettingsDto
@@ -444,7 +444,7 @@ public class LearnServiceTests
 		Assert.Equal(3, result.Sessions.Count);
 		Assert.Equal(5, result.Sessions[0].LearnedEntries);
 		Assert.Equal(10, result.Sessions[0].TotalEntries);
-		vocabularyReferenceStore.Received(1).AddAndSave(Arg.Any<VocabularyReferenceDto>());
+		vocabularyReferenceStore.Received(1).AddAndSave(Arg.Any<VocabularyReferenceModel>());
 	}
 
 	[Fact]
@@ -470,7 +470,7 @@ public class LearnServiceTests
 		// Assert
 		Assert.NotNull(result);
 		Assert.Equal("Failed to load Excel file", result.ErrorMessage);
-		vocabularyReferenceStore.Received(1).AddAndSave(Arg.Any<VocabularyReferenceDto>());
+		vocabularyReferenceStore.Received(1).AddAndSave(Arg.Any<VocabularyReferenceModel>());
 	}
 
 	[Fact]
@@ -496,7 +496,7 @@ public class LearnServiceTests
 		// Assert
 		Assert.NotNull(result);
 		Assert.Equal("Contains no entries.", result.ErrorMessage);
-		vocabularyReferenceStore.Received(1).AddAndSave(Arg.Any<VocabularyReferenceDto>());
+		vocabularyReferenceStore.Received(1).AddAndSave(Arg.Any<VocabularyReferenceModel>());
 	}
 
 	[Fact]
@@ -526,14 +526,14 @@ public class LearnServiceTests
 		// Assert
 		Assert.NotNull(result);
 		Assert.Equal("Duplicates: word1", result.ErrorMessage);
-		vocabularyReferenceStore.Received(1).AddAndSave(Arg.Any<VocabularyReferenceDto>());
+		vocabularyReferenceStore.Received(1).AddAndSave(Arg.Any<VocabularyReferenceModel>());
 	}
 
-	static (ISettingsStore, IVocabularyProgressStore, IVocabularyReferenceStore, IVocabularyExcelReader) CreateMocksForAddVocabularyFile()
+	static (ISettingsStore, IVocabularyProgressStore, IVocabularyReferenceService, IVocabularyExcelReader) CreateMocksForAddVocabularyFile()
 	{
 		var settingsStore = Substitute.For<ISettingsStore>();
 		var vocabularyProgressStore = Substitute.For<IVocabularyProgressStore>();
-		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceStore>();
+		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceService>();
 		var vocabularyExcelReader = Substitute.For<IVocabularyExcelReader>();
 
 		var settings = new SettingsDto

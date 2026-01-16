@@ -9,9 +9,9 @@ namespace MemoryLingo.Core.Services;
 
 public interface ILearnService
 {
-	IReadOnlyList<VocabularyReferenceDto> LoadVocabularyList(bool forceReloadSession);
-	IReadOnlyList<VocabularyReferenceDto> GetVocabularyList();
-	VocabularyReferenceDto AddVocabularyFile(string filePath);
+	IReadOnlyList<VocabularyReferenceModel> LoadVocabularyList(bool forceReloadSession);
+	IReadOnlyList<VocabularyReferenceModel> GetVocabularyList();
+	VocabularyReferenceModel AddVocabularyFile(string filePath);
 	void RemoveVocabularyFile(string filePath);
 
 	VocabularyExcelDto? StartVocabularySession(string filePath, int sessionIndex, bool continueSession);
@@ -24,26 +24,26 @@ public class LearnService : ILearnService
 {
 	readonly ISettingsStore _settingsService;
 	readonly IVocabularyProgressStore _vocabularyProgressStore;
-	readonly IVocabularyReferenceStore _vocabularyListService;
+	readonly IVocabularyReferenceService _vocabularyReferenceService;
 	readonly IVocabularyExcelReader _vocabularyService;
 	readonly SettingsDto _settings;
 	VocabularyExcelDto? _vocabulary;
 	VocabularyProgressDto? _vocabularyProgress;
 	LearnSession? _session;
 
-	public LearnService(ISettingsStore settingsService, IVocabularyProgressStore vocabularyProgressStore, IVocabularyReferenceStore vocabularyListService, IVocabularyExcelReader vocabularyService)
+	public LearnService(ISettingsStore settingsService, IVocabularyProgressStore vocabularyProgressStore, IVocabularyReferenceService vocabularyReferenceService, IVocabularyExcelReader vocabularyService)
 	{
 		_settingsService = settingsService;
 		_vocabularyProgressStore = vocabularyProgressStore;
-		_vocabularyListService = vocabularyListService;
+		_vocabularyReferenceService = vocabularyReferenceService;
 		_vocabularyService = vocabularyService;
 		_settings = _settingsService.Load();
 	}
 
 	#region VocabularyList
-	public IReadOnlyList<VocabularyReferenceDto> LoadVocabularyList(bool forceReloadSession)
+	public IReadOnlyList<VocabularyReferenceModel> LoadVocabularyList(bool forceReloadSession)
 	{
-		var vocabularieReferences = _vocabularyListService.Load();
+		var vocabularieReferences = _vocabularyReferenceService.Load();
 
 		foreach (var vr in vocabularieReferences)
 		{
@@ -59,46 +59,44 @@ public class LearnService : ILearnService
 				for (int sessionIndex = 0; sessionIndex < 3; sessionIndex++)
 				{
 					var s = vocabularyProgress.Sessions[sessionIndex];
-					var avg = vocabularyProgress.Entries.Values
-						.Where(x=> x.Sessions[sessionIndex].IsLearned)
-						.Average(x => (decimal?)x.Sessions[sessionIndex].TotalAttempts);
+					var learnedEntries = vocabularyProgress.Entries.Values.Where(x => x.Sessions[sessionIndex].IsLearned);
+					var avg = learnedEntries.Any()
+						? learnedEntries.Average(x => (decimal?)x.Sessions[sessionIndex].TotalAttempts)
+						: null;
 					vr.Sessions[sessionIndex].Update(s.LastUpdated, s.LearnedEntries, s.TotalEntries, avg);
 				}
 			}
 		}
 
-		_vocabularyListService.Save();
-		return _vocabularyListService.GetVocabularyList();
+		_vocabularyReferenceService.Save();
+		return _vocabularyReferenceService.GetVocabularyList();
 	}
 
-	public VocabularyReferenceDto AddVocabularyFile(string filePath)
+	public VocabularyReferenceModel AddVocabularyFile(string filePath)
 	{
 		var result = LoadAndCheckVocabularyFile(filePath);
 		var vocabularyProgress = _vocabularyProgressStore.Load(filePath);
 
-		var vr = new VocabularyReferenceDto
-		{
-			FilePath = result.CheckResult.FilePath,
-			FileName = result.CheckResult.FileName,
-			ErrorMessage = result.CheckResult.ErrorMessage,
-		};
+		var vr = VocabularyReferenceModel.Empty(result.CheckResult.FilePath);
+		vr.ErrorMessage = result.CheckResult.ErrorMessage;
 
 		for (int sessionIndex = 0; sessionIndex < 3; sessionIndex++)
 		{
 			var s = vocabularyProgress.Sessions[sessionIndex];
-			var avg = vocabularyProgress.Entries.Values
-				.Where(x => x.Sessions[sessionIndex].IsLearned)
-				.Average(x => (decimal)x.Sessions[sessionIndex].TotalAttempts);
+			var learnedEntries = vocabularyProgress.Entries.Values.Where(x => x.Sessions[sessionIndex].IsLearned);
+			var avg = learnedEntries.Any()
+				? learnedEntries.Average(x => (decimal)x.Sessions[sessionIndex].TotalAttempts)
+				: (decimal?)null;
 			vr.Sessions[sessionIndex].Update(s.LastUpdated, s.LearnedEntries, s.TotalEntries, avg);
 		}
 
-		_vocabularyListService.AddAndSave(vr);
+		_vocabularyReferenceService.AddAndSave(vr);
 		return vr;
 	}
 
 	public void RemoveVocabularyFile(string filePath)
 	{
-		_vocabularyListService.RemoveAndSave(filePath);
+		_vocabularyReferenceService.RemoveAndSave(filePath);
 	}
 
 	(VocabularyExcelDto Vocabulary, VocabularyCheckResult CheckResult) LoadAndCheckVocabularyFile(string filePath)
@@ -132,9 +130,9 @@ public class LearnService : ILearnService
 		return (vocabulary, vocabularyReference);
 	}
 
-	public IReadOnlyList<VocabularyReferenceDto> GetVocabularyList()
+	public IReadOnlyList<VocabularyReferenceModel> GetVocabularyList()
 	{
-		return _vocabularyListService.Load();
+		return _vocabularyReferenceService.GetVocabularyList();
 	}
 	#endregion VocabularyList
 
@@ -251,7 +249,7 @@ public class LearnService : ILearnService
 			// update vocabulary progress
 			_vocabularyProgressStore.Save(_vocabulary.FilePath, _session.SessionIndex, _vocabularyProgress);
 			var progress = _vocabularyProgress.GetSessionProgress(_session.SessionIndex);
-			_vocabularyListService.UpdateSessionAndSave(_vocabulary.FilePath, _session.SessionIndex, progress.LearnedEntries, progress.TotalEntries);
+			_vocabularyReferenceService.UpdateSessionAndSave(_vocabulary.FilePath, _session.SessionIndex, progress.LearnedEntries, progress.TotalEntries);
 		}
 
 		return true;
@@ -359,7 +357,7 @@ public class LearnService : ILearnService
 				_session.Queue.Remove(ruText);
 				// update vocabulary progress
 				var progress = _vocabularyProgress.GetSessionProgress(_session.SessionIndex);
-				_vocabularyListService.UpdateSessionAndSave(_vocabulary.FilePath, _session.SessionIndex, progress.LearnedEntries, progress.TotalEntries);
+				_vocabularyReferenceService.UpdateSessionAndSave(_vocabulary.FilePath, _session.SessionIndex, progress.LearnedEntries, progress.TotalEntries);
 			}
 		}
 

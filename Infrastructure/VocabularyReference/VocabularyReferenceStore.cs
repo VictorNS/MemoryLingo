@@ -5,11 +5,11 @@ namespace MemoryLingo.Infrastructure.VocabularyReference;
 
 public interface IVocabularyReferenceStore
 {
-	void AddAndSave(VocabularyReferenceDto file);
-	IReadOnlyList<VocabularyReferenceDto> GetVocabularyList();
 	IReadOnlyList<VocabularyReferenceDto> Load();
-	void RemoveAndSave(string filePath);
+	IReadOnlyList<VocabularyReferenceDto> GetVocabularyList();
 	void Save();
+	void AddAndSave(VocabularyReferenceDto file);
+	void RemoveAndSave(string filePath);
 	void UpdateSessionAndSave(string filePath, int sessionIndex, int learnedEntries, int totalEntries);
 }
 
@@ -33,7 +33,6 @@ public class VocabularyReferenceStore : IVocabularyReferenceStore
 
 		foreach (var vocabularyFile in _vocabularies)
 		{
-			vocabularyFile.FileName = Path.GetFileName(vocabularyFile.FilePath);
 			vocabularyFile.EnsureValid();
 		}
 

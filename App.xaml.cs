@@ -20,6 +20,7 @@ public partial class App : SW.Application
 
 		services.AddSingleton<ISettingsStore, SettingsStore>();
 		services.AddSingleton<IVocabularyReferenceStore, VocabularyReferenceStore>();
+		services.AddSingleton<IVocabularyReferenceService, VocabularyReferenceService>();
 		services.AddSingleton<IVocabularyProgressStore, VocabularyProgressStore>();
 		services.AddSingleton<IVocabularyExcelReader, VocabularyExcelReader>();
 		services.AddSingleton<ITrayService, TrayService>();
