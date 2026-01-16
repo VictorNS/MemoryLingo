@@ -17,7 +17,7 @@ public interface ILearnService
 	VocabularyExcelDto? StartVocabularySession(string filePath, int sessionIndex, bool continueSession);
 	EntryProgress GetFirstEntry();
 	EntryProgress? GetNextEntry();
-	EntryProgress SaveEntryProgress(string ruText, bool isCorrect);
+	EntryProgress SaveEntryProgress(string ruText, bool isAnswerCorrect);
 }
 
 public class LearnService : ILearnService
@@ -333,7 +333,7 @@ public class LearnService : ILearnService
 		return [.. entries.Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)];
 	}
 
-	public EntryProgress SaveEntryProgress(string ruText, bool isCorrect)
+	public EntryProgress SaveEntryProgress(string ruText, bool isAnswerCorrect)
 	{
 		if (_vocabulary is null || _vocabularyProgress is null || _session is null)
 			return EntryProgress.Empty;
@@ -343,7 +343,7 @@ public class LearnService : ILearnService
 		var progressEntrySession = _session.Entries[ruText].Sessions[_session.SessionIndex];
 		progressEntrySession.TotalAttempts++;
 
-		if (isCorrect)
+		if (isAnswerCorrect)
 		{
 			progressEntrySession.CorrectAnswers++;
 
@@ -367,7 +367,7 @@ public class LearnService : ILearnService
 		{
 			Entry = entry,
 			IsLearned = progressEntrySession.IsLearned,
-			IsLastAttemptSuccess = isCorrect,
+			IsLastAttemptSuccess = isAnswerCorrect,
 			CorrectAnswers = progressEntrySession.CorrectAnswers,
 			TotalAttempts = progressEntrySession.TotalAttempts,
 			Session = new()

@@ -566,14 +566,14 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		if (wordResults.All(w => w.IsMatch))
 		{
-			// is correct if no tips were used
-			bool isCorrect = !_tipsUsedForCurrentEntry;
+			// the answer is considered correct if no tips were used
+			bool isAnswerCorrect = !_tipsUsedForCurrentEntry;
 
-			_previous = _learnService.SaveEntryProgress(_current.Entry.RuText, isCorrect: isCorrect);
+			_previous = _learnService.SaveEntryProgress(_current.Entry.RuText, isAnswerCorrect);
 			HideEntry();
 			ShowPreviousEntry();
 
-			if (isCorrect)
+			if (isAnswerCorrect)
 			{
 				ShowSessionInfo(_previous.Session);
 				var vocabularies = _learnService.GetVocabularyList();
@@ -584,15 +584,15 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			return;
 		}
 
-		if (wordResults.Count(x => !x.IsNonWord) == 1)
+		if (wordResults.Count(x => x.IsWord) == 1)
 		{
 			return;
 		}
 
 		// if first word is correct or more then 50% words are correct
-		if (wordResults.FirstOrDefault(x => x.IsMatch && !x.IsNonWord) is not null
+		if (wordResults.First(x => x.IsWord).IsMatch
 		 	||
-			wordResults.Count(x => x.IsMatch && !x.IsNonWord) >= (wordResults.Count(w => !w.IsNonWord) / 2))
+			wordResults.Count(x => x.IsMatch && x.IsWord) >= (wordResults.Count(w => w.IsWord) / 2))
 		{
 			HideIncorrectWords = true;
 			WordResults = new ObservableCollection<WordCheckResult>(wordResults);

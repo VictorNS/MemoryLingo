@@ -1,6 +1,14 @@
 namespace MemoryLingo.Core.Models;
 
-public record WordCheckResult(string Text, bool IsMatch, bool IsPunctuation, bool IsTip)
+public record WordCheckResult(string Text, bool IsMatch, WordCheckResultType EntryType)
 {
-	public bool IsNonWord => IsPunctuation || IsTip;
+	public bool IsPunctuation => EntryType == WordCheckResultType.Punctuation;
+	public bool IsWord => EntryType == WordCheckResultType.Word;
+}
+
+public enum WordCheckResultType
+{
+	Word,
+	Punctuation,
+	Tip
 }

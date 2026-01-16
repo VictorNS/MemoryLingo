@@ -378,7 +378,7 @@
 												<DataTrigger Binding="{Binding IsPunctuation}" Value="True">
 													<Setter Property="Margin" Value="0,0,0,0"/>
 												</DataTrigger>
-												<DataTrigger Binding="{Binding IsNonWord}" Value="True">
+												<DataTrigger Binding="{Binding IsWord}" Value="False">
 													<Setter Property="Foreground" Value="Gray"/>
 												</DataTrigger>
 												<DataTrigger Binding="{Binding IsMatch}" Value="False">
