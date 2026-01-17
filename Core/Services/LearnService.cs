@@ -37,7 +37,7 @@ public class LearnService : ILearnService
 		_vocabularyProgressStore = vocabularyProgressStore;
 		_vocabularyReferenceService = vocabularyReferenceService;
 		_vocabularyService = vocabularyService;
-		_settings = _settingsService.Load();
+		_settings = _settingsService.Get();
 	}
 
 	#region VocabularyList

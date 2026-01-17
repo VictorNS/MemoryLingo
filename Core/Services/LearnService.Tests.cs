@@ -381,7 +381,7 @@ public class LearnServiceTests
 				DifficultEntriesSession3Percent = session3Percent
 			}
 		};
-		settingsStore.Load().Returns(settings);
+		settingsStore.Get().Returns(settings);
 
 		var entries = new List<Entry>();
 		for (int i = 1; i <= entryCount; i++)
@@ -544,7 +544,7 @@ public class LearnServiceTests
 				CorrectAnswersToLearn = 2
 			}
 		};
-		settingsStore.Load().Returns(settings);
+		settingsStore.Get().Returns(settings);
 
 		var defaultProgress = new VocabularyProgressDto
 		{

@@ -5,32 +5,43 @@ namespace MemoryLingo.Infrastructure.Settings;
 
 public interface ISettingsStore
 {
-	SettingsDto Load();
+	SettingsDto Get();
 	void Save(SettingsDto settings);
 }
 
 public class SettingsStore : ISettingsStore
 {
 	readonly string _filePath;
+	SettingsDto? _settings;
 
 	public SettingsStore()
 	{
 		_filePath = Path.Combine(DefaultFilesOptions.AppFolder, "settings.json");
 	}
 
-	public SettingsDto Load()
+	public SettingsDto Get()
 	{
-		if (!File.Exists(_filePath))
-			return new SettingsDto();
+		if (_settings == null)
+		{
+			if (File.Exists(_filePath))
+			{
+				_settings = JsonSerializer.Deserialize<SettingsDto>(File.ReadAllText(_filePath), DefaultFilesOptions.SerializerOptions)
+					?? new SettingsDto();
+			}
+			else
+			{
+				_settings = new SettingsDto();
+			}
+		}
 
-		return JsonSerializer.Deserialize<SettingsDto>(File.ReadAllText(_filePath), DefaultFilesOptions.SerializerOptions)
-			?? new SettingsDto();
+		return _settings;
 	}
 
 	public void Save(SettingsDto settings)
 	{
+		_settings = settings;
 		Directory.CreateDirectory(DefaultFilesOptions.AppFolder);
-		var json = JsonSerializer.Serialize(settings, DefaultFilesOptions.SerializerOptions);
+		var json = JsonSerializer.Serialize(_settings, DefaultFilesOptions.SerializerOptions);
 		File.WriteAllText(_filePath, json);
 	}
 }

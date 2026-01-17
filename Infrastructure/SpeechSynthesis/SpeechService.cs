@@ -20,7 +20,7 @@ public class SpeechService : IDisposable, ISpeechService
 	public SpeechService(ISettingsStore settingsService)
 	{
 		_settingsService = settingsService;
-		_settings = _settingsService.Load();
+		_settings = _settingsService.Get();
 	}
 
 	public void Speak(string lang, string text)

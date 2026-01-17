@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text.Json;
+using MemoryLingo.Infrastructure.Settings;
 
 namespace MemoryLingo.Infrastructure.VocabularyReference;
 
@@ -18,9 +19,12 @@ public class VocabularyReferenceStore : IVocabularyReferenceStore
 	readonly string _filePath;
 	List<VocabularyReferenceDto> _vocabularies = [];
 
-	public VocabularyReferenceStore()
+	public VocabularyReferenceStore(ISettingsStore settingsService)
 	{
-		_filePath = Path.Combine(DefaultFilesOptions.AppFolder, "vocabulary-list.json");
+		var settings = settingsService.Get();
+		_filePath = string.IsNullOrWhiteSpace(settings.VocabularyListPath)
+			? Path.Combine(DefaultFilesOptions.AppFolder, "vocabulary-list.json")
+			: settings.VocabularyListPath;
 	}
 
 	public IReadOnlyList<VocabularyReferenceDto> Load()
