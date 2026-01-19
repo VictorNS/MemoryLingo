@@ -24,7 +24,7 @@ public partial class MainWindow : Window
 
 	void Window_Loaded(object sender, RoutedEventArgs e)
 	{
-		var settings = _settingsService.Load();
+		var settings = _settingsService.Get();
 		Top = settings.Window.Top;
 		Left = settings.Window.Left;
 		Height = settings.Window.Height;
@@ -48,7 +48,7 @@ public partial class MainWindow : Window
 
 	void Window_Closed(object sender, EventArgs e)
 	{
-		var settings = _settingsService.Load();
+		var settings = _settingsService.Get();
 		settings.Window.Top = Top;
 		settings.Window.Left = Left;
 		settings.Window.Height = Height;
@@ -58,7 +58,7 @@ public partial class MainWindow : Window
 
 	void Window_StateChanged(object sender, EventArgs e)
 	{
-		var settings = _settingsService.Load();
+		var settings = _settingsService.Get();
 
 		if (settings.Behavior.MinimizeToTray && WindowState == WindowState.Minimized)
 			_trayService.HideWindow();

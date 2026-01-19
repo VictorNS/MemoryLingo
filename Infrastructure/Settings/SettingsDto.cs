@@ -6,6 +6,7 @@ public class SettingsDto
 	public BehaviorSettings Behavior { get; set; } = new();
 	public LearnSettings Learn { get; set; } = new();
 	public Dictionary<string, SpeechLangSettings> Speech { get; set; } = [];
+	public string VocabularyListPath { get; set; } = string.Empty;
 }
 
 public class WindowSettings
