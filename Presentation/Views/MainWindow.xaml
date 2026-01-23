@@ -372,10 +372,10 @@
 										<Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
 											<Setter Property="Padding" Value="0,1,0,1"/>
 											<Style.Triggers>
-												<DataTrigger Binding="{Binding IsPunctuation}" Value="False">
+												<DataTrigger Binding="{Binding NoSpaceBefore}" Value="False">
 													<Setter Property="Margin" Value="6,0,0,0"/>
 												</DataTrigger>
-												<DataTrigger Binding="{Binding IsPunctuation}" Value="True">
+												<DataTrigger Binding="{Binding NoSpaceBefore}" Value="True">
 													<Setter Property="Margin" Value="0,0,0,0"/>
 												</DataTrigger>
 												<DataTrigger Binding="{Binding IsWord}" Value="False">
