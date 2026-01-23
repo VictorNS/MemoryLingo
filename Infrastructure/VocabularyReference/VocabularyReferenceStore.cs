@@ -8,7 +8,7 @@ public interface IVocabularyReferenceStore
 {
 	IReadOnlyList<VocabularyReferenceDto> Load();
 	IReadOnlyList<VocabularyReferenceDto> GetVocabularyList();
-	void Save();
+	void Save(IReadOnlyList<VocabularyReferenceDto> vocabularies);
 	void AddAndSave(VocabularyReferenceDto file);
 	void RemoveAndSave(string filePath);
 	void UpdateSessionAndSave(string filePath, int sessionIndex, int learnedEntries, int totalEntries);
@@ -78,6 +78,12 @@ public class VocabularyReferenceStore : IVocabularyReferenceStore
 		session.LearnedEntries = learnedEntries;
 		session.TotalEntries = totalEntries;
 
+		Save();
+	}
+
+	public void Save(IReadOnlyList<VocabularyReferenceDto> vocabularies)
+	{
+		_vocabularies = vocabularies.ToList();
 		Save();
 	}
 

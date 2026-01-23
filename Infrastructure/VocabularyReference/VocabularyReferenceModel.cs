@@ -48,8 +48,8 @@ public class VocabularyReferenceModel
 		{
 			FilePath = data.FilePath,
 			FileName = Path.GetFileName(data.FilePath),
-			ErrorMessage = string.Empty,
-			Sessions = data.Sessions
+			Sessions = data.Sessions,
+			ErrorMessage = data.ErrorMessage
 		};
 	}
 
@@ -58,12 +58,18 @@ public class VocabularyReferenceModel
 		return [.. dataList.Select(FromData)];
 	}
 
+	public static IReadOnlyList<VocabularyReferenceDto> ToDataList(IReadOnlyList<VocabularyReferenceModel> models)
+	{
+		return [.. models.Select(m => m.ToData())];
+	}
+
 	public VocabularyReferenceDto ToData()
 	{
 		return new VocabularyReferenceDto
 		{
 			FilePath = FilePath,
-			Sessions = Sessions
+			Sessions = Sessions,
+			ErrorMessage = ErrorMessage
 		};
 	}
 }

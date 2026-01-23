@@ -4,6 +4,7 @@ public class VocabularyReferenceDto
 {
 	public required string FilePath { get; set; }
 	public List<VocabularyReferenceSession> Sessions { get; set; } = [];
+	public string ErrorMessage { get; set; } = string.Empty;
 
 	public void EnsureValid()
 	{

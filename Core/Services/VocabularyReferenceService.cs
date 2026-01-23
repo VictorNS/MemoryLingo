@@ -8,7 +8,7 @@ public interface IVocabularyReferenceService
 	IReadOnlyList<VocabularyReferenceModel> GetVocabularyList();
 	void AddAndSave(VocabularyReferenceModel file);
 	void RemoveAndSave(string filePath);
-	void Save();
+	void Save(IReadOnlyList<VocabularyReferenceModel> vocabularies);
 	void UpdateSessionAndSave(string filePath, int sessionIndex, int learnedEntries, int totalEntries);
 }
 
@@ -33,9 +33,9 @@ public class VocabularyReferenceService : IVocabularyReferenceService
 		return VocabularyReferenceModel.FromDataList(vocabularies);
 	}
 
-	public void Save()
+	public void Save(IReadOnlyList<VocabularyReferenceModel> vocabularies)
 	{
-		_vocabularyReferenceStore.Save();
+		_vocabularyReferenceStore.Save(VocabularyReferenceModel.ToDataList(vocabularies));
 	}
 
 	public void AddAndSave(VocabularyReferenceModel vocabulary)

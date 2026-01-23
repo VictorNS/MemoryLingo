@@ -47,6 +47,7 @@ public class LearnService : ILearnService
 
 		foreach (var vr in vocabularieReferences)
 		{
+			vr.ErrorMessage = string.Empty;
 			var result = LoadAndCheckVocabularyFile(vr.FilePath);
 
 			if (result.CheckResult.HasErrors)
@@ -68,7 +69,7 @@ public class LearnService : ILearnService
 			}
 		}
 
-		_vocabularyReferenceService.Save();
+		_vocabularyReferenceService.Save(vocabularieReferences);
 		return _vocabularyReferenceService.GetVocabularyList();
 	}
 
