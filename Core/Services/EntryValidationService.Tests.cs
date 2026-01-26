@@ -43,17 +43,17 @@ public class EntryValidationServiceTests
 		var actual = service.GetWordCheckResults(input, expectedAnswer);
 
 		// Assert
-		Assert.Equal(2, actual.Count);
-		Assert.Equal("Hello", actual[0].Text);
-		Assert.True(actual[0].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[0].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[0].EntryType);
-		Assert.True(actual[0].IsWord);
-		Assert.Equal("world", actual[1].Text);
-		Assert.True(actual[1].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[1].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[1].EntryType);
-		Assert.True(actual[1].IsWord);
+		Assert.Equal(2, actual.Tokens.Count);
+		Assert.Equal("Hello", actual.Tokens[0].Text);
+		Assert.True(actual.Tokens[0].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[0].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[0].TokenType);
+		Assert.True(actual.Tokens[0].IsWord);
+		Assert.Equal("world", actual.Tokens[1].Text);
+		Assert.True(actual.Tokens[1].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[1].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[1].TokenType);
+		Assert.True(actual.Tokens[1].IsWord);
 	}
 
 	[Fact]
@@ -68,15 +68,15 @@ public class EntryValidationServiceTests
 		var actual = service.GetWordCheckResults(input, expectedAnswer);
 
 		// Assert
-		Assert.Equal(4, actual.Count);
-		Assert.Equal("Hello", actual[0].Text);
-		Assert.True(actual[0].IsMatch);
-		Assert.Equal(",", actual[1].Text);
-		Assert.True(actual[1].IsMatch);
-		Assert.Equal("world", actual[2].Text);
-		Assert.True(actual[2].IsMatch);
-		Assert.Equal("!", actual[3].Text);
-		Assert.True(actual[3].IsMatch);
+		Assert.Equal(4, actual.Tokens.Count);
+		Assert.Equal("Hello", actual.Tokens[0].Text);
+		Assert.True(actual.Tokens[0].IsMatch);
+		Assert.Equal(",", actual.Tokens[1].Text);
+		Assert.True(actual.Tokens[1].IsMatch);
+		Assert.Equal("world", actual.Tokens[2].Text);
+		Assert.True(actual.Tokens[2].IsMatch);
+		Assert.Equal("!", actual.Tokens[3].Text);
+		Assert.True(actual.Tokens[3].IsMatch);
 	}
 
 	[Fact]
@@ -91,27 +91,27 @@ public class EntryValidationServiceTests
 		var actual = service.GetWordCheckResults(input, expectedAnswer);
 
 		// Assert
-		Assert.Equal(4, actual.Count);
-		Assert.Equal("Hello", actual[0].Text);
-		Assert.True(actual[0].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[0].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[0].EntryType);
-		Assert.True(actual[0].IsWord);
-		Assert.Equal(",", actual[1].Text);
-		Assert.True(actual[1].IsMatch);
-		Assert.Equal(WordCheckResultType.Punctuation, actual[1].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[1].EntryType);
-		Assert.False(actual[1].IsWord);
-		Assert.Equal("world", actual[2].Text);
-		Assert.True(actual[2].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[2].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[2].EntryType);
-		Assert.True(actual[2].IsWord);
-		Assert.Equal("!", actual[3].Text);
-		Assert.True(actual[3].IsMatch);
-		Assert.Equal(WordCheckResultType.Punctuation, actual[3].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[3].EntryType);
-		Assert.False(actual[3].IsWord);
+		Assert.Equal(4, actual.Tokens.Count);
+		Assert.Equal("Hello", actual.Tokens[0].Text);
+		Assert.True(actual.Tokens[0].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[0].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[0].TokenType);
+		Assert.True(actual.Tokens[0].IsWord);
+		Assert.Equal(",", actual.Tokens[1].Text);
+		Assert.True(actual.Tokens[1].IsMatch);
+		Assert.Equal(TokenCheckResultType.Punctuation, actual.Tokens[1].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[1].TokenType);
+		Assert.False(actual.Tokens[1].IsWord);
+		Assert.Equal("world", actual.Tokens[2].Text);
+		Assert.True(actual.Tokens[2].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[2].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[2].TokenType);
+		Assert.True(actual.Tokens[2].IsWord);
+		Assert.Equal("!", actual.Tokens[3].Text);
+		Assert.True(actual.Tokens[3].IsMatch);
+		Assert.Equal(TokenCheckResultType.Punctuation, actual.Tokens[3].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[3].TokenType);
+		Assert.False(actual.Tokens[3].IsWord);
 	}
 
 	[Fact]
@@ -126,17 +126,17 @@ public class EntryValidationServiceTests
 		var actual = service.GetWordCheckResults(input, expectedAnswer);
 
 		// Assert
-		Assert.Equal(2, actual.Count);
-		Assert.Equal("hello", actual[0].Text);
-		Assert.True(actual[0].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[0].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[0].EntryType);
-		Assert.True(actual[0].IsWord);
-		Assert.Equal("world", actual[1].Text);
-		Assert.True(actual[1].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[1].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[1].EntryType);
-		Assert.True(actual[1].IsWord);
+		Assert.Equal(2, actual.Tokens.Count);
+		Assert.Equal("hello", actual.Tokens[0].Text);
+		Assert.True(actual.Tokens[0].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[0].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[0].TokenType);
+		Assert.True(actual.Tokens[0].IsWord);
+		Assert.Equal("world", actual.Tokens[1].Text);
+		Assert.True(actual.Tokens[1].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[1].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[1].TokenType);
+		Assert.True(actual.Tokens[1].IsWord);
 	}
 
 	[Fact]
@@ -151,22 +151,22 @@ public class EntryValidationServiceTests
 		var actual = service.GetWordCheckResults(input, expectedAnswer);
 
 		// Assert - This test will fail until service is updated to handle tips
-		Assert.Equal(3, actual.Count);
-		Assert.Equal("hello", actual[0].Text);
-		Assert.True(actual[0].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[0].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[0].EntryType);
-		Assert.True(actual[0].IsWord);
-		Assert.Equal("world", actual[1].Text);
-		Assert.True(actual[1].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[1].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[1].EntryType);
-		Assert.True(actual[1].IsWord);
-		Assert.Equal("(some tip)", actual[2].Text);
-		Assert.True(actual[2].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[2].EntryType);
-		Assert.Equal(WordCheckResultType.Tip, actual[2].EntryType);
-		Assert.False(actual[2].IsWord);
+		Assert.Equal(3, actual.Tokens.Count);
+		Assert.Equal("hello", actual.Tokens[0].Text);
+		Assert.True(actual.Tokens[0].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[0].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[0].TokenType);
+		Assert.True(actual.Tokens[0].IsWord);
+		Assert.Equal("world", actual.Tokens[1].Text);
+		Assert.True(actual.Tokens[1].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[1].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[1].TokenType);
+		Assert.True(actual.Tokens[1].IsWord);
+		Assert.Equal("(some tip)", actual.Tokens[2].Text);
+		Assert.True(actual.Tokens[2].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[2].TokenType);
+		Assert.Equal(TokenCheckResultType.Tip, actual.Tokens[2].TokenType);
+		Assert.False(actual.Tokens[2].IsWord);
 	}
 
 	[Fact]
@@ -181,37 +181,37 @@ public class EntryValidationServiceTests
 		var actual = service.GetWordCheckResults(input, expectedAnswer);
 
 		// Assert
-		Assert.Equal(6, actual.Count);
-		Assert.Equal("(start)", actual[0].Text);
-		Assert.True(actual[0].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[0].EntryType);
-		Assert.Equal(WordCheckResultType.Tip, actual[0].EntryType);
-		Assert.False(actual[0].IsWord);
-		Assert.Equal("Hello", actual[1].Text);
-		Assert.True(actual[1].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[1].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[1].EntryType);
-		Assert.True(actual[1].IsWord);
-		Assert.Equal(",", actual[2].Text);
-		Assert.True(actual[2].IsMatch);
-		Assert.Equal(WordCheckResultType.Punctuation, actual[2].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[2].EntryType);
-		Assert.False(actual[2].IsWord);
-		Assert.Equal("world", actual[3].Text);
-		Assert.True(actual[3].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[3].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[3].EntryType);
-		Assert.True(actual[3].IsWord);
-		Assert.Equal("!", actual[4].Text);
-		Assert.True(actual[4].IsMatch);
-		Assert.Equal(WordCheckResultType.Punctuation, actual[4].EntryType);
-		Assert.NotEqual(WordCheckResultType.Tip, actual[4].EntryType);
-		Assert.False(actual[4].IsWord);
-		Assert.Equal("(end)", actual[5].Text);
-		Assert.True(actual[5].IsMatch);
-		Assert.NotEqual(WordCheckResultType.Punctuation, actual[5].EntryType);
-		Assert.Equal(WordCheckResultType.Tip, actual[5].EntryType);
-		Assert.False(actual[5].IsWord);
+		Assert.Equal(6, actual.Tokens.Count);
+		Assert.Equal("(start)", actual.Tokens[0].Text);
+		Assert.True(actual.Tokens[0].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[0].TokenType);
+		Assert.Equal(TokenCheckResultType.Tip, actual.Tokens[0].TokenType);
+		Assert.False(actual.Tokens[0].IsWord);
+		Assert.Equal("Hello", actual.Tokens[1].Text);
+		Assert.True(actual.Tokens[1].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[1].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[1].TokenType);
+		Assert.True(actual.Tokens[1].IsWord);
+		Assert.Equal(",", actual.Tokens[2].Text);
+		Assert.True(actual.Tokens[2].IsMatch);
+		Assert.Equal(TokenCheckResultType.Punctuation, actual.Tokens[2].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[2].TokenType);
+		Assert.False(actual.Tokens[2].IsWord);
+		Assert.Equal("world", actual.Tokens[3].Text);
+		Assert.True(actual.Tokens[3].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[3].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[3].TokenType);
+		Assert.True(actual.Tokens[3].IsWord);
+		Assert.Equal("!", actual.Tokens[4].Text);
+		Assert.True(actual.Tokens[4].IsMatch);
+		Assert.Equal(TokenCheckResultType.Punctuation, actual.Tokens[4].TokenType);
+		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[4].TokenType);
+		Assert.False(actual.Tokens[4].IsWord);
+		Assert.Equal("(end)", actual.Tokens[5].Text);
+		Assert.True(actual.Tokens[5].IsMatch);
+		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[5].TokenType);
+		Assert.Equal(TokenCheckResultType.Tip, actual.Tokens[5].TokenType);
+		Assert.False(actual.Tokens[5].IsWord);
 	}
 
 	[Fact]

@@ -5,11 +5,11 @@ namespace MemoryLingo.Core.Services;
 
 public class EntryValidationService
 {
-	public List<WordCheckResult> GetWordCheckResults(string input, string expectedAnswer)
+	public EntryCheckResult GetWordCheckResults(string input, string expectedAnswer)
 	{
 		var inputWords = SplitIntoWords(input);
 		var expectedWords = SplitIntoWords(expectedAnswer);
-		var results = new List<WordCheckResult>();
+		var results = new List<TokenCheckResult>();
 
 		// Filter out punctuation and tips from input words for comparison
 		var inputWordsNoPunctuation = inputWords.Where(w => w.Length > 0 && !IsPunctuation(w[0]) && !IsTip(w)).ToList();
@@ -19,30 +19,30 @@ public class EntryValidationService
 		{
 			var expectedWord = expectedWords[i];
 			bool isMatch;
-			WordCheckResultType entryType;
+			TokenCheckResultType entryType;
 
 			if (IsTip(expectedWord))
 			{
 				isMatch = true;
-				entryType = WordCheckResultType.Tip;
+				entryType = TokenCheckResultType.Tip;
 			}
 			else if (expectedWord.Length > 0 && IsPunctuation(expectedWord[0]))
 			{
 				isMatch = true;
-				entryType = WordCheckResultType.Punctuation;
+				entryType = TokenCheckResultType.Punctuation;
 			}
 			else
 			{
 				var inputWord = inputIndex < inputWordsNoPunctuation.Count ? inputWordsNoPunctuation[inputIndex] : "";
 				isMatch = string.Equals(inputWord.Trim(), expectedWord.Trim(), StringComparison.OrdinalIgnoreCase);
-				entryType = WordCheckResultType.Word;
+				entryType = TokenCheckResultType.Word;
 				inputIndex++;
 			}
 
-			results.Add(new WordCheckResult(expectedWord, isMatch, entryType));
+			results.Add(new TokenCheckResult(expectedWord, isMatch, entryType));
 		}
 
-		return results;
+		return new EntryCheckResult(results);
 	}
 
 	internal static List<string> SplitIntoWords(string text)

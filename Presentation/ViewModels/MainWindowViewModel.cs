@@ -259,7 +259,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	} = string.Empty;
 
-	public ObservableCollection<WordCheckResult> WordResults
+	public ObservableCollection<TokenCheckResult> WordResults
 	{
 		get => field;
 		set
@@ -501,7 +501,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			EnExample = _current.Entry.EnExample;
 
 			var wordResults = _entryValidationService.GetWordCheckResults(_current.Entry.EnText, _current.Entry.EnText);
-			WordResults = new ObservableCollection<WordCheckResult>(wordResults);
+			WordResults = new ObservableCollection<TokenCheckResult>(wordResults.Tokens);
 		}
 		else
 		{
@@ -564,7 +564,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		var wordResults = _entryValidationService.GetWordCheckResults(answer, _current.Entry.EnText);
 
-		if (wordResults.All(w => w.IsMatch))
+		if (wordResults.Tokens.All(w => w.IsMatch))
 		{
 			// the answer is considered correct if no tips were used
 			bool isAnswerCorrect = !_tipsUsedForCurrentEntry;
@@ -584,18 +584,18 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			return;
 		}
 
-		if (wordResults.Count(x => x.IsWord) == 1)
+		if (wordResults.Tokens.Count(x => x.IsWord) == 1)
 		{
 			return;
 		}
 
 		// if first word is correct or more then 50% words are correct
-		if (wordResults.First(x => x.IsWord).IsMatch
+		if (wordResults.Tokens.First(x => x.IsWord).IsMatch
 		 	||
-			wordResults.Count(x => x.IsMatch && x.IsWord) >= (wordResults.Count(w => w.IsWord) / 2))
+			wordResults.Tokens.Count(x => x.IsMatch && x.IsWord) >= (wordResults.Tokens.Count(w => w.IsWord) / 2))
 		{
 			HideIncorrectWords = true;
-			WordResults = new ObservableCollection<WordCheckResult>(wordResults);
+			WordResults = new ObservableCollection<TokenCheckResult>(wordResults.Tokens);
 		}
 	}
 
