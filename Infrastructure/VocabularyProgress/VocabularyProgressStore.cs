@@ -56,5 +56,19 @@ public class VocabularyProgressStore : IVocabularyProgressStore
 
 		var json = JsonSerializer.Serialize(vocabularyProgress, DefaultFilesOptions.SerializerOptions);
 		File.WriteAllText(progressFilePath, json);
+		/*
+using System.IO.Compression;
+...
+using var fileStream = File.OpenRead(progressFilePath);
+using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
+using var reader = new StreamReader(gzipStream);
+var jsonContent = reader.ReadToEnd();
+var vocabularyProgress = JsonSerializer.Deserialize<VocabularyProgressDto>(jsonContent, DefaultFilesOptions.SerializerOptions);
+...
+using var fileStream = File.Create(progressFilePath);
+using var gzipStream = new GZipStream(fileStream, CompressionMode.Compress);
+using var writer = new StreamWriter(gzipStream);
+writer.Write(json);
+		*/
 	}
 }
