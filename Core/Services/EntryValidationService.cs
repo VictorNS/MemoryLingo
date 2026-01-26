@@ -42,7 +42,18 @@ public class EntryValidationService
 			results.Add(new TokenCheckResult(expectedWord, isMatch, entryType));
 		}
 
-		return new EntryCheckResult(results);
+		// Determine entry type based on word matches
+		if (results.All(w => w.IsMatch))
+			return new EntryCheckResult(results, EntryCheckResultType.Correct);
+
+		if (results.Count(x => x.IsWord) == 1)
+			return new EntryCheckResult(results, EntryCheckResultType.Wrong);
+
+		var firstWordMatch = results.First(x => x.IsWord).IsMatch;
+		var halfOrMore = results.Count(x => x.IsMatch && x.IsWord) > (results.Count(x => x.IsWord) / 2);
+		var checkResultType = (firstWordMatch || halfOrMore)
+			? EntryCheckResultType.Similar : EntryCheckResultType.Wrong;
+		return new EntryCheckResult(results, checkResultType);
 	}
 
 	internal static List<string> SplitIntoWords(string text)

@@ -54,6 +54,7 @@ public class EntryValidationServiceTests
 		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[1].TokenType);
 		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[1].TokenType);
 		Assert.True(actual.Tokens[1].IsWord);
+		Assert.Equal(EntryCheckResultType.Correct, actual.EntryType);
 	}
 
 	[Fact]
@@ -77,6 +78,7 @@ public class EntryValidationServiceTests
 		Assert.True(actual.Tokens[2].IsMatch);
 		Assert.Equal("!", actual.Tokens[3].Text);
 		Assert.True(actual.Tokens[3].IsMatch);
+		Assert.Equal(EntryCheckResultType.Correct, actual.EntryType);
 	}
 
 	[Fact]
@@ -112,6 +114,7 @@ public class EntryValidationServiceTests
 		Assert.Equal(TokenCheckResultType.Punctuation, actual.Tokens[3].TokenType);
 		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[3].TokenType);
 		Assert.False(actual.Tokens[3].IsWord);
+		Assert.Equal(EntryCheckResultType.Correct, actual.EntryType);
 	}
 
 	[Fact]
@@ -137,6 +140,7 @@ public class EntryValidationServiceTests
 		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[1].TokenType);
 		Assert.NotEqual(TokenCheckResultType.Tip, actual.Tokens[1].TokenType);
 		Assert.True(actual.Tokens[1].IsWord);
+		Assert.Equal(EntryCheckResultType.Correct, actual.EntryType);
 	}
 
 	[Fact]
@@ -167,6 +171,7 @@ public class EntryValidationServiceTests
 		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[2].TokenType);
 		Assert.Equal(TokenCheckResultType.Tip, actual.Tokens[2].TokenType);
 		Assert.False(actual.Tokens[2].IsWord);
+		Assert.Equal(EntryCheckResultType.Correct, actual.EntryType);
 	}
 
 	[Fact]
@@ -212,6 +217,7 @@ public class EntryValidationServiceTests
 		Assert.NotEqual(TokenCheckResultType.Punctuation, actual.Tokens[5].TokenType);
 		Assert.Equal(TokenCheckResultType.Tip, actual.Tokens[5].TokenType);
 		Assert.False(actual.Tokens[5].IsWord);
+		Assert.Equal(EntryCheckResultType.Correct, actual.EntryType);
 	}
 
 	[Fact]
@@ -268,5 +274,80 @@ public class EntryValidationServiceTests
 
 		// Assert
 		Assert.Equal("fgh jkl!", actual);
+	}
+
+	[Fact]
+	public void GetWordCheckResults_AllFiveWordsCorrect_ReturnsCorrect()
+	{
+		// Arrange
+		var service = new EntryValidationService();
+		var expectedAnswer = "(start) one, two three four five (end)";
+		var input = "one, two three four five";
+
+		// Act
+		var actual = service.GetWordCheckResults(input, expectedAnswer);
+
+		// Assert
+		Assert.Equal(EntryCheckResultType.Correct, actual.EntryType);
+	}
+
+	[Fact]
+	public void GetWordCheckResults_FourWordsCorrect_ReturnsSimilar()
+	{
+		// Arrange
+		var service = new EntryValidationService();
+		var expectedAnswer = "(start) one, two three four five (end)";
+		var input = "bla, two three four five";
+
+		// Act
+		var actual = service.GetWordCheckResults(input, expectedAnswer);
+
+		// Assert
+		Assert.Equal(EntryCheckResultType.Similar, actual.EntryType);
+	}
+
+	[Fact]
+	public void GetWordCheckResults_ThreeWordsCorrect_ReturnsSimilar()
+	{
+		// Arrange
+		var service = new EntryValidationService();
+		var expectedAnswer = "(start) one, two three four five (end)";
+		var input = "bla, two three four";
+
+		// Act
+		var actual = service.GetWordCheckResults(input, expectedAnswer);
+
+		// Assert
+		Assert.Equal(EntryCheckResultType.Similar, actual.EntryType);
+	}
+
+	[Fact]
+	public void GetWordCheckResults_TwoWordsCorrect_ReturnsWrong()
+	{
+		// Arrange
+		var service = new EntryValidationService();
+		var expectedAnswer = "(start) one, two three four five (end)";
+		var input = "bla, two three";
+
+		// Act
+		var actual = service.GetWordCheckResults(input, expectedAnswer);
+
+		// Assert
+		Assert.Equal(EntryCheckResultType.Wrong, actual.EntryType);
+	}
+
+	[Fact]
+	public void GetWordCheckResults_WordsReordered_ReturnsWrong()
+	{
+		// Arrange
+		var service = new EntryValidationService();
+		var expectedAnswer = "(start) one, two three four five (end)";
+		var input = "five, one two three four";
+
+		// Act
+		var actual = service.GetWordCheckResults(input, expectedAnswer);
+
+		// Assert
+		Assert.Equal(EntryCheckResultType.Wrong, actual.EntryType);
 	}
 }

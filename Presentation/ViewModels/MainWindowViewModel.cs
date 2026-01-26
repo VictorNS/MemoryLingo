@@ -564,7 +564,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		var wordResults = _entryValidationService.GetWordCheckResults(answer, _current.Entry.EnText);
 
-		if (wordResults.Tokens.All(w => w.IsMatch))
+		if (wordResults.IsCorrect)
 		{
 			// the answer is considered correct if no tips were used
 			bool isAnswerCorrect = !_tipsUsedForCurrentEntry;
@@ -584,15 +584,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			return;
 		}
 
-		if (wordResults.Tokens.Count(x => x.IsWord) == 1)
-		{
-			return;
-		}
-
-		// if first word is correct or more then 50% words are correct
-		if (wordResults.Tokens.First(x => x.IsWord).IsMatch
-		 	||
-			wordResults.Tokens.Count(x => x.IsMatch && x.IsWord) >= (wordResults.Tokens.Count(w => w.IsWord) / 2))
+		if (wordResults.IsSimilar)
 		{
 			HideIncorrectWords = true;
 			WordResults = new ObservableCollection<TokenCheckResult>(wordResults.Tokens);
