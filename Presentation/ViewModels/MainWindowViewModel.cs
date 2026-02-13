@@ -413,7 +413,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		if (initialLoad)
 		{
-			VocabulariesCollection = new ObservableCollection<VocabularyReferenceModel>(vocabularies);
+			VocabulariesCollection = [.. vocabularies];
 			var view = CollectionViewSource.GetDefaultView(VocabulariesCollection);
 			view.SortDescriptions.Clear();
 			view.SortDescriptions.Add(new SortDescription("LastSessionLocalTime", ListSortDirection.Descending));
@@ -501,7 +501,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			EnExample = _current.Entry.EnExample;
 
 			var wordResults = _entryValidationService.GetWordCheckResults(_current.Entry.EnText, _current.Entry.EnText);
-			WordResults = new ObservableCollection<WordCheckResult>(wordResults);
+			WordResults = [.. wordResults];
 		}
 		else
 		{
@@ -595,7 +595,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			wordResults.Count(x => x.IsMatch && x.IsWord) >= (wordResults.Count(w => w.IsWord) / 2))
 		{
 			HideIncorrectWords = true;
-			WordResults = new ObservableCollection<WordCheckResult>(wordResults);
+			WordResults = [.. wordResults];
 		}
 	}
 
