@@ -614,10 +614,14 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			return;
 
 		var enText = _entryValidationService.RemoveTextInBrackets(_previous.Entry.EnText);
-		_speechService.Speak(_vocabularyLanguage, enText);
-
 		var enExample = _entryValidationService.RemoveTextInBrackets(_previous.Entry.EnExample);
-		if (!string.IsNullOrWhiteSpace(enExample) && !enExample.Equals(enText, StringComparison.OrdinalIgnoreCase))
+
+		if (string.IsNullOrWhiteSpace(enExample) || !enExample.Contains(enText, StringComparison.OrdinalIgnoreCase))
+		{
+			_speechService.Speak(_vocabularyLanguage, enText);
+		}
+
+		if (!string.IsNullOrWhiteSpace(enExample))
 		{
 			await Task.Delay(TimeSpan.FromMilliseconds(300));
 			_speechService.Speak(_vocabularyLanguage, _previous.Entry.EnExample);
