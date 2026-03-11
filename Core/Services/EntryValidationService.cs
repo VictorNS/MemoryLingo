@@ -12,45 +12,41 @@ public class EntryValidationService
 		var results = new List<WordCheckResult>();
 
 		// Filter out punctuation and tips from input words for comparison
-		var inputWordsNoPunctuation = inputWords.Where(w => w.Length > 0 && !IsPunctuation(w[0]) && !IsTip(w)).ToList();
+		var inputWordsNoPunctuation = inputWords.Where(w => !w.IsPunctuation && !w.IsTip).ToList();
 		int inputIndex = 0;
 
 		for (int i = 0; i < expectedWords.Count; i++)
 		{
 			var expectedWord = expectedWords[i];
 			bool isMatch;
-			WordCheckResultType entryType;
 
-			if (IsTip(expectedWord))
+			if (expectedWord.IsTip)
 			{
 				isMatch = true;
-				entryType = WordCheckResultType.Tip;
 			}
-			else if (expectedWord.Length > 0 && IsPunctuation(expectedWord[0]))
+			else if (expectedWord.IsPunctuation)
 			{
 				isMatch = true;
-				entryType = WordCheckResultType.Punctuation;
 			}
 			else
 			{
-				var inputWord = inputIndex < inputWordsNoPunctuation.Count ? inputWordsNoPunctuation[inputIndex] : "";
-				isMatch = string.Equals(inputWord.Trim(), expectedWord.Trim(), StringComparison.OrdinalIgnoreCase);
-				entryType = WordCheckResultType.Word;
+				var inputText = inputIndex < inputWordsNoPunctuation.Count ? inputWordsNoPunctuation[inputIndex].Text : "";
+				isMatch = string.Equals(inputText.Trim(), expectedWord.Text.Trim(), StringComparison.OrdinalIgnoreCase);
 				inputIndex++;
 			}
 
-			results.Add(new WordCheckResult(expectedWord, isMatch, entryType));
+			results.Add(expectedWord with { IsMatch = isMatch });
 		}
 
 		return results;
 	}
 
-	internal static List<string> SplitIntoWords(string text)
+	internal static List<WordCheckResult> SplitIntoWords(string text)
 	{
 		if (string.IsNullOrEmpty(text))
 			return [];
 
-		var words = new List<string>();
+		var words = new List<WordCheckResult>();
 		var currentWord = new StringBuilder();
 		var i = 0;
 
@@ -62,7 +58,8 @@ public class EntryValidationService
 			{
 				if (currentWord.Length > 0)
 				{
-					words.Add(currentWord.ToString());
+					bool IsSpaceBefore = i - currentWord.Length > 0 && char.IsWhiteSpace(text[i - currentWord.Length - 1]);
+					words.Add(WordCheckResult.Create(currentWord, IsSpaceBefore));
 					currentWord.Clear();
 				}
 				i++;
@@ -72,7 +69,8 @@ public class EntryValidationService
 				// Save current word if any
 				if (currentWord.Length > 0)
 				{
-					words.Add(currentWord.ToString());
+					bool IsSpaceBefore = i - currentWord.Length > 0 && char.IsWhiteSpace(text[i - currentWord.Length - 1]);
+					words.Add(WordCheckResult.Create(currentWord, IsSpaceBefore));
 					currentWord.Clear();
 				}
 
@@ -93,17 +91,20 @@ public class EntryValidationService
 					i++;
 				}
 
-				words.Add(tipBuilder.ToString());
+				bool IsSpaceBeforeTip = i - currentWord.Length > 0 && char.IsWhiteSpace(text[i - currentWord.Length - 1]);
+				words.Add(WordCheckResult.Create(tipBuilder, IsSpaceBeforeTip));
 			}
-			else if (IsPunctuation(c))
+			else if (WordCheckResult.CharIsPunctuation(c))
 			{
 				if (currentWord.Length > 0)
 				{
-					words.Add(currentWord.ToString());
+					bool IsSpaceBefore = i - currentWord.Length > 0 && char.IsWhiteSpace(text[i - currentWord.Length - 1]);
+					words.Add(WordCheckResult.Create(currentWord, IsSpaceBefore));
 					currentWord.Clear();
 				}
 				// Add punctuation as separate word
-				words.Add(c.ToString());
+				bool isSpaceBeforePunctuation = i > 0 && char.IsWhiteSpace(text[i - 1]);
+				words.Add(WordCheckResult.Create(c, isSpaceBeforePunctuation));
 				i++;
 			}
 			else
@@ -115,20 +116,11 @@ public class EntryValidationService
 
 		if (currentWord.Length > 0)
 		{
-			words.Add(currentWord.ToString());
+			bool IsSpaceBefore = i - currentWord.Length > 0 && char.IsWhiteSpace(text[i - currentWord.Length - 1]);
+			words.Add(WordCheckResult.Create(currentWord, IsSpaceBefore));
 		}
 
 		return words;
-	}
-
-	static bool IsPunctuation(char c)
-	{
-		return c == ',' || c == '.' || c == ';' || c == '!' || c == '?' || c == '-';
-	}
-
-	static bool IsTip(string word)
-	{
-		return word.StartsWith('(') && word.EndsWith(')');
 	}
 
 	public string RemoveTextInBrackets(string text)

@@ -478,7 +478,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	#region Show/Hide UI elements
 	void ShowSessionInfo(EntryProgress.CurrentSessionProgress sessionProgress)
 	{
-		QueueStat = $"{sessionProgress.QueueIndex + 1}-{sessionProgress.QueueCount}";
+		QueueStat = $"{sessionProgress.QueueIndex + 1}/{sessionProgress.QueueCount}";
 		VocabularyStat = $"{sessionProgress.VocabularyLearnedCount}/{sessionProgress.VocabularyEntriesCount}";
 	}
 

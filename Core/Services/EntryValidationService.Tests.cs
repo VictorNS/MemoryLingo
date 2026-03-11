@@ -14,8 +14,33 @@ public class EntryValidationServiceTests
 		var actual = EntryValidationService.SplitIntoWords("Hello world");
 
 		// Assert
-		var expected = new List<string> { "Hello", "world" };
-		Assert.Equal(expected, actual);
+		var expected = actual[0];
+		Assert.Equal("Hello", expected.Text);
+		Assert.Equal(WordCheckResultType.Word, expected.EntryType);
+		Assert.False(expected.IsSpaceBefore);
+		expected = actual[1];
+		Assert.Equal("world", expected.Text);
+		Assert.Equal(WordCheckResultType.Word, expected.EntryType);
+		Assert.True(expected.IsSpaceBefore);
+	}
+
+	[Fact]
+	public void SplitIntoWords_WithSpacesAround_ReturnsWordsWithoutPunctuation()
+	{
+		// Arrange
+
+		// Act
+		var actual = EntryValidationService.SplitIntoWords("  Hello    world  ");
+
+		// Assert
+		var expected = actual[0];
+		Assert.Equal("Hello", expected.Text);
+		Assert.Equal(WordCheckResultType.Word, expected.EntryType);
+		Assert.True(expected.IsSpaceBefore);
+		expected = actual[1];
+		Assert.Equal("world", expected.Text);
+		Assert.Equal(WordCheckResultType.Word, expected.EntryType);
+		Assert.True(expected.IsSpaceBefore);
 	}
 
 	[Fact]
@@ -27,8 +52,96 @@ public class EntryValidationServiceTests
 		var actual = EntryValidationService.SplitIntoWords("Hello, world!");
 
 		// Assert
-		var expected = new List<string> { "Hello", ",", "world", "!" };
-		Assert.Equal(expected, actual);
+		var expected = actual[0];
+		Assert.Equal("Hello", expected.Text);
+		Assert.Equal(WordCheckResultType.Word, expected.EntryType);
+		Assert.False(expected.IsSpaceBefore);
+		expected = actual[1];
+		Assert.Equal(",", expected.Text);
+		Assert.Equal(WordCheckResultType.Punctuation, expected.EntryType);
+		Assert.False(expected.IsSpaceBefore);
+		expected = actual[2];
+		Assert.Equal("world", expected.Text);
+		Assert.Equal(WordCheckResultType.Word, expected.EntryType);
+		Assert.True(expected.IsSpaceBefore);
+		expected = actual[3];
+		Assert.Equal("!", expected.Text);
+		Assert.Equal(WordCheckResultType.Punctuation, expected.EntryType);
+		Assert.False(expected.IsSpaceBefore);
+	}
+
+	[Fact]
+	public void SplitIntoWords_WithLeadingDash_IncludesDashAsFirstToken()
+	{
+		// Arrange
+
+		// Act
+		var actual = EntryValidationService.SplitIntoWords("-Hello, world!");
+
+		// Assert
+		var expected = actual[0];
+		Assert.Equal("-", expected.Text);
+		Assert.Equal(WordCheckResultType.Punctuation, expected.EntryType);
+		Assert.False(expected.IsSpaceBefore);
+		expected = actual[1];
+		Assert.Equal("Hello", expected.Text);
+		Assert.Equal(WordCheckResultType.Word, expected.EntryType);
+		Assert.False(expected.IsSpaceBefore);
+		expected = actual[2];
+		Assert.Equal(",", expected.Text);
+		Assert.Equal(WordCheckResultType.Punctuation, expected.EntryType);
+		Assert.False(expected.IsSpaceBefore);
+		expected = actual[3];
+		Assert.Equal("world", expected.Text);
+		Assert.Equal(WordCheckResultType.Word, expected.EntryType);
+		Assert.True(expected.IsSpaceBefore);
+		expected = actual[4];
+		Assert.Equal("!", expected.Text);
+		Assert.Equal(WordCheckResultType.Punctuation, expected.EntryType);
+		Assert.False(expected.IsSpaceBefore);
+	}
+
+	[Fact]
+	public void SplitIntoWords_WithLeadingDash_IncludesDashes()
+	{
+		// Arrange
+
+		// Act
+		var actual = EntryValidationService.SplitIntoWords(" -Bla blu! -Gla glu!");
+
+		// Assert
+		var expected = actual[0];
+		Assert.Equal("-", expected.Text);
+		Assert.Equal(WordCheckResultType.Punctuation, expected.EntryType);
+		Assert.True(expected.IsSpaceBefore);
+		expected = actual[1];
+		Assert.Equal("Bla", expected.Text);
+		Assert.Equal(WordCheckResultType.Word, expected.EntryType);
+		Assert.False(expected.IsSpaceBefore);
+		expected = actual[2];
+		Assert.Equal("blu", expected.Text);
+		Assert.Equal(WordCheckResultType.Word, expected.EntryType);
+		Assert.True(expected.IsSpaceBefore);
+		expected = actual[3];
+		Assert.Equal("!", expected.Text);
+		Assert.Equal(WordCheckResultType.Punctuation, expected.EntryType);
+		Assert.False(expected.IsSpaceBefore);
+		expected = actual[4];
+		Assert.Equal("-", expected.Text);
+		Assert.Equal(WordCheckResultType.Punctuation, expected.EntryType);
+		Assert.True(expected.IsSpaceBefore);
+		expected = actual[5];
+		Assert.Equal("Gla", expected.Text);
+		Assert.Equal(WordCheckResultType.Word, expected.EntryType);
+		Assert.False(expected.IsSpaceBefore);
+		expected = actual[6];
+		Assert.Equal("glu", expected.Text);
+		Assert.Equal(WordCheckResultType.Word, expected.EntryType);
+		Assert.True(expected.IsSpaceBefore);
+		expected = actual[7];
+		Assert.Equal("!", expected.Text);
+		Assert.Equal(WordCheckResultType.Punctuation, expected.EntryType);
+		Assert.False(expected.IsSpaceBefore);
 	}
 
 	[Fact]
