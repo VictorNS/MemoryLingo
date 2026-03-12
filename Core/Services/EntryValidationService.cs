@@ -5,49 +5,60 @@ namespace MemoryLingo.Core.Services;
 
 public class EntryValidationService
 {
-	public List<WordCheckResult> GetWordCheckResults(string input, string expectedAnswer)
+	public EntryCheckResult GetEntryCheckResult(string input, string expectedAnswer)
 	{
-		var inputWords = SplitIntoWords(input);
-		var expectedWords = SplitIntoWords(expectedAnswer);
-		var results = new List<WordCheckResult>();
+		var inputTokens = SplitIntoTokens(input);
+		var expectedTokens = SplitIntoTokens(expectedAnswer);
+		var results = new List<TokenCheckResult>();
 
-		// Filter out punctuation and tips from input words for comparison
-		var inputWordsNoPunctuation = inputWords.Where(w => !w.IsPunctuation && !w.IsTip).ToList();
+		// Filter out punctuation and tips from input tokens for comparison
+		var inputTokensNoPunctuation = inputTokens.Where(w => !w.IsPunctuation && !w.IsTip).ToList();
 		int inputIndex = 0;
 
-		for (int i = 0; i < expectedWords.Count; i++)
+		for (int i = 0; i < expectedTokens.Count; i++)
 		{
-			var expectedWord = expectedWords[i];
+			var expectedToken = expectedTokens[i];
 			bool isMatch;
 
-			if (expectedWord.IsTip)
+			if (expectedToken.IsTip)
 			{
 				isMatch = true;
 			}
-			else if (expectedWord.IsPunctuation)
+			else if (expectedToken.IsPunctuation)
 			{
 				isMatch = true;
 			}
 			else
 			{
-				var inputText = inputIndex < inputWordsNoPunctuation.Count ? inputWordsNoPunctuation[inputIndex].Text : "";
-				isMatch = string.Equals(inputText.Trim(), expectedWord.Text.Trim(), StringComparison.OrdinalIgnoreCase);
+				var inputText = inputIndex < inputTokensNoPunctuation.Count ? inputTokensNoPunctuation[inputIndex].Text : "";
+				isMatch = string.Equals(inputText.Trim(), expectedToken.Text.Trim(), StringComparison.OrdinalIgnoreCase);
 				inputIndex++;
 			}
 
-			results.Add(expectedWord with { IsMatch = isMatch });
+			results.Add(expectedToken with { IsMatch = isMatch });
 		}
 
-		return results;
+		// Determine entry type based on token matches
+		if (results.All(w => w.IsMatch))
+			return new EntryCheckResult(results, EntryCheckResultType.Correct);
+
+		if (results.Count(x => x.IsWord) == 1)
+			return new EntryCheckResult(results, EntryCheckResultType.Wrong);
+
+		var firstTokenMatch = results.First(x => x.IsWord).IsMatch;
+		var halfOrMore = results.Count(x => x.IsMatch && x.IsWord) >= (results.Count(x => x.IsWord) / 2);
+		var checkResultType = (firstTokenMatch || halfOrMore)
+			? EntryCheckResultType.Similar : EntryCheckResultType.Wrong;
+		return new EntryCheckResult(results, checkResultType);
 	}
 
-	internal static List<WordCheckResult> SplitIntoWords(string text)
+	internal static List<TokenCheckResult> SplitIntoTokens(string text)
 	{
 		if (string.IsNullOrEmpty(text))
 			return [];
 
-		var words = new List<WordCheckResult>();
-		var currentWord = new StringBuilder();
+		var tokens = new List<TokenCheckResult>();
+		var currentToken = new StringBuilder();
 		var i = 0;
 
 		while (i < text.Length)
@@ -56,22 +67,22 @@ public class EntryValidationService
 
 			if (char.IsWhiteSpace(c))
 			{
-				if (currentWord.Length > 0)
+				if (currentToken.Length > 0)
 				{
-					bool IsSpaceBefore = i - currentWord.Length > 0 && char.IsWhiteSpace(text[i - currentWord.Length - 1]);
-					words.Add(WordCheckResult.Create(currentWord, IsSpaceBefore));
-					currentWord.Clear();
+					bool IsSpaceBefore = i - currentToken.Length > 0 && char.IsWhiteSpace(text[i - currentToken.Length - 1]);
+					tokens.Add(TokenCheckResult.Create(currentToken, IsSpaceBefore));
+					currentToken.Clear();
 				}
 				i++;
 			}
 			else if (c == '(')
 			{
 				// Save current word if any
-				if (currentWord.Length > 0)
+				if (currentToken.Length > 0)
 				{
-					bool IsSpaceBefore = i - currentWord.Length > 0 && char.IsWhiteSpace(text[i - currentWord.Length - 1]);
-					words.Add(WordCheckResult.Create(currentWord, IsSpaceBefore));
-					currentWord.Clear();
+					bool IsSpaceBefore = i - currentToken.Length > 0 && char.IsWhiteSpace(text[i - currentToken.Length - 1]);
+					tokens.Add(TokenCheckResult.Create(currentToken, IsSpaceBefore));
+					currentToken.Clear();
 				}
 
 				// Find matching closing parenthesis
@@ -91,36 +102,36 @@ public class EntryValidationService
 					i++;
 				}
 
-				bool IsSpaceBeforeTip = i - currentWord.Length > 0 && char.IsWhiteSpace(text[i - currentWord.Length - 1]);
-				words.Add(WordCheckResult.Create(tipBuilder, IsSpaceBeforeTip));
+				bool IsSpaceBeforeTip = i - currentToken.Length > 0 && char.IsWhiteSpace(text[i - currentToken.Length - 1]);
+				tokens.Add(TokenCheckResult.Create(tipBuilder, IsSpaceBeforeTip));
 			}
-			else if (WordCheckResult.CharIsPunctuation(c))
+			else if (TokenCheckResult.CharIsPunctuation(c))
 			{
-				if (currentWord.Length > 0)
+				if (currentToken.Length > 0)
 				{
-					bool IsSpaceBefore = i - currentWord.Length > 0 && char.IsWhiteSpace(text[i - currentWord.Length - 1]);
-					words.Add(WordCheckResult.Create(currentWord, IsSpaceBefore));
-					currentWord.Clear();
+					bool IsSpaceBefore = i - currentToken.Length > 0 && char.IsWhiteSpace(text[i - currentToken.Length - 1]);
+					tokens.Add(TokenCheckResult.Create(currentToken, IsSpaceBefore));
+					currentToken.Clear();
 				}
 				// Add punctuation as separate word
 				bool isSpaceBeforePunctuation = i > 0 && char.IsWhiteSpace(text[i - 1]);
-				words.Add(WordCheckResult.Create(c, isSpaceBeforePunctuation));
+				tokens.Add(TokenCheckResult.Create(c, isSpaceBeforePunctuation));
 				i++;
 			}
 			else
 			{
-				currentWord.Append(c);
+				currentToken.Append(c);
 				i++;
 			}
 		}
 
-		if (currentWord.Length > 0)
+		if (currentToken.Length > 0)
 		{
-			bool IsSpaceBefore = i - currentWord.Length > 0 && char.IsWhiteSpace(text[i - currentWord.Length - 1]);
-			words.Add(WordCheckResult.Create(currentWord, IsSpaceBefore));
+			bool IsSpaceBefore = i - currentToken.Length > 0 && char.IsWhiteSpace(text[i - currentToken.Length - 1]);
+			tokens.Add(TokenCheckResult.Create(currentToken, IsSpaceBefore));
 		}
 
-		return words;
+		return tokens;
 	}
 
 	public string RemoveTextInBrackets(string text)

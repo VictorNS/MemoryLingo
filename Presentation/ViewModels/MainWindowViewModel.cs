@@ -259,7 +259,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	} = string.Empty;
 
-	public ObservableCollection<WordCheckResult> WordResults
+	public ObservableCollection<TokenCheckResult> TokensResult
 	{
 		get => field;
 		set
@@ -272,7 +272,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	} = [];
 
-	public bool HideIncorrectWords
+	public bool HideIncorrectTokens
 	{
 		get => field;
 		set
@@ -484,7 +484,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 	void ShowEntry(bool isNewEntry, bool showTips)
 	{
-		HideIncorrectWords = false;
+		HideIncorrectTokens = false;
 		RuText = _current.Entry.RuText;
 		RuTip = _current.Entry.RuTip;
 
@@ -500,28 +500,28 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			RuExample = _current.Entry.RuExample;
 			EnExample = _current.Entry.EnExample;
 
-			var wordResults = _entryValidationService.GetWordCheckResults(_current.Entry.EnText, _current.Entry.EnText);
-			WordResults = [.. wordResults];
+			var wordResults = _entryValidationService.GetEntryCheckResult(_current.Entry.EnText, _current.Entry.EnText);
+			TokensResult = [.. wordResults.Tokens];
 		}
 		else
 		{
 			Transcription = string.Empty;
 			RuExample = string.Empty;
 			EnExample = string.Empty;
-			WordResults = [];
+			TokensResult = [];
 		}
 	}
 
 	void HideEntry()
 	{
-		HideIncorrectWords = false;
+		HideIncorrectTokens = false;
 		RuText = string.Empty;
 		RuTip = string.Empty;
 		Answer = string.Empty;
 		Transcription = string.Empty;
 		RuExample = string.Empty;
 		EnExample = string.Empty;
-		WordResults = [];
+		TokensResult = [];
 	}
 
 	void ShowPreviousEntry()
@@ -562,9 +562,9 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	{
 		ShowEntry(isNewEntry: false, showTips: false);
 
-		var wordResults = _entryValidationService.GetWordCheckResults(answer, _current.Entry.EnText);
+		var wordResults = _entryValidationService.GetEntryCheckResult(answer, _current.Entry.EnText);
 
-		if (wordResults.All(w => w.IsMatch))
+		if (wordResults.IsCorrect)
 		{
 			// the answer is considered correct if no tips were used
 			bool isAnswerCorrect = !_tipsUsedForCurrentEntry;
@@ -584,18 +584,10 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			return;
 		}
 
-		if (wordResults.Count(x => x.IsWord) == 1)
+		if (wordResults.IsSimilar)
 		{
-			return;
-		}
-
-		// if first word is correct or more then 50% words are correct
-		if (wordResults.First(x => x.IsWord).IsMatch
-		 	||
-			wordResults.Count(x => x.IsMatch && x.IsWord) >= (wordResults.Count(w => w.IsWord) / 2))
-		{
-			HideIncorrectWords = true;
-			WordResults = [.. wordResults];
+			HideIncorrectTokens = true;
+			TokensResult = [.. wordResults.Tokens];
 		}
 	}
 

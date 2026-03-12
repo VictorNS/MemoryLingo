@@ -361,7 +361,7 @@
 					<Label Grid.Row="0" Content="{Binding RuText}"/>
 					<Label Grid.Row="1" Content="{Binding RuTip}" Style="{StaticResource TipLabel}"/>
 					<TextBox Grid.Row="2" Text="{Binding Answer, UpdateSourceTrigger=PropertyChanged}"/>
-					<ItemsControl Grid.Row="3" ItemsSource="{Binding WordResults}" Style="{StaticResource TipText}">
+					<ItemsControl Grid.Row="3" ItemsSource="{Binding TokensResult}" Style="{StaticResource TipText}">
 						<ItemsControl.ItemsPanel>
 							<ItemsPanelTemplate>
 								<WrapPanel Orientation="Horizontal"/>
@@ -389,7 +389,7 @@
 												<MultiDataTrigger>
 													<MultiDataTrigger.Conditions>
 														<Condition Binding="{Binding IsMatch}" Value="False"/>
-														<Condition Binding="{Binding DataContext.HideIncorrectWords, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True"/>
+														<Condition Binding="{Binding DataContext.HideIncorrectTokens, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True"/>
 													</MultiDataTrigger.Conditions>
 													<Setter Property="Foreground" Value="Pink"/>
 												</MultiDataTrigger>
