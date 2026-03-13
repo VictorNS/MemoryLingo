@@ -627,11 +627,17 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		if (newEntry is null)
 		{
 			_current = EntryProgress.Empty;
+			LoadVocabularyList(false);
 			SelectedTabIndex = 0;
 		}
 		else
 		{
 			_current = newEntry;
+
+			if (newEntry.Session.QueueIndex == 0)
+			{
+				LoadVocabularyList(false);
+			}
 		}
 
 		ShowEntry(isNewEntry: true, showTips: false);
