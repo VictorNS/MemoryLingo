@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.IO.Compression;
 using System.Text.Json;
 
 namespace MemoryLingo.Infrastructure.VocabularyProgress;
@@ -16,13 +17,28 @@ public class VocabularyProgressStore : IVocabularyProgressStore
 		if (string.IsNullOrWhiteSpace(filePath))
 			return new VocabularyProgressDto();
 
-		var progressFilePath = Path.ChangeExtension(filePath, ".progress.json");
+		VocabularyProgressDto vocabularyProgress;
+		var progressZipPath = Path.ChangeExtension(filePath, ".progress.zip");
 
-		if (!File.Exists(progressFilePath))
-			return new VocabularyProgressDto();
+		if (File.Exists(progressZipPath))
+		{
+			using var fileStream = File.OpenRead(progressZipPath);
+			using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+			using var reader = new StreamReader(zipArchive.Entries[0].Open());
+			var jsonContent = reader.ReadToEnd();
+			vocabularyProgress = JsonSerializer.Deserialize<VocabularyProgressDto>(jsonContent, DefaultFilesOptions.SerializerOptions)
+				?? new VocabularyProgressDto();
+		}
+		else
+		{
+			var progressFilePath = Path.ChangeExtension(filePath, ".progress.json");
 
-		var vocabularyProgress = JsonSerializer.Deserialize<VocabularyProgressDto>(File.ReadAllText(progressFilePath), DefaultFilesOptions.SerializerOptions)
-			?? new VocabularyProgressDto();
+			if (!File.Exists(progressFilePath))
+				return new VocabularyProgressDto();
+
+			vocabularyProgress = JsonSerializer.Deserialize<VocabularyProgressDto>(File.ReadAllText(progressFilePath), DefaultFilesOptions.SerializerOptions)
+				?? new VocabularyProgressDto();
+		}
 
 		vocabularyProgress.EnsureValid();
 
@@ -38,9 +54,6 @@ public class VocabularyProgressStore : IVocabularyProgressStore
 		if (folderPath == null)
 			return;
 
-		Directory.CreateDirectory(folderPath);
-		var progressFilePath = Path.ChangeExtension(filePath, ".progress.json");
-
 		vocabularyProgress.EnsureValid();
 
 		for (int i = 0; i < 3; i++)
@@ -54,7 +67,13 @@ public class VocabularyProgressStore : IVocabularyProgressStore
 				session.LastUpdated = DateTime.UtcNow;
 		}
 
+		Directory.CreateDirectory(folderPath);
 		var json = JsonSerializer.Serialize(vocabularyProgress, DefaultFilesOptions.SerializerOptions);
-		File.WriteAllText(progressFilePath, json);
+		var progressZipPath = Path.ChangeExtension(filePath, ".progress.zip");
+		var entryName = Path.GetFileNameWithoutExtension(filePath) + ".progress.json";
+		using var fileStream = File.Create(progressZipPath);
+		using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Create);
+		using var writer = new StreamWriter(zipArchive.CreateEntry(entryName).Open());
+		writer.Write(json);
 	}
 }
