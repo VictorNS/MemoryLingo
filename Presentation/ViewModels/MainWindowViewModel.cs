@@ -24,6 +24,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	bool _tipsUsedForCurrentEntry;
 	readonly DispatcherTimer _validationTimer = new();
 	string _vocabularyLanguage = string.Empty;
+	string _vocabularyPath = string.Empty;
 	#endregion logic properties
 
 	#region UI properties
@@ -339,6 +340,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		DeleteVocabularyCommand = new ParameterizedRelayCommand<VocabularyReferenceModel>(DeleteVocabulary);
 		SessionClickCommand = new ParameterizedRelayCommand<SessionClickParameter>(OnSessionClick);
 		RefreshSessionCommand = new ParameterizedRelayCommand<SessionClickParameter>(OnRefreshSessionClick);
+		OpenCurrentFileCommand = new RelayCommand(OnOpenCurrentFileClick);
 
 		_validationTimer.Interval = TimeSpan.FromMilliseconds(300);
 		_validationTimer.Tick += (s, e) =>
@@ -361,6 +363,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	public ICommand DeleteVocabularyCommand { get; }
 	public ICommand SessionClickCommand { get; }
 	public ICommand RefreshSessionCommand { get; }
+	public ICommand OpenCurrentFileCommand { get; }
 
 	void ShowTips()
 	{
@@ -398,6 +401,14 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			return;
 
 		StartVocabularySession(vocabularyFile, sessionParam.SessionIndex, false);
+	}
+
+	void OnOpenCurrentFileClick()
+	{
+		if (string.IsNullOrWhiteSpace(_vocabularyPath))
+			return;
+
+		System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(_vocabularyPath) { UseShellExecute = true });
 	}
 	#endregion events
 
@@ -550,6 +561,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			return;
 
 		_vocabularyLanguage = vocabulary.Lang;
+		_vocabularyPath = vocabulary.FilePath;
 		FileName = vocabulary.FileName;
 		ShowPreviousEntry();
 		_current = _learnService.GetFirstEntry();

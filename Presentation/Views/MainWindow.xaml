@@ -141,6 +141,10 @@
 			<Setter Property="Margin" Value="0"/>
 			<Setter Property="Margin" Value="10,0,0,0"/>
 		</Style>
+		<Style x:Key="StatusFileButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LinkButton}">
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="Margin" Value="10,0,0,0"/>
+		</Style>
 	</Window.Resources>
 
 	<TabControl SelectedIndex="{Binding SelectedTabIndex}">
@@ -435,8 +439,7 @@
 
 							<Image Source="/Presentation/Assets/Images/vocabulary-16.png" Style="{StaticResource StatusImage}"/>
 							<Label Content="{Binding VocabularyStat}" Style="{StaticResource StatusLabel}"/>
-							<Label Content=" | " Style="{StaticResource StatusLabel}"/>
-							<Label Content="{Binding FileName}" Style="{StaticResource StatusLabel}"/>
+							<Button Content="{Binding FileName}" Style="{StaticResource StatusFileButton}" Command="{Binding OpenCurrentFileCommand}" />
 						</WrapPanel>
 					</Border>
 				</Grid>
