@@ -408,7 +408,14 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		if (string.IsNullOrWhiteSpace(_vocabularyPath))
 			return;
 
-		System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(_vocabularyPath) { UseShellExecute = true });
+		try
+		{
+			System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(_vocabularyPath) { UseShellExecute = true });
+		}
+		catch (Exception ex)
+		{
+			SW.MessageBox.Show($"Failed to open file: {ex.Message}", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
+		}
 	}
 	#endregion events
 
