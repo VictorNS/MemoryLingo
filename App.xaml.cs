@@ -23,6 +23,7 @@ public partial class App : SW.Application
 		services.AddSingleton<IVocabularyReferenceService, VocabularyReferenceService>();
 		services.AddSingleton<IVocabularyProgressStore, VocabularyProgressStore>();
 		services.AddSingleton<IVocabularyExcelReader, VocabularyExcelReader>();
+		services.AddSingleton<ISingleInstanceService, SingleInstanceService>();
 		services.AddSingleton<ITrayService, TrayService>();
 		services.AddSingleton<ISpeechService, SpeechService>();
 		services.AddSingleton<EntryValidationService>();
@@ -30,6 +31,16 @@ public partial class App : SW.Application
 		services.AddSingleton<MainWindow>();
 
 		_serviceProvider = services.BuildServiceProvider();
+
+		var singleInstance = _serviceProvider.GetRequiredService<ISingleInstanceService>();
+		if (!singleInstance.TryClaimInstance())
+		{
+			singleInstance.NotifyFirstInstance();
+			Shutdown();
+			return;
+		}
+
+		singleInstance.StartListening();
 
 		var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
 		mainWindow.Show();
