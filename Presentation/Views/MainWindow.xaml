@@ -185,6 +185,9 @@
 										</Setter.Value>
 									</Setter>
 									<Style.Triggers>
+										<DataTrigger Binding="{Binding LastSessionOlderThan7Days}" Value="True">
+											<Setter Property="Foreground" Value="Gray"/>
+										</DataTrigger>
 										<DataTrigger Binding="{Binding HasErrors}" Value="True">
 											<Setter Property="Foreground" Value="Red"/>
 										</DataTrigger>
@@ -195,7 +198,13 @@
 						<DataGridTextColumn Header="Last Session" Binding="{Binding LastSessionLocalTime, StringFormat={}{0:yyyy-MM-dd HH-mm}, Mode=OneWay}"
 							Width="Auto" MinWidth="100" SortDirection="Descending">
 							<DataGridTextColumn.ElementStyle>
-								<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}"/>
+							<Style TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}">
+								<Style.Triggers>
+									<DataTrigger Binding="{Binding LastSessionOlderThan7Days}" Value="True">
+										<Setter Property="Foreground" Value="Gray"/>
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
 							</DataGridTextColumn.ElementStyle>
 						</DataGridTextColumn>
 

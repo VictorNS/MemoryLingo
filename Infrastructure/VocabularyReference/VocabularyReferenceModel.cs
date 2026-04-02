@@ -28,6 +28,7 @@ public class VocabularyReferenceModel
 		: Sessions[2].AverageAttempts.GetValueOrDefault().ToString("0.##");
 	public bool Session2Outdated => (Sessions[0].LastUpdated ?? DateTime.MinValue) > (Sessions[1].LastUpdated ?? DateTime.MinValue);
 	public bool Session3Outdated => (Sessions[1].LastUpdated ?? DateTime.MinValue) > (Sessions[2].LastUpdated ?? DateTime.MinValue);
+	public bool LastSessionOlderThan7Days => LastSessionLocalTime.HasValue && (DateTime.Now - LastSessionLocalTime.Value).TotalDays > 7;
 
 	public static VocabularyReferenceModel Empty(string filePath)
 	{
@@ -39,7 +40,7 @@ public class VocabularyReferenceModel
 			Sessions = [new(), new(), new()]
 		};
 	}
-	
+
 	public static VocabularyReferenceModel FromData(VocabularyReferenceDto data)
 	{
 		data.EnsureValid();
