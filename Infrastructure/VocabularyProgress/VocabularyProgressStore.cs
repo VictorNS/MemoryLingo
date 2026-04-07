@@ -12,36 +12,51 @@ public interface IVocabularyProgressStore
 
 public class VocabularyProgressStore : IVocabularyProgressStore
 {
+	private ReaderWriterLockSlim _cacheLock = new();
+	private Dictionary<string, string> _cache = [];
+
 	public VocabularyProgressDto Load(string filePath)
 	{
 		if (string.IsNullOrWhiteSpace(filePath))
 			return new VocabularyProgressDto();
 
-		VocabularyProgressDto vocabularyProgress;
+		_cacheLock.EnterReadLock();
+		try
+		{
+			if (_cache.TryGetValue(filePath, out var cachedProgress))
+			{
+				return JsonSerializer.Deserialize<VocabularyProgressDto>(cachedProgress, DefaultFilesOptions.SerializerOptions)
+					?? new VocabularyProgressDto();
+			}
+		}
+		finally
+		{
+			_cacheLock.ExitReadLock();
+		}
+
 		var progressZipPath = Path.ChangeExtension(filePath, ".progress.zip");
 
-		if (File.Exists(progressZipPath))
+		if (!File.Exists(progressZipPath))
+			return new VocabularyProgressDto();
+
+		VocabularyProgressDto vocabularyProgress;
+		_cacheLock.EnterWriteLock();
+		try
 		{
 			using var fileStream = File.OpenRead(progressZipPath);
 			using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
 			using var reader = new StreamReader(zipArchive.Entries[0].Open());
-			var jsonContent = reader.ReadToEnd();
-			vocabularyProgress = JsonSerializer.Deserialize<VocabularyProgressDto>(jsonContent, DefaultFilesOptions.SerializerOptions)
+			var json = reader.ReadToEnd();
+			_cache[filePath] = json;
+			vocabularyProgress = JsonSerializer.Deserialize<VocabularyProgressDto>(json, DefaultFilesOptions.SerializerOptions)
 				?? new VocabularyProgressDto();
 		}
-		else
+		finally
 		{
-			var progressFilePath = Path.ChangeExtension(filePath, ".progress.json");
-
-			if (!File.Exists(progressFilePath))
-				return new VocabularyProgressDto();
-
-			vocabularyProgress = JsonSerializer.Deserialize<VocabularyProgressDto>(File.ReadAllText(progressFilePath), DefaultFilesOptions.SerializerOptions)
-				?? new VocabularyProgressDto();
+			_cacheLock.ExitWriteLock();
 		}
 
 		vocabularyProgress.EnsureValid();
-
 		return vocabularyProgress;
 	}
 
@@ -67,13 +82,44 @@ public class VocabularyProgressStore : IVocabularyProgressStore
 				session.LastUpdated = DateTime.UtcNow;
 		}
 
-		Directory.CreateDirectory(folderPath);
 		var json = JsonSerializer.Serialize(vocabularyProgress, DefaultFilesOptions.SerializerOptions);
-		var progressZipPath = Path.ChangeExtension(filePath, ".progress.zip");
-		var entryName = Path.GetFileNameWithoutExtension(filePath) + ".progress.json";
-		using var fileStream = File.Create(progressZipPath);
-		using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Create);
-		using var writer = new StreamWriter(zipArchive.CreateEntry(entryName).Open());
-		writer.Write(json);
+		if (json is null)
+			return;
+
+		Directory.CreateDirectory(folderPath);
+		_cacheLock.EnterWriteLock();
+		try
+		{
+			_cache[filePath] = json;
+			var progressZipPath = Path.ChangeExtension(filePath, ".progress.zip");
+			var entryName = Path.GetFileNameWithoutExtension(filePath) + ".progress.json";
+
+			FileStream? fileStream = null;
+			int attempt;
+			for (attempt = 0; attempt < 10; attempt++)
+			{
+				try
+				{
+					fileStream = File.Create(progressZipPath);
+					break;
+				}
+				catch (IOException)
+				{
+					Thread.Sleep(500);
+				}
+			}
+			if (fileStream is null)
+				return;
+			if (attempt > 0)
+				Console.WriteLine($"Warning: Had to retry creating progress file {progressZipPath} {attempt} times.");
+
+			using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Create);
+			using var writer = new StreamWriter(zipArchive.CreateEntry(entryName).Open());
+			writer.Write(json);
+		}
+		finally
+		{
+			_cacheLock.ExitWriteLock();
+		}
 	}
 }

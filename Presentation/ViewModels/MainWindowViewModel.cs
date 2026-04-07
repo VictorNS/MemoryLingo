@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using MemoryLingo.Core.Models;
 using MemoryLingo.Core.Services;
+using MemoryLingo.Infrastructure.Logging;
 using MemoryLingo.Infrastructure.SpeechSynthesis;
 using MemoryLingo.Infrastructure.VocabularyReference;
 using MemoryLingo.Presentation.Commands;
@@ -18,6 +19,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	#region logic properties
 	readonly EntryValidationService _entryValidationService;
 	readonly ILearnService _learnService;
+	readonly ILogService _logService;
 	readonly ISpeechService _speechService;
 	EntryProgress _current = EntryProgress.Empty;
 	EntryProgress _previous = EntryProgress.Empty;
@@ -328,10 +330,11 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	static string WrapTranscription(string t) => t.StartsWith('[') ? t : $"[{t}]";
 	#endregion UI properties
 
-	public MainWindowViewModel(EntryValidationService entryValidationService, ILearnService learnService, ISpeechService speechService)
+	public MainWindowViewModel(EntryValidationService entryValidationService, ILearnService learnService, ILogService logService, ISpeechService speechService)
 	{
 		_entryValidationService = entryValidationService;
 		_learnService = learnService;
+		_logService = logService;
 		_speechService = speechService;
 
 		ShowTipsCommand = new RelayCommand(ShowTips);
@@ -563,40 +566,71 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 	void StartVocabularySession(VocabularyReferenceModel vocabularyFile, int sessionIndex, bool continueSession)
 	{
-		var vocabulary = _learnService.StartVocabularySession(vocabularyFile.FilePath, sessionIndex, continueSession);
-		if (vocabulary is null)
-			return;
+		try
+		{
+			var vocabulary = _learnService.StartVocabularySession(vocabularyFile.FilePath, sessionIndex, continueSession);
+			if (vocabulary is null)
+				return;
 
-		_vocabularyLanguage = vocabulary.Lang;
-		_vocabularyPath = vocabulary.FilePath;
-		FileName = vocabulary.FileName;
-		ShowPreviousEntry();
-		_current = _learnService.GetFirstEntry();
-		ShowEntry(isNewEntry: true, showTips: false);
-		ShowSessionInfo(_current.Session);
-		SelectedTabIndex = 1;
+			_vocabularyLanguage = vocabulary.Lang;
+			_vocabularyPath = vocabulary.FilePath;
+			FileName = vocabulary.FileName;
+			ShowPreviousEntry();
+			_current = _learnService.GetFirstEntry();
+			ShowEntry(isNewEntry: true, showTips: false);
+			ShowSessionInfo(_current.Session);
+			SelectedTabIndex = 1;
+		}
+		catch (Exception ex)
+		{
+			SW.MessageBox.Show($"Failed to start session: {ex.Message}", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
+			_logService.LogError(ex, nameof(StartVocabularySession));
+			SelectedTabIndex = 1;
+		}
 	}
 
 	void ProcessAnswer(string answer)
 	{
-		ShowEntry(isNewEntry: false, showTips: false);
+		EntryCheckResult wordResults;
 
-		var wordResults = _entryValidationService.GetEntryCheckResult(answer, _current.Entry.EnText);
+		try
+		{
+			ShowEntry(isNewEntry: false, showTips: false);
+
+			wordResults = _entryValidationService.GetEntryCheckResult(answer, _current.Entry.EnText);
+		}
+		catch (Exception ex)
+		{
+			SW.MessageBox.Show("An error occurred while processing the answer.", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
+			_logService.LogError(ex, nameof(ProcessAnswer));
+			SelectedTabIndex = 1;
+			return;
+		}
 
 		if (wordResults.IsCorrect)
 		{
-			// the answer is considered correct if no tips were used
-			bool isAnswerCorrect = !_tipsUsedForCurrentEntry;
-
-			_previous = _learnService.SaveEntryProgress(_current.Entry.RuText, isAnswerCorrect);
-			HideEntry();
-			ShowPreviousEntry();
-
-			if (isAnswerCorrect)
+			try
 			{
-				ShowSessionInfo(_previous.Session);
-				var vocabularies = _learnService.GetVocabularyList();
-				UpdateVocabulariesCollectionPreserveSort(vocabularies);
+				// the answer is considered correct if no tips were used
+				bool isAnswerCorrect = !_tipsUsedForCurrentEntry;
+
+				_previous = _learnService.SaveEntryProgress(_current.Entry.RuText, isAnswerCorrect);
+				HideEntry();
+				ShowPreviousEntry();
+
+				if (isAnswerCorrect)
+				{
+					ShowSessionInfo(_previous.Session);
+					var vocabularies = _learnService.GetVocabularyList();
+					UpdateVocabulariesCollectionPreserveSort(vocabularies);
+				}
+			}
+			catch (Exception ex)
+			{
+				SW.MessageBox.Show("An error occurred while processing the answer.", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
+				_logService.LogError(ex, nameof(ProcessAnswer));
+				SelectedTabIndex = 1;
+				return;
 			}
 
 			SpeakPreviousEntryThenInitializeNext();
@@ -624,8 +658,8 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		if (string.IsNullOrWhiteSpace(_vocabularyLanguage))
 			return;
 
-		var enText = _entryValidationService.RemoveTextInBrackets(_previous.Entry.EnText);
-		var enExample = _entryValidationService.RemoveTextInBrackets(_previous.Entry.EnExample);
+		var enText = _entryValidationService.RemoveUnspeakableSymbols(_previous.Entry.EnText);
+		var enExample = _entryValidationService.RemoveUnspeakableSymbols(_previous.Entry.EnExample);
 
 		if (string.IsNullOrWhiteSpace(enExample) || !enExample.Contains(enText, StringComparison.OrdinalIgnoreCase))
 		{
@@ -641,27 +675,36 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 	void InitializeNextEntry()
 	{
-		var newEntry = _learnService.GetNextEntry();
-
-		if (newEntry is null)
+		try
 		{
-			_current = EntryProgress.Empty;
-			LoadVocabularyList(false);
-			SelectedTabIndex = 0;
-		}
-		else
-		{
-			_current = newEntry;
+			var newEntry = _learnService.GetNextEntry();
 
-			if (newEntry.Session.QueueIndex == 0)
+			if (newEntry is null)
 			{
+				_current = EntryProgress.Empty;
 				LoadVocabularyList(false);
+				SelectedTabIndex = 0;
 			}
+			else
+			{
+				_current = newEntry;
+
+				if (newEntry.Session.QueueIndex == 0)
+				{
+					LoadVocabularyList(false);
+				}
+			}
+
+			ShowEntry(isNewEntry: true, showTips: false);
+			ShowSessionInfo(_current.Session);
+
+			IsOverlayVisible = false;
 		}
-
-		ShowEntry(isNewEntry: true, showTips: false);
-		ShowSessionInfo(_current.Session);
-
-		IsOverlayVisible = false;
+		catch (Exception ex)
+		{
+			SW.MessageBox.Show("An error occurred while initializing the next entry.", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
+			_logService.LogError(ex, nameof(InitializeNextEntry));
+			SelectedTabIndex = 1;
+		}
 	}
 }

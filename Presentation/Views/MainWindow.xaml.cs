@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using MemoryLingo.Core.Services;
+using MemoryLingo.Infrastructure.Logging;
 using MemoryLingo.Infrastructure.Settings;
 using MemoryLingo.Infrastructure.SpeechSynthesis;
 using MemoryLingo.Infrastructure.WindowsIntegration;
@@ -14,12 +15,12 @@ public partial class MainWindow : Window
 	readonly ITrayService _trayService;
 	public MainWindowViewModel ViewModel { get; }
 
-	public MainWindow(ISettingsStore settingsService, ITrayService trayService, EntryValidationService entryValidationService, ILearnService learnService, ISpeechService speechService)
+	public MainWindow(ISettingsStore settingsService, ITrayService trayService, EntryValidationService entryValidationService, ILearnService learnService, ILogService logService, ISpeechService speechService)
 	{
 		InitializeComponent();
 		_settingsService = settingsService;
 		_trayService = trayService;
-		ViewModel = new MainWindowViewModel(entryValidationService, learnService, speechService);
+		ViewModel = new MainWindowViewModel(entryValidationService, learnService, logService, speechService);
 	}
 
 	void Window_Loaded(object sender, RoutedEventArgs e)

@@ -134,7 +134,7 @@ public class EntryValidationService
 		return tokens;
 	}
 
-	public string RemoveTextInBrackets(string text)
+	public string RemoveUnspeakableSymbols(string text)
 	{
 		if (string.IsNullOrWhiteSpace(text))
 			return text;
@@ -174,6 +174,8 @@ public class EntryValidationService
 			}
 		}
 
-		return result.ToString().Trim();
+		return result.ToString()
+			.Replace("/", "").Replace("|", "")
+			.Trim();
 	}
 }

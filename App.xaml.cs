@@ -1,4 +1,5 @@
 ﻿using MemoryLingo.Core.Services;
+using MemoryLingo.Infrastructure.Logging;
 using MemoryLingo.Infrastructure.Settings;
 using MemoryLingo.Infrastructure.SpeechSynthesis;
 using MemoryLingo.Infrastructure.VocabularyExcel;
@@ -18,6 +19,7 @@ public partial class App : SW.Application
 	{
 		var services = new ServiceCollection();
 
+		services.AddSingleton<ILogService, LogService>();
 		services.AddSingleton<ISettingsStore, SettingsStore>();
 		services.AddSingleton<IVocabularyReferenceStore, VocabularyReferenceStore>();
 		services.AddSingleton<IVocabularyReferenceService, VocabularyReferenceService>();

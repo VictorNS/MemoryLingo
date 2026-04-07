@@ -404,7 +404,7 @@ public class EntryValidationServiceTests
 		var input = "(asd) fgh jkl (qwert).";
 
 		// Act
-		var actual = service.RemoveTextInBrackets(input);
+		var actual = service.RemoveUnspeakableSymbols(input);
 
 		// Assert
 		Assert.Equal("fgh jkl.", actual);
@@ -418,7 +418,7 @@ public class EntryValidationServiceTests
 		var input = "fgh jkl (qwert).";
 
 		// Act
-		var actual = service.RemoveTextInBrackets(input);
+		var actual = service.RemoveUnspeakableSymbols(input);
 
 		// Assert
 		Assert.Equal("fgh jkl.", actual);
@@ -432,7 +432,7 @@ public class EntryValidationServiceTests
 		var input = "(asd) fgh jkl.";
 
 		// Act
-		var actual = service.RemoveTextInBrackets(input);
+		var actual = service.RemoveUnspeakableSymbols(input);
 
 		// Assert
 		Assert.Equal("fgh jkl.", actual);
@@ -446,7 +446,7 @@ public class EntryValidationServiceTests
 		var input = "(asd)fgh jkl!(qwert)";
 
 		// Act
-		var actual = service.RemoveTextInBrackets(input);
+		var actual = service.RemoveUnspeakableSymbols(input);
 
 		// Assert
 		Assert.Equal("fgh jkl!", actual);
