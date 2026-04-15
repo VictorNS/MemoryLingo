@@ -585,7 +585,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		{
 			SW.MessageBox.Show($"Failed to start session: {ex.Message}", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
 			_logService.LogError(ex, nameof(StartVocabularySession));
-			SelectedTabIndex = 1;
 		}
 	}
 
@@ -603,7 +602,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		{
 			SW.MessageBox.Show("An error occurred while processing the answer.", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
 			_logService.LogError(ex, nameof(ProcessAnswer));
-			SelectedTabIndex = 1;
+			SelectedTabIndex = 0;
 			return;
 		}
 
@@ -629,7 +628,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			{
 				SW.MessageBox.Show("An error occurred while processing the answer.", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
 				_logService.LogError(ex, nameof(ProcessAnswer));
-				SelectedTabIndex = 1;
+				SelectedTabIndex = 0;
 				return;
 			}
 
@@ -704,7 +703,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		{
 			SW.MessageBox.Show("An error occurred while initializing the next entry.", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
 			_logService.LogError(ex, nameof(InitializeNextEntry));
-			SelectedTabIndex = 1;
+			SelectedTabIndex = 0;
 		}
 	}
 }

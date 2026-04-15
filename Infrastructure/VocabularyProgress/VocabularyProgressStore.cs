@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
+using MemoryLingo.Infrastructure.Logging;
 
 namespace MemoryLingo.Infrastructure.VocabularyProgress;
 
@@ -12,8 +13,14 @@ public interface IVocabularyProgressStore
 
 public class VocabularyProgressStore : IVocabularyProgressStore
 {
-	private ReaderWriterLockSlim _cacheLock = new();
-	private Dictionary<string, string> _cache = [];
+	readonly ILogService _logService;
+	readonly ReaderWriterLockSlim _cacheLock = new();
+	readonly Dictionary<string, string> _cache = [];
+
+	public VocabularyProgressStore(ILogService logService)
+	{
+		_logService = logService;
+	}
 
 	public VocabularyProgressDto Load(string filePath)
 	{
@@ -111,7 +118,7 @@ public class VocabularyProgressStore : IVocabularyProgressStore
 			if (fileStream is null)
 				return;
 			if (attempt > 0)
-				Console.WriteLine($"Warning: Had to retry creating progress file {progressZipPath} {attempt} times.");
+				_logService.LogError(new IOException($"Failed to create progress file after {attempt} attempts."), nameof(Save));
 
 			using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Create);
 			using var writer = new StreamWriter(zipArchive.CreateEntry(entryName).Open());
