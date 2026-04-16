@@ -21,6 +21,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	readonly ILearnService _learnService;
 	readonly ILogService _logService;
 	readonly ISpeechService _speechService;
+	readonly ISynthesisService _synthesisService;
 	EntryProgress _current = EntryProgress.Empty;
 	EntryProgress _previous = EntryProgress.Empty;
 	bool _tipsUsedForCurrentEntry;
@@ -330,12 +331,13 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	static string WrapTranscription(string t) => t.StartsWith('[') ? t : $"[{t}]";
 	#endregion UI properties
 
-	public MainWindowViewModel(EntryValidationService entryValidationService, ILearnService learnService, ILogService logService, ISpeechService speechService)
+	public MainWindowViewModel(EntryValidationService entryValidationService, ILearnService learnService, ILogService logService, ISpeechService speechService, ISynthesisService synthesisService)
 	{
 		_entryValidationService = entryValidationService;
 		_learnService = learnService;
 		_logService = logService;
 		_speechService = speechService;
+		_synthesisService = synthesisService;
 
 		ShowTipsCommand = new RelayCommand(ShowTips);
 		AddVocabularyCommand = new RelayCommand(AddVocabulary);
@@ -657,18 +659,17 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		if (string.IsNullOrWhiteSpace(_vocabularyLanguage))
 			return;
 
-		var enText = _entryValidationService.RemoveUnspeakableSymbols(_previous.Entry.EnText);
-		var enExample = _entryValidationService.RemoveUnspeakableSymbols(_previous.Entry.EnExample);
+		var (text, example) = _speechService.PrepareTextAndExample(_previous.Entry.EnText, _previous.Entry.EnExample);
 
-		if (string.IsNullOrWhiteSpace(enExample) || !enExample.Contains(enText, StringComparison.OrdinalIgnoreCase))
+		if (!string.IsNullOrEmpty(text))
 		{
-			_speechService.Speak(_vocabularyLanguage, enText);
+			_synthesisService.Speak(_vocabularyLanguage, text);
 		}
 
-		if (!string.IsNullOrWhiteSpace(enExample))
+		if (!string.IsNullOrEmpty(example))
 		{
 			await Task.Delay(TimeSpan.FromMilliseconds(300));
-			_speechService.Speak(_vocabularyLanguage, _previous.Entry.EnExample);
+			_synthesisService.Speak(_vocabularyLanguage, example);
 		}
 	}
 

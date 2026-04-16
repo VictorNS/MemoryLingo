@@ -4,13 +4,13 @@ using MemoryLingo.Infrastructure.Settings;
 
 namespace MemoryLingo.Infrastructure.SpeechSynthesis;
 
-public interface ISpeechService
+public interface ISynthesisService
 {
 	void Dispose();
 	void Speak(string lang, string text);
 }
 
-public class SpeechService : IDisposable, ISpeechService
+public class SynthesisService : IDisposable, ISynthesisService
 {
 	readonly ILogService _logService;
 	readonly ISettingsStore _settingsService;
@@ -19,7 +19,7 @@ public class SpeechService : IDisposable, ISpeechService
 	string _currentLang = string.Empty;
 	private bool disposedValue;
 
-	public SpeechService(ILogService logService, ISettingsStore settingsService)
+	public SynthesisService(ILogService logService, ISettingsStore settingsService)
 	{
 		_logService = logService;
 		_settingsService = settingsService;

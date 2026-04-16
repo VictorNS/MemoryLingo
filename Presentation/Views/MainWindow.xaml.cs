@@ -15,12 +15,12 @@ public partial class MainWindow : Window
 	readonly ITrayService _trayService;
 	public MainWindowViewModel ViewModel { get; }
 
-	public MainWindow(ISettingsStore settingsService, ITrayService trayService, EntryValidationService entryValidationService, ILearnService learnService, ILogService logService, ISpeechService speechService)
+	public MainWindow(ISettingsStore settingsService, ITrayService trayService, EntryValidationService entryValidationService, ILearnService learnService, ILogService logService, ISpeechService speechService, ISynthesisService synthesisService)
 	{
 		InitializeComponent();
 		_settingsService = settingsService;
 		_trayService = trayService;
-		ViewModel = new MainWindowViewModel(entryValidationService, learnService, logService, speechService);
+		ViewModel = new MainWindowViewModel(entryValidationService, learnService, logService, speechService, synthesisService);
 	}
 
 	void Window_Loaded(object sender, RoutedEventArgs e)

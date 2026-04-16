@@ -27,6 +27,7 @@ public partial class App : SW.Application
 		services.AddSingleton<IVocabularyExcelReader, VocabularyExcelReader>();
 		services.AddSingleton<ISingleInstanceService, SingleInstanceService>();
 		services.AddSingleton<ITrayService, TrayService>();
+		services.AddSingleton<ISynthesisService, SynthesisService>();
 		services.AddSingleton<ISpeechService, SpeechService>();
 		services.AddSingleton<EntryValidationService>();
 		services.AddSingleton<ILearnService, LearnService>();
