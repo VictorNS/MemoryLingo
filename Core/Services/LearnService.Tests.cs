@@ -559,4 +559,46 @@ public class LearnServiceTests
 		return (settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader);
 	}
 	#endregion AddVocabularyFile
+
+	#region BuildQueue
+	[Fact]
+	public void BuildQueue_With40Entries10Started_SplitsInto3Groups()
+	{
+		// Arrange
+		// exerciseSize=17: startedCount=7, nearCount=6, farCount=4
+		var settingsStore = Substitute.For<ISettingsStore>();
+		var vocabularyProgressStore = Substitute.For<IVocabularyProgressStore>();
+		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceService>();
+		var vocabularyExcelReader = Substitute.For<IVocabularyExcelReader>();
+
+		settingsStore.Get().Returns(new SettingsDto
+		{
+			Behavior = new BehaviorSettings { RandomizeQueue = true },
+			Learn = new LearnSettings { ExerciseSize = 17 }
+		});
+
+		var service = new LearnService(settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader);
+
+		var entries = new Dictionary<string, VocabularyProgressEntry>();
+		for (int i = 1; i <= 12; i++)
+			entries[$"word{i}"] = new VocabularyProgressEntry { Sessions = [new VocabularyProgressEntrySession { TotalAttempts = 3 }] };
+		for (int i = 13; i <= 20; i++)
+			entries[$"word{i}"] = new VocabularyProgressEntry { Sessions = [new VocabularyProgressEntrySession { TotalAttempts = 1 }] };
+		for (int i = 21; i <= 40; i++)
+			entries[$"word{i}"] = new VocabularyProgressEntry { Sessions = [new VocabularyProgressEntrySession { TotalAttempts = 0 }] };
+
+		var startedSet = Enumerable.Range(1, 12).Select(i => $"word{i}").ToHashSet();
+		var nearSet = Enumerable.Range(13, 3).Select(i => $"word{i}").ToHashSet();
+		var farSet = Enumerable.Range(16, 2).Select(i => $"word{i}").ToHashSet();
+
+		// Act
+		var queue = service.BuildQueue(entries, sessionIndex: 0);
+
+		// Assert
+		Assert.Equal(17, queue.Count);
+		Assert.Equal(12, queue.Count(x => startedSet.Contains(x)));
+		Assert.Equal(3, queue.Count(x => nearSet.Contains(x)));
+		Assert.Equal(2, queue.Count(x => farSet.Contains(x)));
+	}
+	#endregion BuildQueue
 }

@@ -240,7 +240,7 @@ public class LearnService : ILearnService
 			QueueIndex = 0,
 			IsLastLearned = false,
 			Entries = restEntries,
-			Queue = BuildQueue(restEntries),
+			Queue = BuildQueue(restEntries, sessionIndex),
 			VocabularyEntriesCount = _vocabularyProgress.Entries.Count - skippedCount,
 			VocabularyLearnedCount = _vocabularyProgress.Entries.Count - restEntries.Count - skippedCount,
 		};
@@ -283,7 +283,7 @@ public class LearnService : ILearnService
 			return GetEntryByQueueIndex();
 		}
 
-		if (_session.Queue.Count > 2)
+		if (_session.Queue.Count > 3) // if there are more than 3 entries, repeat the queue, otherwise reshuffle to avoid quick repetition
 		{
 			_session.QueueIndex = 0;
 			return GetEntryByQueueIndex();
@@ -296,7 +296,7 @@ public class LearnService : ILearnService
 		if (restEntries.Count == 0)
 			return null;
 
-		_session.Queue = BuildQueue(restEntries);
+		_session.Queue = BuildQueue(restEntries, _session.SessionIndex);
 		_session.QueueIndex = 0;
 		return GetEntryByQueueIndex();
 	}
@@ -326,12 +326,36 @@ public class LearnService : ILearnService
 		};
 	}
 
-	List<string> BuildQueue(Dictionary<string, VocabularyProgressEntry> entries)
+	internal List<string> BuildQueue(Dictionary<string, VocabularyProgressEntry> entries, int sessionIndex)
 	{
-		if (_settings.Behavior.RandomizeQueue)
-			return [.. entries.OrderBy(x => Random.Shared.Next()).Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)];
+		var exerciseSize = _settings.Learn.ExerciseSize;
 
-		return [.. entries.Take(_settings.Learn.ExerciseSize).Select(kv => kv.Key)];
+		if (!_settings.Behavior.RandomizeQueue)
+		{
+			return [.. entries.Take(exerciseSize).Select(kv => kv.Key)];
+		}
+		else if (entries.Count <= exerciseSize * 1.4)
+		{
+			return [.. entries.OrderBy(_ => Random.Shared.Next()).Take(exerciseSize).Select(kv => kv.Key)];
+		}
+
+		// Split proportionally into 3 groups:
+		// Group 1 (~70%): already started entries (TotalAttempts > 0)
+		// Group 2 (~20%): from the nearest range
+		// Group 3 (remainder): from the farther range
+		var startedKeys = entries
+			.Where(kv => kv.Value.Sessions[sessionIndex].TotalAttempts > 0)
+			.OrderByDescending(kv => kv.Value.Sessions[sessionIndex].TotalAttempts)
+			.Select(kv => kv.Key).ToList();
+		var startedCount = (int)Math.Round(exerciseSize * 0.70);
+		var started = startedKeys.Take(startedCount).OrderBy(_ => Random.Shared.Next()).ToList();
+
+		var restKeys = entries.Select(kv => kv.Key).Except(started).ToList();
+		var nearCount = Math.Max((int)Math.Round(exerciseSize * 0.20), exerciseSize - started.Count - (int)Math.Round(exerciseSize * 0.67));
+		var near = restKeys.Take(nearCount).OrderBy(_ => Random.Shared.Next()).ToList();
+		var farCount = exerciseSize - started.Count - near.Count;
+		var far = restKeys.Skip(nearCount).Take(farCount).OrderBy(_ => Random.Shared.Next()).ToList();
+		return [.. started, .. near, .. far];
 	}
 
 	public EntryProgress SaveEntryProgress(string ruText, bool isAnswerCorrect)
