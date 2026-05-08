@@ -351,7 +351,7 @@ public class LearnService : ILearnService
 		var started = startedKeys.Take(startedCount).OrderBy(_ => Random.Shared.Next()).ToList();
 
 		var restKeys = entries.Select(kv => kv.Key).Except(started).ToList();
-		var nearCount = Math.Max((int)Math.Round(exerciseSize * 0.20), exerciseSize - started.Count - (int)Math.Round(exerciseSize * 0.67));
+		var nearCount = (int)Math.Round((exerciseSize - started.Count) * 0.65);
 		var near = restKeys.Take(nearCount).OrderBy(_ => Random.Shared.Next()).ToList();
 		var farCount = exerciseSize - started.Count - near.Count;
 		var far = restKeys.Skip(nearCount).Take(farCount).OrderBy(_ => Random.Shared.Next()).ToList();
