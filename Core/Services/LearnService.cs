@@ -277,15 +277,9 @@ public class LearnService : ILearnService
 		var expectQueueIndex = _session.QueueIndex + (_session.IsLastLearned ? 0 : 1);
 		_session.IsLastLearned = false;
 
-		if (expectQueueIndex < _session.Queue.Count)
-		{
-			_session.QueueIndex = expectQueueIndex;
-			return GetEntryByQueueIndex();
-		}
-
 		if (_session.Queue.Count > 3) // if there are more than 3 entries, repeat the queue, otherwise reshuffle to avoid quick repetition
 		{
-			_session.QueueIndex = 0;
+			_session.QueueIndex = expectQueueIndex >= _session.Queue.Count ? 0 : expectQueueIndex;
 			return GetEntryByQueueIndex();
 		}
 
