@@ -19,12 +19,10 @@ public class VocabularyReferenceStore : IVocabularyReferenceStore
 	readonly string _filePath;
 	List<VocabularyReferenceDto> _vocabularies = [];
 
-	public VocabularyReferenceStore(ISettingsStore settingsService)
+	public VocabularyReferenceStore(IPathSettingsStore pathSettingsStore)
 	{
-		var settings = settingsService.Get();
-		_filePath = string.IsNullOrWhiteSpace(settings.VocabularyListPath)
-			? Path.Combine(DefaultFilesOptions.AppFolder, "vocabulary-list.json")
-			: settings.VocabularyListPath;
+		var settings = pathSettingsStore.Get();
+		_filePath = Path.Combine(settings.VocabularyListPath, "vocabulary-list.json");
 	}
 
 	public IReadOnlyList<VocabularyReferenceDto> Load()

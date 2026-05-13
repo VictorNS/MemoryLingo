@@ -12,31 +12,26 @@ namespace MemoryLingo;
 public partial class MainWindow : Window
 {
 	readonly ISettingsStore _settingsService;
+	readonly IWindowSettingsStore _windowSettingsStore;
 	readonly ITrayService _trayService;
 	public MainWindowViewModel ViewModel { get; }
 
-	public MainWindow(ISettingsStore settingsService, ITrayService trayService, EntryValidationService entryValidationService, ILearnService learnService, ILogService logService, ISpeechService speechService, ISynthesisService synthesisService)
+	public MainWindow(ISettingsStore settingsService, IWindowSettingsStore windowSettingsStore, ITrayService trayService, EntryValidationService entryValidationService, ILearnService learnService, ILogService logService, ISpeechService speechService, ISynthesisService synthesisService)
 	{
 		InitializeComponent();
 		_settingsService = settingsService;
+		_windowSettingsStore = windowSettingsStore;
 		_trayService = trayService;
 		ViewModel = new MainWindowViewModel(entryValidationService, learnService, logService, speechService, synthesisService);
 	}
 
 	void Window_Loaded(object sender, RoutedEventArgs e)
 	{
-		var settings = _settingsService.Get();
-		Top = settings.Window.Top;
-		Left = settings.Window.Left;
-		Height = settings.Window.Height;
-		Width = settings.Window.Width;
-
-		if (settings.Speech.Count == 0)
-		{
-			settings.Speech.Add("en", new SpeechLangSettings { IsActive = true, Voice = "Microsoft David Desktop", Rate = -2 });
-			settings.Speech.Add("bg", new SpeechLangSettings { IsActive = true, Voice = "Microsoft Ivan", Rate = -2 });
-			_settingsService.Save(settings);
-		}
+		var windowSettings = _windowSettingsStore.Get();
+		Top = windowSettings.Top;
+		Left = windowSettings.Left;
+		Height = windowSettings.Height;
+		Width = windowSettings.Width;
 
 		_trayService.Initialize(this);
 
@@ -49,12 +44,7 @@ public partial class MainWindow : Window
 
 	void Window_Closed(object sender, EventArgs e)
 	{
-		var settings = _settingsService.Get();
-		settings.Window.Top = Top;
-		settings.Window.Left = Left;
-		settings.Window.Height = Height;
-		settings.Window.Width = Width;
-		_settingsService.Save(settings);
+		_windowSettingsStore.Save(Top, Left, Height, Width);
 	}
 
 	void Window_StateChanged(object sender, EventArgs e)

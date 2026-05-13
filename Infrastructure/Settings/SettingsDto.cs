@@ -2,19 +2,30 @@
 
 public class SettingsDto
 {
-	public WindowSettings Window { get; set; } = new();
 	public BehaviorSettings Behavior { get; set; } = new();
 	public LearnSettings Learn { get; set; } = new();
 	public Dictionary<string, SpeechLangSettings> Speech { get; set; } = [];
-	public string VocabularyListPath { get; set; } = string.Empty;
-}
 
-public class WindowSettings
-{
-	public double Top { get; set; } = 16;
-	public double Left { get; set; } = 16;
-	public double Height { get; set; } = 240;
-	public double Width { get; set; } = 600;
+	public static SettingsDto Default => new()
+	{
+		Behavior = new BehaviorSettings
+		{
+			MinimizeToTray = true,
+			RandomizeQueue = true
+		},
+		Learn = new LearnSettings
+		{
+			ExerciseSize = 17,
+			CorrectAnswersToLearn = 2,
+			DifficultEntriesSession2Percent = 30,
+			DifficultEntriesSession3Percent = 50
+		},
+		Speech = new Dictionary<string, SpeechLangSettings>
+		{
+			{ "en", new SpeechLangSettings { IsActive = true, Voice = "Microsoft David Desktop", Rate = 0 } },
+			{ "bg", new SpeechLangSettings { IsActive = true, Voice = "Microsoft Ivan", Rate = 0 } }
+		}
+	};
 }
 
 public class BehaviorSettings
@@ -48,7 +59,7 @@ public class LearnSettings
 
 public class SpeechLangSettings
 {
-    public required string Voice { get; set; }
+	public required string Voice { get; set; }
 	public required int Rate { get; set; }
 	public bool IsActive { get; set; }
 }

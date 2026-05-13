@@ -20,7 +20,9 @@ public partial class App : SW.Application
 		var services = new ServiceCollection();
 
 		services.AddSingleton<ILogService, LogService>();
+		services.AddSingleton<IPathSettingsStore, PathSettingsStore>();
 		services.AddSingleton<ISettingsStore, SettingsStore>();
+		services.AddSingleton<IWindowSettingsStore, WindowSettingsStore>();
 		services.AddSingleton<IVocabularyReferenceStore, VocabularyReferenceStore>();
 		services.AddSingleton<IVocabularyReferenceService, VocabularyReferenceService>();
 		services.AddSingleton<IVocabularyProgressStore, VocabularyProgressStore>();

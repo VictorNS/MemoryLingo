@@ -14,9 +14,10 @@ public class SettingsStore : ISettingsStore
 	readonly string _filePath;
 	SettingsDto? _settings;
 
-	public SettingsStore()
+	public SettingsStore(IPathSettingsStore pathSettingsStore)
 	{
-		_filePath = Path.Combine(DefaultFilesOptions.AppFolder, "settings.json");
+		var settings = pathSettingsStore.Get();
+		_filePath = Path.Combine(settings.VocabularyListPath, "settings.json");
 	}
 
 	public SettingsDto Get()
@@ -30,7 +31,8 @@ public class SettingsStore : ISettingsStore
 			}
 			else
 			{
-				_settings = new SettingsDto();
+				_settings = SettingsDto.Default;
+				Save(_settings);
 			}
 		}
 
