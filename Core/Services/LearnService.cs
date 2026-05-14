@@ -342,14 +342,14 @@ public class LearnService : ILearnService
 			.OrderByDescending(kv => kv.Value.Sessions[sessionIndex].TotalAttempts)
 			.Select(kv => kv.Key).ToList();
 		var startedCount = (int)Math.Round(exerciseSize * 0.70);
-		var started = startedKeys.Take(startedCount).OrderBy(_ => Random.Shared.Next()).ToList();
+		var started = startedKeys.Take(startedCount).ToList();
 
 		var restKeys = entries.Select(kv => kv.Key).Except(started).ToList();
 		var nearCount = (int)Math.Round((exerciseSize - started.Count) * 0.65);
-		var near = restKeys.Take(nearCount).OrderBy(_ => Random.Shared.Next()).ToList();
+		var near = restKeys.Take(nearCount).ToList();
 		var farCount = exerciseSize - started.Count - near.Count;
-		var far = restKeys.Skip(nearCount).Take(farCount).OrderBy(_ => Random.Shared.Next()).ToList();
-		return [.. started, .. near, .. far];
+		var far = restKeys.Skip(nearCount).Take(farCount).ToList();
+		return started.Concat(near).Concat(far).OrderBy(_ => Random.Shared.Next()).ToList();
 	}
 
 	public EntryProgress SaveEntryProgress(string ruText, bool isAnswerCorrect)
