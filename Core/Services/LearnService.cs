@@ -287,6 +287,12 @@ public class LearnService : ILearnService
 			.Where(kv => !kv.Value.Sessions[_session.SessionIndex].IsSkipped && !kv.Value.Sessions[_session.SessionIndex].IsLearned)
 			.ToDictionary(kv => kv.Key, kv => kv.Value);
 
+		if (_session.Queue.Count == restEntries.Count) // if the queue is the same as before, just move to the next entry without reshuffling
+		{
+			_session.QueueIndex = expectQueueIndex >= _session.Queue.Count ? 0 : expectQueueIndex;
+			return GetEntryByQueueIndex();
+		}
+
 		if (restEntries.Count == 0)
 			return null;
 
@@ -337,18 +343,20 @@ public class LearnService : ILearnService
 		// Group 1 (~70%): already started entries (TotalAttempts > 0)
 		// Group 2 (~20%): from the nearest range
 		// Group 3 (remainder): from the farther range
+		var startedCount = (int)Math.Round(exerciseSize * 0.70);
 		var startedKeys = entries
 			.Where(kv => kv.Value.Sessions[sessionIndex].TotalAttempts > 0)
 			.OrderByDescending(kv => kv.Value.Sessions[sessionIndex].TotalAttempts)
 			.Select(kv => kv.Key).ToList();
-		var startedCount = (int)Math.Round(exerciseSize * 0.70);
 		var started = startedKeys.Take(startedCount).ToList();
 
-		var restKeys = entries.Select(kv => kv.Key).Except(started).ToList();
 		var nearCount = (int)Math.Round((exerciseSize - started.Count) * 0.65);
-		var near = restKeys.Take(nearCount).ToList();
+		var restKeys = entries.Select(kv => kv.Key).Except(started).ToList();
+		var near = restKeys.Take(exerciseSize).OrderBy(_ => Random.Shared.Next()).Take(nearCount).ToList();
+
 		var farCount = exerciseSize - started.Count - near.Count;
-		var far = restKeys.Skip(nearCount).Take(farCount).ToList();
+		restKeys = restKeys.Except(near).ToList();
+		var far = restKeys.OrderBy(_ => Random.Shared.Next()).Take(farCount).ToList();
 		return started.Concat(near).Concat(far).OrderBy(_ => Random.Shared.Next()).ToList();
 	}
 
