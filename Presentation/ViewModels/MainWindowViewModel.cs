@@ -24,7 +24,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	readonly ISynthesisService _synthesisService;
 	EntryProgress _current = EntryProgress.Empty;
 	EntryProgress _previous = EntryProgress.Empty;
-	bool _tipsUsedForCurrentEntry;
 	readonly DispatcherTimer _validationTimer = new();
 	string _vocabularyLanguage = string.Empty;
 	string _vocabularyPath = string.Empty;
@@ -276,6 +275,19 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	} = [];
 
+	public bool TipsUsedForCurrentEntry
+	{
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	}
+
 	public bool HideIncorrectTokens
 	{
 		get => field;
@@ -373,8 +385,8 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	void ShowTips()
 	{
 		_validationTimer.Stop();
-		_tipsUsedForCurrentEntry = true;
-		ShowEntry(isNewEntry: false, showTips: true);
+		TipsUsedForCurrentEntry = true;
+		ShowEntry(isNewEntry: false);
 	}
 
 	void RestartValidationTimer()
@@ -458,6 +470,12 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		if (openFileDialog.ShowDialog() == true)
 		{
+			if (VocabulariesCollection.Any(v => v.FilePath.Equals(openFileDialog.FileName, StringComparison.OrdinalIgnoreCase)))
+			{
+				SW.MessageBox.Show("This vocabulary file is already added.", "Duplicate", SW.MessageBoxButton.OK, SW.MessageBoxImage.Stop);
+				return;
+			}
+
 			var vocabularyFile = _learnService.AddVocabularyFile(openFileDialog.FileName);
 			VocabulariesCollection.Add(vocabularyFile);
 			var view = CollectionViewSource.GetDefaultView(VocabulariesCollection);
@@ -505,7 +523,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		VocabularyStat = $"{sessionProgress.VocabularyLearnedCount}/{sessionProgress.VocabularyEntriesCount}";
 	}
 
-	void ShowEntry(bool isNewEntry, bool showTips)
+	void ShowEntry(bool isNewEntry)
 	{
 		HideIncorrectTokens = false;
 		RuText = _current.Entry.RuText;
@@ -514,17 +532,17 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		if (isNewEntry)
 		{
 			Answer = string.Empty;
-			_tipsUsedForCurrentEntry = false;
+			TipsUsedForCurrentEntry = false;
 		}
 
-		if (showTips)
+		if (TipsUsedForCurrentEntry)
 		{
 			Transcription = WrapTranscription(_current.Entry.Transcription);
 			RuExample = _current.Entry.RuExample;
 			EnExample = _current.Entry.EnExample;
 
-			var wordResults = _entryValidationService.GetEntryCheckResult(_current.Entry.EnText, _current.Entry.EnText);
-			TokensResult = [.. wordResults.Tokens];
+			var tokens = EntryValidationService.SplitIntoTokens(_current.Entry.EnText);
+			TokensResult = [.. tokens.Select(x=> x with { IsMatch = true })];
 		}
 		else
 		{
@@ -579,7 +597,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			FileName = vocabulary.FileName;
 			ShowPreviousEntry();
 			_current = _learnService.GetFirstEntry();
-			ShowEntry(isNewEntry: true, showTips: false);
+			ShowEntry(isNewEntry: true);
 			ShowSessionInfo(_current.Session);
 			SelectedTabIndex = 1;
 		}
@@ -596,7 +614,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 		try
 		{
-			ShowEntry(isNewEntry: false, showTips: false);
+			ShowEntry(isNewEntry: false);
 
 			wordResults = _entryValidationService.GetEntryCheckResult(answer, _current.Entry.EnText);
 		}
@@ -613,7 +631,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			try
 			{
 				// the answer is considered correct if no tips were used
-				bool isAnswerCorrect = !_tipsUsedForCurrentEntry;
+				bool isAnswerCorrect = !TipsUsedForCurrentEntry;
 
 				_previous = _learnService.SaveEntryProgress(_current.Entry.RuText, isAnswerCorrect);
 				HideEntry();
@@ -695,7 +713,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 				}
 			}
 
-			ShowEntry(isNewEntry: true, showTips: false);
+			ShowEntry(isNewEntry: true);
 			ShowSessionInfo(_current.Session);
 
 			IsOverlayVisible = false;

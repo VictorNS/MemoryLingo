@@ -52,7 +52,7 @@ public class EntryValidationService
 		return new EntryCheckResult(results, checkResultType);
 	}
 
-	internal static List<TokenCheckResult> SplitIntoTokens(string text)
+	public static List<TokenCheckResult> SplitIntoTokens(string text)
 	{
 		if (string.IsNullOrEmpty(text))
 			return [];

@@ -15,7 +15,6 @@ public class VocabularyProgressStore : IVocabularyProgressStore
 {
 	readonly ILogService _logService;
 	readonly ReaderWriterLockSlim _cacheLock = new();
-	readonly Dictionary<string, string> _cache = [];
 
 	public VocabularyProgressStore(ILogService logService)
 	{
@@ -26,20 +25,6 @@ public class VocabularyProgressStore : IVocabularyProgressStore
 	{
 		if (string.IsNullOrWhiteSpace(filePath))
 			return new VocabularyProgressDto();
-
-		_cacheLock.EnterReadLock();
-		try
-		{
-			if (_cache.TryGetValue(filePath, out var cachedProgress))
-			{
-				return JsonSerializer.Deserialize<VocabularyProgressDto>(cachedProgress, DefaultFilesOptions.SerializerOptions)
-					?? new VocabularyProgressDto();
-			}
-		}
-		finally
-		{
-			_cacheLock.ExitReadLock();
-		}
 
 		var progressZipPath = Path.ChangeExtension(filePath, ".progress.zip");
 
@@ -54,7 +39,6 @@ public class VocabularyProgressStore : IVocabularyProgressStore
 			using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
 			using var reader = new StreamReader(zipArchive.Entries[0].Open());
 			var json = reader.ReadToEnd();
-			_cache[filePath] = json;
 			vocabularyProgress = JsonSerializer.Deserialize<VocabularyProgressDto>(json, DefaultFilesOptions.SerializerOptions)
 				?? new VocabularyProgressDto();
 		}
@@ -97,7 +81,6 @@ public class VocabularyProgressStore : IVocabularyProgressStore
 		_cacheLock.EnterWriteLock();
 		try
 		{
-			_cache[filePath] = json;
 			var progressZipPath = Path.ChangeExtension(filePath, ".progress.zip");
 			var entryName = Path.GetFileNameWithoutExtension(filePath) + ".progress.json";
 

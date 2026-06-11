@@ -352,7 +352,7 @@ public class LearnService : ILearnService
 
 		var nearCount = (int)Math.Round((exerciseSize - started.Count) * 0.65);
 		var restKeys = entries.Select(kv => kv.Key).Except(started).ToList();
-		var near = restKeys.Take(exerciseSize).OrderBy(_ => Random.Shared.Next()).Take(nearCount).ToList();
+		var near = restKeys.Take(exerciseSize * 2).OrderBy(_ => Random.Shared.Next()).Take(nearCount).ToList();
 
 		var farCount = exerciseSize - started.Count - near.Count;
 		restKeys = restKeys.Except(near).ToList();

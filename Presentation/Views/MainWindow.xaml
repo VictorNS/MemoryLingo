@@ -371,6 +371,15 @@
 				</Grid.ColumnDefinitions>
 
 				<Grid Grid.Row="0">
+					<Grid.Style>
+						<Style TargetType="Grid">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding TipsUsedForCurrentEntry}" Value="True">
+									<Setter Property="Background" Value="LavenderBlush"/>
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</Grid.Style>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto"/>
 						<RowDefinition Height="Auto"/>
@@ -430,7 +439,7 @@
 					<Label Grid.Row="6" Content="{Binding EnExample}" Style="{StaticResource TipLabel}"/>
 				</Grid>
 
-				<Grid Grid.Row="1" Background="LightGray">
+				<Grid Grid.Row="1" Background="Gainsboro">
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto"/>
 						<RowDefinition Height="Auto"/>
