@@ -145,6 +145,30 @@ public class EntryValidationServiceTests
 	}
 
 	[Fact]
+	public void SplitIntoTokens_WithTipInParentheses_IncludesTipAsToken()
+	{
+		// Arrange
+
+		// Act
+		var actual = EntryValidationService.SplitIntoTokens("Hello (big) world");
+
+		// Assert
+		Assert.Equal(3, actual.Count);
+		var expected = actual[0];
+		Assert.Equal("Hello", expected.Text);
+		Assert.True(expected.IsWord);
+		Assert.False(expected.IsSpaceBefore);
+		expected = actual[1];
+		Assert.Equal("(big)", expected.Text);
+		Assert.True(expected.IsTip);
+		Assert.True(expected.IsSpaceBefore);
+		expected = actual[2];
+		Assert.Equal("world", expected.Text);
+		Assert.True(expected.IsWord);
+		Assert.True(expected.IsSpaceBefore);
+	}
+
+	[Fact]
 	public void GetEntryCheckResult_ReturnsWrong()
 	{
 		// Arrange

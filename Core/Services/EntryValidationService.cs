@@ -86,6 +86,7 @@ public class EntryValidationService
 				}
 
 				// Find matching closing parenthesis
+				int tipStartIndex = i;
 				var tipBuilder = new StringBuilder();
 				tipBuilder.Append(c); // Include opening parenthesis
 				i++;
@@ -102,7 +103,7 @@ public class EntryValidationService
 					i++;
 				}
 
-				bool IsSpaceBeforeTip = i - currentToken.Length > 0 && char.IsWhiteSpace(text[i - currentToken.Length - 1]);
+				bool IsSpaceBeforeTip = tipStartIndex > 0 && char.IsWhiteSpace(text[tipStartIndex - 1]);
 				tokens.Add(TokenCheckResult.Create(tipBuilder, IsSpaceBeforeTip));
 			}
 			else if (TokenCheckResult.CharIsPunctuation(c))
