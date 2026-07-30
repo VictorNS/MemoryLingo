@@ -330,7 +330,7 @@ public class LearnService : ILearnService
 	{
 		var exerciseSize = _settings.Learn.ExerciseSize;
 
-		if (!_settings.Behavior.RandomizeQueue)
+		if (_settings.Behavior.RandomizeLevel == 0)
 		{
 			return [.. entries.Take(exerciseSize).Select(kv => kv.Key)];
 		}
@@ -339,18 +339,37 @@ public class LearnService : ILearnService
 			return [.. entries.OrderBy(_ => Random.Shared.Next()).Take(exerciseSize).Select(kv => kv.Key)];
 		}
 
-		// Split proportionally into 3 groups:
-		// Group 1 (~70%): already started entries (TotalAttempts > 0)
-		// Group 2 (~20%): from the nearest range
+		// Split proportionally into 3 groups, where the split ratios depend on RandomizeLevel:
+		// Group 1 (startedP): already started entries (TotalAttempts > 0)
+		// Group 2 (nearP of the remainder): from the nearest range
 		// Group 3 (remainder): from the farther range
-		var startedCount = (int)Math.Round(exerciseSize * 0.70);
+		// Higher RandomizeLevel lowers startedP/nearP, shifting weight toward farther, more random entries:
+		// Level 1 (default): startedP 0.70, nearP 0.65
+		// Level 2: startedP 0.30, nearP 0.30
+		// Level 3: startedP 0.10, nearP 0.00 (no near group)
+
+		double startedP = 0.70;
+		double nearP = 0.65;
+
+		if (_settings.Behavior.RandomizeLevel == 2)
+		{
+			startedP = 0.30;
+			nearP = 0.30;
+		}
+		else if (_settings.Behavior.RandomizeLevel == 3)
+		{
+			startedP = 0.00;
+			nearP = 0.00;
+		}
+
+		var startedCount = (int)Math.Round(exerciseSize * startedP);
 		var startedKeys = entries
 			.Where(kv => kv.Value.Sessions[sessionIndex].TotalAttempts > 0)
 			.OrderByDescending(kv => kv.Value.Sessions[sessionIndex].TotalAttempts)
 			.Select(kv => kv.Key).ToList();
 		var started = startedKeys.Take(startedCount).ToList();
 
-		var nearCount = (int)Math.Round((exerciseSize - started.Count) * 0.65);
+		var nearCount = (int)Math.Round((exerciseSize - started.Count) * nearP);
 		var restKeys = entries.Select(kv => kv.Key).Except(started).ToList();
 		var near = restKeys.Take(exerciseSize * 2).OrderBy(_ => Random.Shared.Next()).Take(nearCount).ToList();
 

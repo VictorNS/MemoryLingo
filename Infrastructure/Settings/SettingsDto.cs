@@ -8,18 +8,8 @@ public class SettingsDto
 
 	public static SettingsDto Default => new()
 	{
-		Behavior = new BehaviorSettings
-		{
-			MinimizeToTray = true,
-			RandomizeQueue = true
-		},
-		Learn = new LearnSettings
-		{
-			ExerciseSize = 17,
-			CorrectAnswersToLearn = 2,
-			DifficultEntriesSession2Percent = 30,
-			DifficultEntriesSession3Percent = 50
-		},
+		Behavior = new BehaviorSettings(),
+		Learn = new LearnSettings(),
 		Speech = new Dictionary<string, SpeechLangSettings>
 		{
 			{ "en", new SpeechLangSettings { IsActive = true, Voice = "Microsoft David Desktop", Rate = 0 } },
@@ -32,9 +22,9 @@ public class BehaviorSettings
 {
 	public bool MinimizeToTray { get; set; } = true;
 	/// <summary>
-	/// Randomize the order of entries in the session queue
+	/// Randomize the order of entries in the session queue with a level of randomness from 0 to 3
 	/// </summary>
-	public bool RandomizeQueue { get; set; } = true;
+	public int RandomizeLevel { get; set; } = 1;
 }
 
 public class LearnSettings

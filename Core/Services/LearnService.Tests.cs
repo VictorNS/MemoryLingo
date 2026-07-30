@@ -573,7 +573,7 @@ public class LearnServiceTests
 
 		settingsStore.Get().Returns(new SettingsDto
 		{
-			Behavior = new BehaviorSettings { RandomizeQueue = true },
+			Behavior = new BehaviorSettings { RandomizeLevel = 1 },
 			Learn = new LearnSettings { ExerciseSize = 17 }
 		});
 
