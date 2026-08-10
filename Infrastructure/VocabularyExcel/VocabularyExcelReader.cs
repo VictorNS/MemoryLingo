@@ -31,44 +31,56 @@ public class VocabularyExcelReader : IVocabularyExcelReader
 				ErrorMessage = "File not found"
 			};
 
+		try
+		{
+			var worksheet = Workbook.LoadWorksheets(filePath).FirstOrDefault();
 
-		var worksheet = Workbook.LoadWorksheets(filePath).FirstOrDefault();
+			if (worksheet == null)
+				return new VocabularyExcelDto
+				{
+					FileName = Path.GetFileName(filePath),
+					FilePath = filePath,
+					Entries = [],
+					ErrorMessage = "No worksheets found in the file"
+				};
 
-		if (worksheet == null)
+			var entries = new List<Entry>();
+
+			foreach (var excelRow in worksheet.Rows)
+			{
+				var entry = new Entry
+				{
+					RuText = excelRow.GetText(0),
+					RuTip = excelRow.GetText(1),
+					Transcription = excelRow.GetText(2),
+					EnText = excelRow.GetText(3),
+					RuExample = excelRow.GetText(4),
+					EnExample = excelRow.GetText(5)
+				};
+
+				if (string.IsNullOrWhiteSpace(entry.RuText) && string.IsNullOrWhiteSpace(entry.EnText))
+					continue;
+
+				entries.Add(entry);
+			}
+
+			return new VocabularyExcelDto
+			{
+				FileName = Path.GetFileName(filePath),
+				FilePath = filePath,
+				Entries = entries,
+				ErrorMessage = ""
+			};
+		}
+		catch (Exception ex)
+		{
 			return new VocabularyExcelDto
 			{
 				FileName = Path.GetFileName(filePath),
 				FilePath = filePath,
 				Entries = [],
-				ErrorMessage = "No worksheets found in the file"
+				ErrorMessage = $"Error reading the file: {ex.Message}"
 			};
-
-		var entries = new List<Entry>();
-
-		foreach (var excelRow in worksheet.Rows)
-		{
-			var entry = new Entry
-			{
-				RuText = excelRow.GetText(0),
-				RuTip = excelRow.GetText(1),
-				Transcription = excelRow.GetText(2),
-				EnText = excelRow.GetText(3),
-				RuExample = excelRow.GetText(4),
-				EnExample = excelRow.GetText(5)
-			};
-
-			if (string.IsNullOrWhiteSpace(entry.RuText) && string.IsNullOrWhiteSpace(entry.EnText))
-				continue;
-
-			entries.Add(entry);
 		}
-
-		return new VocabularyExcelDto
-		{
-			FileName = Path.GetFileName(filePath),
-			FilePath = filePath,
-			Entries = entries,
-			ErrorMessage = ""
-		};
 	}
 }
