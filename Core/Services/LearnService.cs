@@ -330,13 +330,34 @@ public class LearnService : ILearnService
 	{
 		var exerciseSize = _settings.Learn.ExerciseSize;
 
+		// Level 0: just take the first N entries (no randomization)
 		if (_settings.Behavior.RandomizeLevel == 0)
 		{
 			return [.. entries.Take(exerciseSize).Select(kv => kv.Key)];
 		}
-		else if (entries.Count <= exerciseSize * 1.4)
+		// If entries count is less than or equal to 1.4 times the exercise size, just randomize and take the first N entries
+		if (entries.Count <= exerciseSize * 1.4)
 		{
 			return [.. entries.OrderBy(_ => Random.Shared.Next()).Take(exerciseSize).Select(kv => kv.Key)];
+		}
+		// Level 3: just randomize all entries
+		if (_settings.Behavior.RandomizeLevel == 3)
+		{
+			return entries
+				.Select(kv => kv.Key)
+				.OrderBy(_ => Random.Shared.Next())
+				.Take(exerciseSize)
+				.ToList();
+		}
+		// Level 4: prioritize entries with fewer attempts
+		if (_settings.Behavior.RandomizeLevel == 4)
+		{
+			return entries
+				.OrderBy(kv => kv.Value.Sessions[sessionIndex].TotalAttempts)
+				.ThenBy(_ => Random.Shared.Next())
+				.Select(kv => kv.Key)
+				.Take(exerciseSize)
+				.ToList();
 		}
 
 		// Split proportionally into 3 groups, where the split ratios depend on RandomizeLevel:
@@ -344,10 +365,10 @@ public class LearnService : ILearnService
 		// Group 2 (nearP of the remainder): from the nearest range
 		// Group 3 (remainder): from the farther range
 		// Higher RandomizeLevel lowers startedP/nearP, shifting weight toward farther, more random entries:
-		// Level 1 (default): startedP 0.70, nearP 0.65
+		// Level 1: startedP 0.70, nearP 0.65
 		// Level 2: startedP 0.30, nearP 0.30
-		// Level 3: startedP 0.10, nearP 0.00 (no near group)
 
+		// Default: RandomizeLevel == 1
 		double startedP = 0.70;
 		double nearP = 0.65;
 
@@ -355,11 +376,6 @@ public class LearnService : ILearnService
 		{
 			startedP = 0.30;
 			nearP = 0.30;
-		}
-		else if (_settings.Behavior.RandomizeLevel == 3)
-		{
-			startedP = 0.00;
-			nearP = 0.00;
 		}
 
 		var startedCount = (int)Math.Round(exerciseSize * startedP);
