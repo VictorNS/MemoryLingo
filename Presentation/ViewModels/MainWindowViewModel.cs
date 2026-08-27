@@ -354,6 +354,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		ShowTipsCommand = new RelayCommand(ShowTips);
 		AddVocabularyCommand = new RelayCommand(AddVocabulary);
 		ReloadVocabulariesCommand = new RelayCommand(ReloadVocabularies);
+		ReloadLessonCommand = new RelayCommand(ReloadLesson);
 		DeleteVocabularyCommand = new ParameterizedRelayCommand<VocabularyReferenceModel>(DeleteVocabulary);
 		SessionClickCommand = new ParameterizedRelayCommand<SessionClickParameter>(OnSessionClick);
 		RefreshSessionCommand = new ParameterizedRelayCommand<SessionClickParameter>(OnRefreshSessionClick);
@@ -381,6 +382,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	public ICommand SessionClickCommand { get; }
 	public ICommand RefreshSessionCommand { get; }
 	public ICommand OpenCurrentFileCommand { get; }
+	public ICommand ReloadLessonCommand { get; }
 
 	void ShowTips()
 	{
@@ -515,6 +517,38 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	}
 	#endregion VocabularyList
+
+	#region Lesson
+	void ReloadLesson()
+	{
+		try
+		{
+			var newEntry = _learnService.GetFirstEntryOfNewSession();
+
+			if (newEntry is null)
+			{
+				_current = EntryProgress.Empty;
+				LoadVocabularyList(false);
+				SelectedTabIndex = 0;
+			}
+			else
+			{
+				_current = newEntry;
+			}
+
+			ShowEntry(isNewEntry: true);
+			ShowSessionInfo(_current.Session);
+
+			IsOverlayVisible = false;
+		}
+		catch (Exception ex)
+		{
+			SW.MessageBox.Show("An error occurred while initializing the next entry.", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
+			_logService.LogError(ex, nameof(InitializeNextEntry));
+			SelectedTabIndex = 0;
+		}
+	}
+	#endregion Lesson
 
 	#region Show/Hide UI elements
 	void ShowSessionInfo(EntryProgress.CurrentSessionProgress sessionProgress)

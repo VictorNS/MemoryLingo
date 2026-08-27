@@ -17,6 +17,7 @@ public interface ILearnService
 	VocabularyExcelDto? StartVocabularySession(string filePath, int sessionIndex, bool continueSession);
 	EntryProgress GetFirstEntry();
 	EntryProgress? GetNextEntry();
+	EntryProgress? GetFirstEntryOfNewSession();
 	EntryProgress SaveEntryProgress(string ruText, bool isAnswerCorrect);
 }
 
@@ -292,6 +293,23 @@ public class LearnService : ILearnService
 			_session.QueueIndex = expectQueueIndex >= _session.Queue.Count ? 0 : expectQueueIndex;
 			return GetEntryByQueueIndex();
 		}
+
+		if (restEntries.Count == 0)
+			return null;
+
+		_session.Queue = BuildQueue(restEntries, _session.SessionIndex);
+		_session.QueueIndex = 0;
+		return GetEntryByQueueIndex();
+	}
+
+	public EntryProgress? GetFirstEntryOfNewSession()
+	{
+		if (_vocabularyProgress is null || _session is null)
+			return null;
+
+		var restEntries = _vocabularyProgress.Entries
+			.Where(kv => !kv.Value.Sessions[_session.SessionIndex].IsSkipped && !kv.Value.Sessions[_session.SessionIndex].IsLearned)
+			.ToDictionary(kv => kv.Key, kv => kv.Value);
 
 		if (restEntries.Count == 0)
 			return null;
