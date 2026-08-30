@@ -7,6 +7,7 @@ using System.Windows.Threading;
 using MemoryLingo.Core.Models;
 using MemoryLingo.Core.Services;
 using MemoryLingo.Infrastructure.Logging;
+using MemoryLingo.Infrastructure.Settings;
 using MemoryLingo.Infrastructure.SpeechSynthesis;
 using MemoryLingo.Infrastructure.VocabularyReference;
 using MemoryLingo.Presentation.Commands;
@@ -17,6 +18,8 @@ namespace MemoryLingo.Presentation.ViewModels;
 public class MainWindowViewModel : INotifyPropertyChanged
 {
 	#region logic properties
+	readonly ISettingsStore _settingsService;
+	readonly SettingsDto _settings;
 	readonly EntryValidationService _entryValidationService;
 	readonly ILearnService _learnService;
 	readonly ILogService _logService;
@@ -29,8 +32,41 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	string _vocabularyPath = string.Empty;
 	#endregion logic properties
 
+	#region Application settings properties
+	public int RandomizeLevel
+	{
+		get => _settings.Behavior.RandomizeLevel;
+		set
+		{
+			if (_settings.Behavior.RandomizeLevel != value)
+			{
+				_settings.Behavior.RandomizeLevel = value;
+				SaveSettings();
+				OnPropertyChanged();
+			}
+		}
+	}
+
+	public int ExerciseSize
+	{
+		get => _settings.Learn.ExerciseSize;
+		set
+		{
+			int clamped = Math.Clamp(value, 3, 100);
+			if (_settings.Learn.ExerciseSize != clamped)
+			{
+				_settings.Learn.ExerciseSize = clamped;
+				SaveSettings();
+				OnPropertyChanged();
+			}
+		}
+	}
+	#endregion Application settings properties
+
 	#region UI properties
 	public event PropertyChangedEventHandler? PropertyChanged;
+
+	public event Action? FocusAnswerRequested;
 
 	protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = "")
 	{
@@ -343,8 +379,11 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	static string WrapTranscription(string t) => t.StartsWith('[') ? t : $"[{t}]";
 	#endregion UI properties
 
-	public MainWindowViewModel(EntryValidationService entryValidationService, ILearnService learnService, ILogService logService, ISpeechService speechService, ISynthesisService synthesisService)
+	public MainWindowViewModel(ISettingsStore settingsService, EntryValidationService entryValidationService, ILearnService learnService,
+		ILogService logService, ISpeechService speechService, ISynthesisService synthesisService)
 	{
+		_settingsService = settingsService;
+		_settings = settingsService.Get();
 		_entryValidationService = entryValidationService;
 		_learnService = learnService;
 		_logService = logService;
@@ -550,6 +589,22 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	}
 	#endregion Lesson
 
+	#region Application settings
+	void SaveSettings()
+	{
+		try
+		{
+			_settingsService.Save(_settings);
+		}
+		catch (Exception ex)
+		{
+			SW.MessageBox.Show("An error occurred while saving the settings.", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
+			_logService.LogError(ex, nameof(SaveSettings));
+			SelectedTabIndex = 0;
+		}
+	}
+	#endregion Application settings
+
 	#region Show/Hide UI elements
 	void ShowSessionInfo(EntryProgress.CurrentSessionProgress sessionProgress)
 	{
@@ -634,6 +689,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			ShowEntry(isNewEntry: true);
 			ShowSessionInfo(_current.Session);
 			SelectedTabIndex = 1;
+			FocusAnswerRequested?.Invoke();
 		}
 		catch (Exception ex)
 		{

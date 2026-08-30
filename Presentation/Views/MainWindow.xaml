@@ -4,147 +4,14 @@
 		xmlns:vm="clr-namespace:MemoryLingo.Presentation.ViewModels"
 		xmlns:converters="clr-namespace:MemoryLingo.Presentation.Converters"
 		Closed="Window_Closed" Loaded="Window_Loaded" StateChanged="Window_StateChanged"
-		Title="Memory Lingo" Height="230" Width="600">
+		Title="Memory Lingo" Height="260" Width="600">
 
 	<Window.Resources>
-		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-		<converters:SessionClickParameterConverter x:Key="SessionClickParameterConverter"/>
-		<converters:BooleanInverterConverter x:Key="BooleanInverterConverter"/>
-
-		<Style TargetType="{x:Type TabControl}">
-			<Setter Property="Background" Value="LightCyan"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Margin" Value="0"/>
-			<Setter Property="Padding" Value="0"/>
-			<Setter Property="TabStripPlacement" Value="Top"/>
-		</Style>
-		<Style TargetType="{x:Type TabItem}">
-			<Setter Property="Background" Value="White"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Padding" Value="8,4"/>
-			<Setter Property="Margin" Value="0"/>
-			<Setter Property="Template">
-				<Setter.Value>
-					<ControlTemplate TargetType="{x:Type TabItem}">
-						<Border x:Name="Border"
-								BorderThickness="{TemplateBinding BorderThickness}"
-								BorderBrush="{TemplateBinding BorderBrush}"
-								Background="{TemplateBinding Background}"
-								Padding="{TemplateBinding Padding}">
-							<ContentPresenter x:Name="ContentSite"
-											  VerticalAlignment="Center"
-											  HorizontalAlignment="Center"
-											  ContentSource="Header"/>
-						</Border>
-						<ControlTemplate.Triggers>
-							<Trigger Property="IsSelected" Value="True">
-								<Setter TargetName="Border" Property="BorderThickness" Value="0"/>
-								<Setter TargetName="Border" Property="Background" Value="LightCyan"/>
-							</Trigger>
-						</ControlTemplate.Triggers>
-					</ControlTemplate>
-				</Setter.Value>
-			</Setter>
-		</Style>
-
-		<Style TargetType="{x:Type Label}">
-			<Setter Property="FontFamily" Value="Verdana"/>
-			<Setter Property="FontSize" Value="18"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Margin" Value="4,0,1,0"/>
-			<Setter Property="Padding" Value="2,1,2,1"/>
-		</Style>
-		<Style TargetType="{x:Type TextBox}">
-			<Setter Property="FontFamily" Value="Verdana"/>
-			<Setter Property="FontSize" Value="18"/>
-			<Setter Property="VerticalContentAlignment" Value="Center"/>
-			<Setter Property="VerticalAlignment" Value="Center"/>
-			<Setter Property="BorderThickness" Value="1"/>
-			<Setter Property="Margin" Value="1,0,1,0"/>
-			<Setter Property="Padding" Value="2,4,2,4"/>
-		</Style>
-
-		<Style x:Key="BaseImageButton" TargetType="{x:Type Button}">
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Cursor" Value="Hand"/>
-		</Style>
-		<Style x:Key="LinkButton" TargetType="{x:Type Button}">
-			<Setter Property="FontFamily" Value="Tahoma"/>
-			<Setter Property="FontSize" Value="12"/>
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Foreground" Value="Blue"/>
-			<Setter Property="Cursor" Value="Hand"/>
-			<Setter Property="Margin" Value="4,0,1,0"/>
-			<Setter Property="Padding" Value="2,1,2,1"/>
-		</Style>
-
-		<Style x:Key="ToolbarImageButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseImageButton}">
-			<Setter Property="Margin" Value="4,0,0,0"/>
-		</Style>
-		<Style TargetType="{x:Type DataGrid}">
-			<Setter Property="FontFamily" Value="Tahoma"/>
-			<Setter Property="FontSize" Value="12"/>
-			<Setter Property="Margin" Value="0"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Background" Value="LightCyan"/>
-			<Setter Property="GridLinesVisibility" Value="All"/>
-			<Setter Property="HorizontalGridLinesBrush" Value="Silver"/>
-			<Setter Property="VerticalGridLinesBrush" Value="Silver"/>
-		</Style>
-		<Style x:Key="DataGridTextBlockStyle" TargetType="TextBlock">
-			<Setter Property="VerticalAlignment" Value="Center"/>
-			<Setter Property="Padding" Value="2,0,2,0"/>
-		</Style>
-		<Style x:Key="LocalTimeColumn" TargetType="TextBlock" BasedOn="{StaticResource DataGridTextBlockStyle}">
-			<Setter Property="FontSize" Value="10"/>
-		</Style>
-		<Style x:Key="SessionButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LinkButton}">
-			<Setter Property="Margin" Value="0"/>
-			<Setter Property="Padding" Value="0"/>
-		</Style>
-		<Style x:Key="SessionLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
-			<Setter Property="FontSize" Value="10"/>
-			<Setter Property="VerticalAlignment" Value="Center"/>
-			<Setter Property="VerticalContentAlignment" Value="Center"/>
-		</Style>
-		<Style x:Key="SessionRefreshButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BaseImageButton}">
-			<Setter Property="Margin" Value="0,0,0,0"/>
-		</Style>
-
-		<Style x:Key="TipLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
-			<Setter Property="FontSize" Value="14"/>
-		</Style>
-		<Style x:Key="TipText" TargetType="{x:Type ItemsControl}">
-			<Setter Property="Margin" Value="0"/>
-			<Setter Property="Padding" Value="6,0,0,0"/>
-			<Setter Property="MinHeight" Value="28"/>
-		</Style>
-		<Style x:Key="StatusLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
-			<Setter Property="FontSize" Value="14"/>
-			<Setter Property="Margin" Value="0,0,0,0"/>
-		</Style>
-		<Style x:Key="StatusLabelCut" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
-			<Setter Property="FontSize" Value="14"/>
-			<Setter Property="ContentTemplate">
-				<Setter.Value>
-					<DataTemplate>
-						<TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis"/>
-					</DataTemplate>
-				</Setter.Value>
-			</Setter>
-		</Style>
-		<Style x:Key="StatusImage" TargetType="{x:Type Image}">
-			<Setter Property="Width" Value="16"/>
-			<Setter Property="Height" Value="16"/>
-			<Setter Property="Margin" Value="0"/>
-			<Setter Property="Margin" Value="10,0,0,0"/>
-		</Style>
-		<Style x:Key="StatusFileButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LinkButton}">
-			<Setter Property="FontSize" Value="14"/>
-			<Setter Property="Margin" Value="10,0,0,0"/>
-		</Style>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="/Presentation/Assets/Styles/MainWindowStyles.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
 	</Window.Resources>
 
 	<TabControl SelectedIndex="{Binding SelectedTabIndex}">
@@ -155,9 +22,9 @@
 					<RowDefinition Height="*"/>
 				</Grid.RowDefinitions>
 
-				<WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,2,0,2">
+				<WrapPanel Grid.Row="0" Style="{StaticResource ToolbarWrapPanel}">
 					<Button Content="Add Vocabulary" Command="{Binding AddVocabularyCommand}"
-							Style="{StaticResource LinkButton}"/>
+							Style="{StaticResource ToolbarLinkButton}"/>
 					<Button Command="{Binding ReloadVocabulariesCommand}"
 							Style="{StaticResource ToolbarImageButton}"
 							ToolTip="Reload all sessions">
@@ -165,9 +32,9 @@
 					</Button>
 				</WrapPanel>
 
-				<DataGrid ItemsSource="{Binding VocabulariesCollection}"
+				<DataGrid Grid.Row="1" ItemsSource="{Binding VocabulariesCollection}"
 						AutoGenerateColumns="False" CanUserAddRows="False"
-						CanUserDeleteRows="False" SelectionMode="Single" Grid.ColumnSpan="2" Margin="0,24,0,0" Grid.RowSpan="2">
+						CanUserDeleteRows="False" SelectionMode="Single">
 					<DataGrid.Columns>
 						<DataGridTextColumn Header="File Name" Binding="{Binding FileName, Mode=OneWay}" Width="250">
 							<DataGridTextColumn.ElementStyle>
@@ -229,8 +96,7 @@
 												</MultiBinding>
 											</Button.CommandParameter>
 										</Button>
-										<Label Content="{Binding Session1AverageAttempts}" Style="{StaticResource SessionLabel}">
-										</Label>
+										<Label Content="{Binding Session1AverageAttempts}" Style="{StaticResource SessionLabel}"/>
 										<Button Style="{StaticResource SessionRefreshButton}"
 												Command="{Binding DataContext.RefreshSessionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
 												ToolTip="Restart Session 1"
@@ -276,8 +142,7 @@
 												</MultiBinding>
 											</Button.CommandParameter>
 										</Button>
-										<Label Content="{Binding Session2AverageAttempts}" Style="{StaticResource SessionLabel}">
-										</Label>
+										<Label Content="{Binding Session2AverageAttempts}" Style="{StaticResource SessionLabel}"/>
 										<Button Style="{StaticResource SessionRefreshButton}"
 												Command="{Binding DataContext.RefreshSessionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
 												ToolTip="Restart Session 2"
@@ -323,8 +188,7 @@
 												</MultiBinding>
 											</Button.CommandParameter>
 										</Button>
-										<Label Content="{Binding Session3AverageAttempts}" Style="{StaticResource SessionLabel}">
-										</Label>
+										<Label Content="{Binding Session3AverageAttempts}" Style="{StaticResource SessionLabel}"/>
 										<Button Style="{StaticResource SessionRefreshButton}"
 												Command="{Binding DataContext.RefreshSessionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
 												ToolTip="Restart Session 3"
@@ -364,7 +228,28 @@
 					<RowDefinition Height="*"/>
 				</Grid.RowDefinitions>
 
-				<WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,2,0,2">
+				<WrapPanel Grid.Row="0">
+					<WrapPanel.Style>
+						<Style TargetType="WrapPanel" BasedOn="{StaticResource ToolbarWrapPanel}">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding TipsUsedForCurrentEntry}" Value="True">
+									<Setter Property="Background" Value="LavenderBlush"/>
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</WrapPanel.Style>
+					<Label Content="Method:" Style="{StaticResource ToolbarLabel}"/>
+					<ComboBox Style="{StaticResource ToolbarComboBox}"
+						SelectedIndex="{Binding RandomizeLevel}">
+						<ComboBoxItem Content="0 - No randomization"/>
+						<ComboBoxItem Content="1 - Balanced 70/20/10"/>
+						<ComboBoxItem Content="2 - More random 30/20/50"/>
+						<ComboBoxItem Content="3 - Fully random All"/>
+						<ComboBoxItem Content="4 - Fully random Untrained"/>
+					</ComboBox>
+					<Label Content="Size:" Style="{StaticResource ToolbarLabel}"/>
+					<TextBox Text="{Binding ExerciseSize}" Style="{StaticResource ToolbarTextBox}"
+						Width="30" Margin="0" ToolTip="Entries per exercise (3-100)"/>
 					<Button Command="{Binding ReloadLessonCommand}"
 							Style="{StaticResource ToolbarImageButton}"
 							ToolTip="Reload lesson">
@@ -394,9 +279,9 @@
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*"/>
 					</Grid.ColumnDefinitions>
-					<Label Grid.Row="0" Content="{Binding RuText}"/>
+					<Label Grid.Row="0" Content="{Binding RuText}" Style="{StaticResource LessonLabel}"/>
 					<Label Grid.Row="1" Content="{Binding RuTip}" Style="{StaticResource TipLabel}"/>
-					<TextBox Grid.Row="2" Text="{Binding Answer, UpdateSourceTrigger=PropertyChanged}"/>
+					<TextBox x:Name="AnswerTextBox" Grid.Row="2" Text="{Binding Answer, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource AnswerTextBox}"/>
 					<ItemsControl Grid.Row="3" ItemsSource="{Binding TokensResult}" Style="{StaticResource TipText}">
 						<ItemsControl.ItemsPanel>
 							<ItemsPanelTemplate>
@@ -407,7 +292,7 @@
 							<DataTemplate>
 								<Label Content="{Binding Text}">
 									<Label.Style>
-										<Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+										<Style TargetType="Label" BasedOn="{StaticResource LessonLabel}">
 											<Setter Property="Padding" Value="0,1,0,1"/>
 											<Style.Triggers>
 												<DataTrigger Binding="{Binding IsSpaceBefore}" Value="True">
@@ -455,9 +340,9 @@
 						<ColumnDefinition Width="*"/>
 					</Grid.ColumnDefinitions>
 
-					<Label Grid.Row="0" Content="{Binding PrevRuText}"/>
+					<Label Grid.Row="0" Content="{Binding PrevRuText}" Style="{StaticResource LessonLabel}"/>
 					<Label Grid.Row="1" Content="{Binding PrevRuTip}" Style="{StaticResource TipLabel}"/>
-					<Label Grid.Row="2" Content="{Binding PrevEnText}"/>
+					<Label Grid.Row="2" Content="{Binding PrevEnText}" Style="{StaticResource LessonLabel}"/>
 					<Label Grid.Row="3" Content="{Binding PrevTranscription}" Style="{StaticResource TipLabel}"/>
 					<Label Grid.Row="4" Content="{Binding PrevRuExample}" Style="{StaticResource TipLabel}"/>
 					<Label Grid.Row="5" Content="{Binding PrevEnExample}" Style="{StaticResource TipLabel}"/>
@@ -477,8 +362,8 @@
 				</Grid>
 
 				<Grid Grid.Row="0" Grid.RowSpan="2" Panel.ZIndex="1000" Background="#80FFFFFF" Visibility="{Binding IsOverlayVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-					<Border VerticalAlignment="Top">
-						<Label Content="wait..." Padding="20" HorizontalAlignment="Center" Foreground="Gray"/>
+					<Border VerticalAlignment="Top" HorizontalAlignment="Center">
+						<Label Content="wait..." Padding="34" HorizontalAlignment="Center" Foreground="Gray" Style="{StaticResource LessonLabel}"/>
 					</Border>
 				</Grid>
 			</Grid>

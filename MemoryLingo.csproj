@@ -47,8 +47,4 @@
 		<Resource Include="Presentation\Assets\Images\refresh-16.png" />
 		<Resource Include="Presentation\Assets\Images\vocabulary-16.png" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Presentation\Assets\Styles\" />
-	</ItemGroup>
 </Project>

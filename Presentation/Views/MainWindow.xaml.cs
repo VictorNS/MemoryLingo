@@ -22,7 +22,7 @@ public partial class MainWindow : Window
 		_settingsService = settingsService;
 		_windowSettingsStore = windowSettingsStore;
 		_trayService = trayService;
-		ViewModel = new MainWindowViewModel(entryValidationService, learnService, logService, speechService, synthesisService);
+		ViewModel = new MainWindowViewModel(settingsService, entryValidationService, learnService, logService, speechService, synthesisService);
 	}
 
 	void Window_Loaded(object sender, RoutedEventArgs e)
@@ -38,8 +38,19 @@ public partial class MainWindow : Window
 		ViewModel.Initialize();
 		DataContext = ViewModel;
 
+		ViewModel.FocusAnswerRequested += FocusAnswer;
+
 		// Add KeyDown event handler for F1 key
 		KeyDown += MainWindow_KeyDown;
+	}
+
+	void FocusAnswer()
+	{
+		Dispatcher.BeginInvoke(() =>
+		{
+			AnswerTextBox.Focus();
+			SWI.Keyboard.Focus(AnswerTextBox);
+		}, System.Windows.Threading.DispatcherPriority.Input);
 	}
 
 	void Window_Closed(object sender, EventArgs e)
