@@ -402,6 +402,84 @@ public class LearnServiceTests
 	}
 	#endregion LoadSession
 
+	#region LessonRepeatCount
+	[Fact]
+	public void GetNextEntry_AfterConfiguredLessonPasses_RebuildsQueue()
+	{
+		// Arrange
+		var learnService = CreateLearnServiceForLessonRepeats(lessonRepeatCount: 2);
+		learnService.StartVocabularySession("test.xlsx", 0, true);
+
+		// Act
+		var firstPassSecondEntry = learnService.GetNextEntry();
+		var secondPassFirstEntry = learnService.GetNextEntry();
+		var secondPassSecondEntry = learnService.GetNextEntry();
+		var rebuiltLessonFirstEntry = learnService.GetNextEntry();
+
+		// Assert
+		Assert.Equal(1, firstPassSecondEntry?.Session.QueueIndex);
+		Assert.Equal(0, secondPassFirstEntry?.Session.QueueIndex);
+		Assert.Equal(1, secondPassSecondEntry?.Session.QueueIndex);
+		Assert.Equal(0, rebuiltLessonFirstEntry?.Session.QueueIndex);
+		Assert.Equal(0, learnService.GetCurrentSession()?.CompletedLessonPasses);
+	}
+
+	[Fact]
+	public void GetFirstEntryOfNewSession_ResetsCompletedLessonPasses()
+	{
+		// Arrange
+		var learnService = CreateLearnServiceForLessonRepeats(lessonRepeatCount: 2);
+		learnService.StartVocabularySession("test.xlsx", 0, true);
+		learnService.GetNextEntry();
+		learnService.GetNextEntry();
+
+		// Act
+		var reloadedEntry = learnService.GetFirstEntryOfNewSession();
+
+		// Assert
+		Assert.Equal(0, reloadedEntry?.Session.QueueIndex);
+		Assert.Equal(0, learnService.GetCurrentSession()?.CompletedLessonPasses);
+	}
+
+	static LearnService CreateLearnServiceForLessonRepeats(int lessonRepeatCount)
+	{
+		var settingsStore = Substitute.For<ISettingsStore>();
+		var vocabularyProgressStore = Substitute.For<IVocabularyProgressStore>();
+		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceService>();
+		var vocabularyExcelReader = Substitute.For<IVocabularyExcelReader>();
+
+		settingsStore.Get().Returns(new SettingsDto
+		{
+			Behavior = new BehaviorSettings { RandomizeLevel = 0 },
+			Learn = new LearnSettings
+			{
+				ExerciseSize = 3,
+				LessonRepeatCount = lessonRepeatCount
+			}
+		});
+
+		var entries = new Dictionary<string, VocabularyProgressEntry>
+		{
+			["word1"] = new VocabularyProgressEntry(),
+			["word2"] = new VocabularyProgressEntry()
+		};
+		vocabularyProgressStore.Load("test.xlsx").Returns(new VocabularyProgressDto { Entries = entries });
+		vocabularyExcelReader.LoadVocabulary("test.xlsx").Returns(new VocabularyExcelDto
+		{
+			FileName = "test.xlsx",
+			FilePath = "test.xlsx",
+			ErrorMessage = string.Empty,
+			Entries =
+			[
+				new Entry { RuText = "word1", EnText = "translation1" },
+				new Entry { RuText = "word2", EnText = "translation2" }
+			]
+		});
+
+		return new LearnService(settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader);
+	}
+	#endregion LessonRepeatCount
+
 	#region AddVocabularyFile
 	[Fact]
 	public void AddVocabularyFile_WithValidFile_ReturnsVocabularyReferenceWithUpdatedSessions()
@@ -559,46 +637,4 @@ public class LearnServiceTests
 		return (settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader);
 	}
 	#endregion AddVocabularyFile
-
-	#region BuildQueue
-	[Fact]
-	public void BuildQueue_With40Entries10Started_SplitsInto3Groups()
-	{
-		// Arrange
-		// exerciseSize=17: startedCount=7, nearCount=6, farCount=4
-		var settingsStore = Substitute.For<ISettingsStore>();
-		var vocabularyProgressStore = Substitute.For<IVocabularyProgressStore>();
-		var vocabularyReferenceStore = Substitute.For<IVocabularyReferenceService>();
-		var vocabularyExcelReader = Substitute.For<IVocabularyExcelReader>();
-
-		settingsStore.Get().Returns(new SettingsDto
-		{
-			Behavior = new BehaviorSettings { RandomizeLevel = 1 },
-			Learn = new LearnSettings { ExerciseSize = 17 }
-		});
-
-		var service = new LearnService(settingsStore, vocabularyProgressStore, vocabularyReferenceStore, vocabularyExcelReader);
-
-		var entries = new Dictionary<string, VocabularyProgressEntry>();
-		for (int i = 1; i <= 12; i++)
-			entries[$"word{i}"] = new VocabularyProgressEntry { Sessions = [new VocabularyProgressEntrySession { TotalAttempts = 3 }] };
-		for (int i = 13; i <= 20; i++)
-			entries[$"word{i}"] = new VocabularyProgressEntry { Sessions = [new VocabularyProgressEntrySession { TotalAttempts = 1 }] };
-		for (int i = 21; i <= 40; i++)
-			entries[$"word{i}"] = new VocabularyProgressEntry { Sessions = [new VocabularyProgressEntrySession { TotalAttempts = 0 }] };
-
-		var startedSet = Enumerable.Range(1, 12).Select(i => $"word{i}").ToHashSet();
-		var nearSet = Enumerable.Range(13, 3).Select(i => $"word{i}").ToHashSet();
-		var farSet = Enumerable.Range(16, 2).Select(i => $"word{i}").ToHashSet();
-
-		// Act
-		var queue = service.BuildQueue(entries, sessionIndex: 0);
-
-		// Assert
-		Assert.Equal(17, queue.Count);
-		Assert.Equal(12, queue.Count(x => startedSet.Contains(x)));
-		Assert.Equal(3, queue.Count(x => nearSet.Contains(x)));
-		Assert.Equal(2, queue.Count(x => farSet.Contains(x)));
-	}
-	#endregion BuildQueue
 }

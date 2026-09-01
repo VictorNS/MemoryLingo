@@ -239,6 +239,7 @@ public class LearnService : ILearnService
 		{
 			SessionIndex = sessionIndex,
 			QueueIndex = 0,
+			CompletedLessonPasses = 0,
 			IsLastLearned = false,
 			Entries = restEntries,
 			Queue = BuildQueue(restEntries, sessionIndex),
@@ -278,9 +279,18 @@ public class LearnService : ILearnService
 		var expectQueueIndex = _session.QueueIndex + (_session.IsLastLearned ? 0 : 1);
 		_session.IsLastLearned = false;
 
+		if (expectQueueIndex >= _session.Queue.Count) // We have completed the session.
+		{
+			expectQueueIndex = 0;
+			_session.CompletedLessonPasses++;
+
+			if (_session.CompletedLessonPasses >= _settings.Learn.LessonRepeatCount)
+				return GetFirstEntryOfNewSession(); // Start a new session if the repeat count is reached.
+		}
+
 		if (_session.Queue.Count > 3) // if there are more than 3 entries, repeat the queue, otherwise reshuffle to avoid quick repetition
 		{
-			_session.QueueIndex = expectQueueIndex >= _session.Queue.Count ? 0 : expectQueueIndex;
+			_session.QueueIndex = expectQueueIndex;
 			return GetEntryByQueueIndex();
 		}
 
@@ -290,7 +300,7 @@ public class LearnService : ILearnService
 
 		if (_session.Queue.Count == restEntries.Count) // if the queue is the same as before, just move to the next entry without reshuffling
 		{
-			_session.QueueIndex = expectQueueIndex >= _session.Queue.Count ? 0 : expectQueueIndex;
+			_session.QueueIndex = expectQueueIndex;
 			return GetEntryByQueueIndex();
 		}
 
@@ -299,6 +309,7 @@ public class LearnService : ILearnService
 
 		_session.Queue = BuildQueue(restEntries, _session.SessionIndex);
 		_session.QueueIndex = 0;
+		_session.CompletedLessonPasses = 0;
 		return GetEntryByQueueIndex();
 	}
 
@@ -316,6 +327,7 @@ public class LearnService : ILearnService
 
 		_session.Queue = BuildQueue(restEntries, _session.SessionIndex);
 		_session.QueueIndex = 0;
+		_session.CompletedLessonPasses = 0;
 		return GetEntryByQueueIndex();
 	}
 

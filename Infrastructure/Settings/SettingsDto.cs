@@ -45,6 +45,10 @@ public class LearnSettings
 	/// Percentage of difficult entries we will repeat in a third session
 	/// </summary>
 	public int DifficultEntriesSession3Percent { get; set; } = 50;
+	/// <summary>
+	/// Maximum number of repetitions of one lesson.
+	/// </summary>
+	public int LessonRepeatCount { get; set; } = 10;
 }
 
 public class SpeechLangSettings

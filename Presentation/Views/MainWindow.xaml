@@ -238,7 +238,7 @@
 							</Style.Triggers>
 						</Style>
 					</WrapPanel.Style>
-					<Label Content="Method:" Style="{StaticResource ToolbarLabel}"/>
+					<Label Content="Method" Style="{StaticResource ToolbarLabel}"/>
 					<ComboBox Style="{StaticResource ToolbarComboBox}"
 						SelectedIndex="{Binding RandomizeLevel}">
 						<ComboBoxItem Content="0 - No randomization"/>
@@ -247,9 +247,12 @@
 						<ComboBoxItem Content="3 - Fully random All"/>
 						<ComboBoxItem Content="4 - Fully random Untrained"/>
 					</ComboBox>
-					<Label Content="Size:" Style="{StaticResource ToolbarLabel}"/>
-					<TextBox Text="{Binding ExerciseSize}" Style="{StaticResource ToolbarTextBox}"
-						Width="30" Margin="0" ToolTip="Entries per exercise (3-100)"/>
+					<Label Content="Size" Style="{StaticResource ToolbarLabel}"/>
+					<TextBox Text="{Binding ExerciseSize}" Style="{StaticResource ToolbarNumericTextBox}"
+						Width="30" ToolTip="Entries per exercise (3-100)"/>
+					<Label Content="Repeat Lesson" Style="{StaticResource ToolbarLabel}"/>
+					<TextBox Text="{Binding LessonRepeatCount}" Style="{StaticResource ToolbarNumericTextBox}"
+						Width="30" ToolTip="Maximum repetitions per lesson (1-100)"/>
 					<Button Command="{Binding ReloadLessonCommand}"
 							Style="{StaticResource ToolbarImageButton}"
 							ToolTip="Reload lesson">
@@ -348,6 +351,8 @@
 					<Label Grid.Row="5" Content="{Binding PrevEnExample}" Style="{StaticResource TipLabel}"/>
 					<Border Grid.Row="6" BorderThickness="0,1,0,0" BorderBrush="Silver" Margin="0,2,0,0" Padding="0,2,0,0">
 						<WrapPanel Orientation="Horizontal">
+							<Label Content="{Binding TotalEntitiesAnswered}" Style="{StaticResource StatusLabel}"/>
+
 							<Image Source="{Binding PrevStatusImage}" Style="{StaticResource StatusImage}"/>
 							<Label Content="{Binding PrevStatus}" Style="{StaticResource StatusLabel}"/>
 

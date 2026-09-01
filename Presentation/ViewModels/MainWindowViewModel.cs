@@ -61,6 +61,21 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			}
 		}
 	}
+
+	public int LessonRepeatCount
+	{
+		get => _settings.Learn.LessonRepeatCount;
+		set
+		{
+			int clamped = Math.Clamp(value, 1, 100);
+			if (_settings.Learn.LessonRepeatCount != clamped)
+			{
+				_settings.Learn.LessonRepeatCount = clamped;
+				SaveSettings();
+				OnPropertyChanged();
+			}
+		}
+	}
 	#endregion Application settings properties
 
 	#region UI properties
@@ -297,6 +312,19 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			}
 		}
 	} = string.Empty;
+
+	public int TotalEntitiesAnswered
+	{
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	}
 
 	public ObservableCollection<TokenCheckResult> TokensResult
 	{
@@ -689,6 +717,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			ShowEntry(isNewEntry: true);
 			ShowSessionInfo(_current.Session);
 			SelectedTabIndex = 1;
+			TotalEntitiesAnswered = 0;
 			FocusAnswerRequested?.Invoke();
 		}
 		catch (Exception ex)
@@ -726,6 +755,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 				_previous = _learnService.SaveEntryProgress(_current.Entry.RuText, isAnswerCorrect);
 				HideEntry();
 				ShowPreviousEntry();
+				TotalEntitiesAnswered++;
 
 				if (isAnswerCorrect)
 				{
