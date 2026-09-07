@@ -9,7 +9,8 @@ public class LearnSession
 	public required Dictionary<string, VocabularyProgressEntry> Entries { get; set; }
 	public required int SessionIndex { get; set; }
 	public required int QueueIndex { get; set; }
-	public required int CompletedLessonPasses { get; set; }
+	public required int LessonsCompletedCount { get; set; }
+	public required int TotalEntriesCompletedCount { get; set; }
 	public required List<string> Queue { get; set; }
 	public required bool IsLastLearned { get; set; }
 }

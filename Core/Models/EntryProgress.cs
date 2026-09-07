@@ -7,6 +7,7 @@ public class EntryProgress
 	public bool IsLastAttemptSuccess { get; set; }
 	public required int CorrectAnswers { get; set; }
 	public required int TotalAttempts { get; set; }
+	public required int TotalEntriesCompletedCount { get; set; }
 	public required CurrentSessionProgress Session { get; set; }
 
 	public static EntryProgress Empty { get; } = new()
@@ -16,6 +17,7 @@ public class EntryProgress
 		IsLastAttemptSuccess = false,
 		CorrectAnswers = 0,
 		TotalAttempts = 0,
+		TotalEntriesCompletedCount = 0,
 		Session = new()
 		{
 			QueueIndex = 0,

@@ -239,7 +239,8 @@ public class LearnService : ILearnService
 		{
 			SessionIndex = sessionIndex,
 			QueueIndex = 0,
-			CompletedLessonPasses = 0,
+			LessonsCompletedCount = 0,
+			TotalEntriesCompletedCount = 0,
 			IsLastLearned = false,
 			Entries = restEntries,
 			Queue = BuildQueue(restEntries, sessionIndex),
@@ -276,15 +277,16 @@ public class LearnService : ILearnService
 		if (_session.Queue.Count == 0) // it's possible when all entries are learned
 			return null;
 
+		_session.TotalEntriesCompletedCount++;
 		var expectQueueIndex = _session.QueueIndex + (_session.IsLastLearned ? 0 : 1);
 		_session.IsLastLearned = false;
 
 		if (expectQueueIndex >= _session.Queue.Count) // We have completed the session.
 		{
 			expectQueueIndex = 0;
-			_session.CompletedLessonPasses++;
+			_session.LessonsCompletedCount++;
 
-			if (_session.CompletedLessonPasses >= _settings.Learn.LessonRepeatCount)
+			if (_session.LessonsCompletedCount >= _settings.Learn.LessonRepeatCount)
 				return GetFirstEntryOfNewSession(); // Start a new session if the repeat count is reached.
 		}
 
@@ -309,7 +311,7 @@ public class LearnService : ILearnService
 
 		_session.Queue = BuildQueue(restEntries, _session.SessionIndex);
 		_session.QueueIndex = 0;
-		_session.CompletedLessonPasses = 0;
+		_session.LessonsCompletedCount = 0;
 		return GetEntryByQueueIndex();
 	}
 
@@ -327,7 +329,8 @@ public class LearnService : ILearnService
 
 		_session.Queue = BuildQueue(restEntries, _session.SessionIndex);
 		_session.QueueIndex = 0;
-		_session.CompletedLessonPasses = 0;
+		_session.LessonsCompletedCount = 0;
+		_session.TotalEntriesCompletedCount = 0;
 		return GetEntryByQueueIndex();
 	}
 
@@ -346,6 +349,7 @@ public class LearnService : ILearnService
 			IsLearned = progress.IsLearned,
 			CorrectAnswers = progress.CorrectAnswers,
 			TotalAttempts = progress.TotalAttempts,
+			TotalEntriesCompletedCount = _session.TotalEntriesCompletedCount,
 			Session = new()
 			{
 				QueueIndex = _session.QueueIndex,
@@ -358,7 +362,7 @@ public class LearnService : ILearnService
 
 	internal List<string> BuildQueue(Dictionary<string, VocabularyProgressEntry> entries, int sessionIndex)
 	{
-		var exerciseSize = _settings.Learn.ExerciseSize;
+		var exerciseSize = _settings.Learn.LessonSize;
 
 		// Level 0: just take the first N entries (no randomization)
 		if (_settings.Behavior.RandomizeLevel == 0)
@@ -462,6 +466,7 @@ public class LearnService : ILearnService
 			IsLastAttemptSuccess = isAnswerCorrect,
 			CorrectAnswers = progressEntrySession.CorrectAnswers,
 			TotalAttempts = progressEntrySession.TotalAttempts,
+			TotalEntriesCompletedCount = _session.TotalEntriesCompletedCount,
 			Session = new()
 			{
 				QueueIndex = _session.QueueIndex,

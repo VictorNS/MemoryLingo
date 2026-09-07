@@ -32,7 +32,7 @@ public class LearnSettings
 	/// <summary>
 	/// Number of entries per exercise
 	/// </summary>
-	public int ExerciseSize { get; set; } = 17;
+	public int LessonSize { get; set; } = 17;
 	/// <summary>
 	/// Number of correct answers required to learn an entry
 	/// </summary>

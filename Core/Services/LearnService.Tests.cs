@@ -375,7 +375,7 @@ public class LearnServiceTests
 		{
 			Learn = new LearnSettings
 			{
-				ExerciseSize = exerciseSize,
+				LessonSize = exerciseSize,
 				CorrectAnswersToLearn = correctAnswersToLearn,
 				DifficultEntriesSession2Percent = session2Percent,
 				DifficultEntriesSession3Percent = session3Percent
@@ -421,11 +421,11 @@ public class LearnServiceTests
 		Assert.Equal(0, secondPassFirstEntry?.Session.QueueIndex);
 		Assert.Equal(1, secondPassSecondEntry?.Session.QueueIndex);
 		Assert.Equal(0, rebuiltLessonFirstEntry?.Session.QueueIndex);
-		Assert.Equal(0, learnService.GetCurrentSession()?.CompletedLessonPasses);
+		Assert.Equal(0, learnService.GetCurrentSession()?.LessonsCompletedCount);
 	}
 
 	[Fact]
-	public void GetFirstEntryOfNewSession_ResetsCompletedLessonPasses()
+	public void GetFirstEntryOfNewSession_ResetsLessonsCompletedCount()
 	{
 		// Arrange
 		var learnService = CreateLearnServiceForLessonRepeats(lessonRepeatCount: 2);
@@ -438,7 +438,7 @@ public class LearnServiceTests
 
 		// Assert
 		Assert.Equal(0, reloadedEntry?.Session.QueueIndex);
-		Assert.Equal(0, learnService.GetCurrentSession()?.CompletedLessonPasses);
+		Assert.Equal(0, learnService.GetCurrentSession()?.LessonsCompletedCount);
 	}
 
 	static LearnService CreateLearnServiceForLessonRepeats(int lessonRepeatCount)
@@ -453,7 +453,7 @@ public class LearnServiceTests
 			Behavior = new BehaviorSettings { RandomizeLevel = 0 },
 			Learn = new LearnSettings
 			{
-				ExerciseSize = 3,
+				LessonSize = 3,
 				LessonRepeatCount = lessonRepeatCount
 			}
 		});
@@ -618,7 +618,7 @@ public class LearnServiceTests
 		{
 			Learn = new LearnSettings
 			{
-				ExerciseSize = 5,
+				LessonSize = 5,
 				CorrectAnswersToLearn = 2
 			}
 		};

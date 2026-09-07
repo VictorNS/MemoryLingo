@@ -47,15 +47,15 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	}
 
-	public int ExerciseSize
+	public int LessonSize
 	{
-		get => _settings.Learn.ExerciseSize;
+		get => _settings.Learn.LessonSize;
 		set
 		{
 			int clamped = Math.Clamp(value, 3, 100);
-			if (_settings.Learn.ExerciseSize != clamped)
+			if (_settings.Learn.LessonSize != clamped)
 			{
-				_settings.Learn.ExerciseSize = clamped;
+				_settings.Learn.LessonSize = clamped;
 				SaveSettings();
 				OnPropertyChanged();
 			}
@@ -287,7 +287,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	} = string.Empty;
 
-	public string QueueStat
+	public int QueuesPosition
 	{
 		get => field;
 		set
@@ -298,7 +298,46 @@ public class MainWindowViewModel : INotifyPropertyChanged
 				OnPropertyChanged();
 			}
 		}
-	} = string.Empty;
+	}
+
+	public int QueuesTotal
+	{
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	}
+
+	public int QueuePosition
+	{
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	}
+
+	public int QueueTotal
+	{
+		get => field;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				OnPropertyChanged();
+			}
+		}
+	}
 
 	public string VocabularyStat
 	{
@@ -636,7 +675,8 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	#region Show/Hide UI elements
 	void ShowSessionInfo(EntryProgress.CurrentSessionProgress sessionProgress)
 	{
-		QueueStat = $"{sessionProgress.QueueIndex + 1}/{sessionProgress.QueueCount}";
+		QueuePosition = sessionProgress.QueueCount == 0 ? 0 : sessionProgress.QueueIndex + 1;
+		QueueTotal = sessionProgress.QueueCount;
 		VocabularyStat = $"{sessionProgress.VocabularyLearnedCount}/{sessionProgress.VocabularyEntriesCount}";
 	}
 
@@ -668,6 +708,8 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			EnExample = string.Empty;
 			TokensResult = [];
 		}
+
+		QueuesPosition = _current.TotalEntriesCompletedCount + 1;
 	}
 
 	void HideEntry()
@@ -718,6 +760,8 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			ShowSessionInfo(_current.Session);
 			SelectedTabIndex = 1;
 			TotalEntitiesAnswered = 0;
+			QueuesPosition = 1;
+			QueuesTotal = LessonSize * LessonRepeatCount;
 			FocusAnswerRequested?.Invoke();
 		}
 		catch (Exception ex)

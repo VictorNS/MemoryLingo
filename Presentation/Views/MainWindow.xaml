@@ -248,7 +248,7 @@
 						<ComboBoxItem Content="4 - Fully random Untrained"/>
 					</ComboBox>
 					<Label Content="Size" Style="{StaticResource ToolbarLabel}"/>
-					<TextBox Text="{Binding ExerciseSize}" Style="{StaticResource ToolbarNumericTextBox}"
+					<TextBox Text="{Binding LessonSize}" Style="{StaticResource ToolbarNumericTextBox}"
 						Width="30" ToolTip="Entries per exercise (3-100)"/>
 					<Label Content="Repeat Lesson" Style="{StaticResource ToolbarLabel}"/>
 					<TextBox Text="{Binding LessonRepeatCount}" Style="{StaticResource ToolbarNumericTextBox}"
@@ -349,21 +349,60 @@
 					<Label Grid.Row="3" Content="{Binding PrevTranscription}" Style="{StaticResource TipLabel}"/>
 					<Label Grid.Row="4" Content="{Binding PrevRuExample}" Style="{StaticResource TipLabel}"/>
 					<Label Grid.Row="5" Content="{Binding PrevEnExample}" Style="{StaticResource TipLabel}"/>
-					<Border Grid.Row="6" BorderThickness="0,1,0,0" BorderBrush="Silver" Margin="0,2,0,0" Padding="0,2,0,0">
-						<WrapPanel Orientation="Horizontal">
+					<Grid Grid.Row="6" Margin="0,2,0,0">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+						</Grid.RowDefinitions>
+
+						<ProgressBar Grid.Row="0" Height="4" BorderThickness="0" Background="LightCyan" Foreground="PaleTurquoise"
+							Minimum="0" Value="{Binding QueuesPosition}" Maximum="{Binding QueuesTotal}">
+							<ProgressBar.ToolTip>
+								<ToolTip>
+									<TextBlock>
+										<TextBlock.Text>
+											<MultiBinding StringFormat="Total progress: {0}/{1} Lesson progress: {2}/{3}">
+												<Binding Path="QueuesPosition"/>
+												<Binding Path="QueuesTotal"/>
+												<Binding Path="QueuePosition"/>
+												<Binding Path="QueueTotal"/>
+											</MultiBinding>
+										</TextBlock.Text>
+									</TextBlock>
+								</ToolTip>
+							</ProgressBar.ToolTip>
+						</ProgressBar>
+						<ProgressBar Grid.Row="1" Height="4" BorderThickness="0" Background="LightCyan" Foreground="CornflowerBlue"
+							Minimum="0" Value="{Binding QueuePosition}" Maximum="{Binding QueueTotal}">
+							<ProgressBar.ToolTip>
+								<ToolTip>
+									<TextBlock>
+										<TextBlock.Text>
+											<MultiBinding StringFormat="Total progress: {0}/{1} Lesson progress: {2}/{3}">
+												<Binding Path="QueuesPosition"/>
+												<Binding Path="QueuesTotal"/>
+												<Binding Path="QueuePosition"/>
+												<Binding Path="QueueTotal"/>
+											</MultiBinding>
+										</TextBlock.Text>
+									</TextBlock>
+								</ToolTip>
+							</ProgressBar.ToolTip>
+						</ProgressBar>
+
+						<WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,2,0,0">
+							<Image Source="/Presentation/Assets/Images/dyslexia-16.png" Style="{StaticResource StatusImage}"/>
 							<Label Content="{Binding TotalEntitiesAnswered}" Style="{StaticResource StatusLabel}"/>
 
 							<Image Source="{Binding PrevStatusImage}" Style="{StaticResource StatusImage}"/>
 							<Label Content="{Binding PrevStatus}" Style="{StaticResource StatusLabel}"/>
 
-							<Image Source="/Presentation/Assets/Images/dyslexia-16.png" Style="{StaticResource StatusImage}"/>
-							<Label Content="{Binding QueueStat}" Style="{StaticResource StatusLabel}"/>
-
 							<Image Source="/Presentation/Assets/Images/vocabulary-16.png" Style="{StaticResource StatusImage}"/>
 							<Label Content="{Binding VocabularyStat}" Style="{StaticResource StatusLabel}"/>
 							<Button Content="{Binding FileName}" Style="{StaticResource StatusFileButton}" Command="{Binding OpenCurrentFileCommand}" />
 						</WrapPanel>
-					</Border>
+					</Grid>
 				</Grid>
 
 				<Grid Grid.Row="0" Grid.RowSpan="2" Panel.ZIndex="1000" Background="#80FFFFFF" Visibility="{Binding IsOverlayVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
