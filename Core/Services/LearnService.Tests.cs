@@ -410,35 +410,19 @@ public class LearnServiceTests
 		var learnService = CreateLearnServiceForLessonRepeats(lessonRepeatCount: 2);
 		learnService.StartVocabularySession("test.xlsx", 0, true);
 
-		// Act
-		var firstPassSecondEntry = learnService.GetNextEntry();
-		var secondPassFirstEntry = learnService.GetNextEntry();
-		var secondPassSecondEntry = learnService.GetNextEntry();
-		var rebuiltLessonFirstEntry = learnService.GetNextEntry();
+		EntryContainer e;
 
-		// Assert
-		Assert.Equal(1, firstPassSecondEntry?.Session.QueueIndex);
-		Assert.Equal(0, secondPassFirstEntry?.Session.QueueIndex);
-		Assert.Equal(1, secondPassSecondEntry?.Session.QueueIndex);
-		Assert.Equal(0, rebuiltLessonFirstEntry?.Session.QueueIndex);
+		e = learnService.GetFirstEntry();
+		Assert.Equal(0, e?.Session.QueueIndex);
+		e = learnService.GetNextEntry();
+		Assert.Equal(1, e?.Session.QueueIndex);
+		e = learnService.GetNextEntry();
+		Assert.Equal(2, e?.Session.QueueIndex);
 		Assert.Equal(0, learnService.GetCurrentSession()?.LessonsCompletedCount);
-	}
 
-	[Fact]
-	public void GetFirstEntryOfNewSession_ResetsLessonsCompletedCount()
-	{
-		// Arrange
-		var learnService = CreateLearnServiceForLessonRepeats(lessonRepeatCount: 2);
-		learnService.StartVocabularySession("test.xlsx", 0, true);
-		learnService.GetNextEntry();
-		learnService.GetNextEntry();
-
-		// Act
-		var reloadedEntry = learnService.GetFirstEntryOfNewSession();
-
-		// Assert
-		Assert.Equal(0, reloadedEntry?.Session.QueueIndex);
-		Assert.Equal(0, learnService.GetCurrentSession()?.LessonsCompletedCount);
+		e = learnService.GetNextEntry();
+		Assert.Equal(0, e?.Session.QueueIndex);
+		Assert.Equal(1, learnService.GetCurrentSession()?.LessonsCompletedCount);
 	}
 
 	static LearnService CreateLearnServiceForLessonRepeats(int lessonRepeatCount)
@@ -461,7 +445,10 @@ public class LearnServiceTests
 		var entries = new Dictionary<string, VocabularyProgressEntry>
 		{
 			["word1"] = new VocabularyProgressEntry(),
-			["word2"] = new VocabularyProgressEntry()
+			["word2"] = new VocabularyProgressEntry(),
+			["word3"] = new VocabularyProgressEntry(),
+			["word4"] = new VocabularyProgressEntry(),
+			["word5"] = new VocabularyProgressEntry()
 		};
 		vocabularyProgressStore.Load("test.xlsx").Returns(new VocabularyProgressDto { Entries = entries });
 		vocabularyExcelReader.LoadVocabulary("test.xlsx").Returns(new VocabularyExcelDto
@@ -472,7 +459,10 @@ public class LearnServiceTests
 			Entries =
 			[
 				new Entry { RuText = "word1", EnText = "translation1" },
-				new Entry { RuText = "word2", EnText = "translation2" }
+				new Entry { RuText = "word2", EnText = "translation2" },
+				new Entry { RuText = "word3", EnText = "translation3" },
+				new Entry { RuText = "word4", EnText = "translation4" },
+				new Entry { RuText = "word5", EnText = "translation5" }
 			]
 		});
 

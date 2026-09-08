@@ -25,8 +25,8 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	readonly ILogService _logService;
 	readonly ISpeechService _speechService;
 	readonly ISynthesisService _synthesisService;
-	EntryProgress _current = EntryProgress.Empty;
-	EntryProgress _previous = EntryProgress.Empty;
+	EntryContainer _current = EntryContainer.Empty;
+	EntryContainer _previous = EntryContainer.Empty;
 	readonly DispatcherTimer _validationTimer = new();
 	string _vocabularyLanguage = string.Empty;
 	string _vocabularyPath = string.Empty;
@@ -629,19 +629,17 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	{
 		try
 		{
-			var newEntry = _learnService.GetFirstEntryOfNewSession();
+			var newEntryContainer = _learnService.GetFirstEntryOfNewSession();
 
-			if (newEntry is null)
+			if (!newEntryContainer.IsReady)
 			{
-				_current = EntryProgress.Empty;
+				_current = EntryContainer.Empty;
 				LoadVocabularyList(false);
 				SelectedTabIndex = 0;
-			}
-			else
-			{
-				_current = newEntry;
+				return;
 			}
 
+			_current = newEntryContainer;
 			ShowEntry(isNewEntry: true);
 			ShowSessionInfo(_current.Session);
 
@@ -673,7 +671,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	#endregion Application settings
 
 	#region Show/Hide UI elements
-	void ShowSessionInfo(EntryProgress.CurrentSessionProgress sessionProgress)
+	void ShowSessionInfo(EntryCurrentSession sessionProgress)
 	{
 		QueuePosition = sessionProgress.QueueCount == 0 ? 0 : sessionProgress.QueueIndex + 1;
 		QueueTotal = sessionProgress.QueueCount;
@@ -709,7 +707,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			TokensResult = [];
 		}
 
-		QueuesPosition = _current.TotalEntriesCompletedCount + 1;
+		QueuesPosition = _current.Session.TotalEntriesCompletedCount + 1;
 	}
 
 	void HideEntry()
@@ -732,14 +730,14 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		PrevTranscription = WrapTranscription(_previous.Entry.Transcription);
 		PrevRuExample = _previous.Entry.RuExample;
 		PrevEnExample = _previous.Entry.EnExample;
-		PrevStatusImage = $"/Presentation/Assets/Images/{(_previous.CorrectAnswers == 0 && _previous.TotalAttempts == 0
+		PrevStatusImage = $"/Presentation/Assets/Images/{(_previous.Progress.CorrectAnswers == 0 && _previous.Progress.TotalAttempts == 0
 			? "question-mark-16.png"
-			: _previous.IsLearned
+			: _previous.Progress.IsLearned
 				? "check-16.png"
-				: _previous.IsLastAttemptSuccess
+				: _previous.Progress.IsLastAttemptSuccess
 					? "increase-16.png"
 					: "decrease-16.png")}";
-		PrevStatus = $"{_previous.CorrectAnswers}/{_previous.TotalAttempts}";
+		PrevStatus = $"{_previous.Progress.CorrectAnswers}/{_previous.Progress.TotalAttempts}";
 	}
 	#endregion Show/Hide UI elements
 
@@ -833,7 +831,19 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		await Task.Delay(TimeSpan.FromMilliseconds(100));
 		await SpeakPreviousEntry();
 		await Task.Delay(TimeSpan.FromMilliseconds(100));
+
 		InitializeNextEntry();
+
+		while (_current.Progress.IsLearned || _current.Progress.IsLastAttemptSuccess)
+		{
+			IsOverlayVisible = true;
+			_previous = _current;
+			ShowPreviousEntry();
+			await Task.Delay(TimeSpan.FromMilliseconds(100));
+			await SpeakPreviousEntry();
+			await Task.Delay(TimeSpan.FromMilliseconds(100));
+			InitializeNextEntry();
+		}
 	}
 
 	async Task SpeakPreviousEntry()
@@ -859,22 +869,21 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	{
 		try
 		{
-			var newEntry = _learnService.GetNextEntry();
+			var newEntryContainer = _learnService.GetNextEntry();
 
-			if (newEntry is null)
+			if (!newEntryContainer.IsReady)
 			{
-				_current = EntryProgress.Empty;
+				_current = EntryContainer.Empty;
 				LoadVocabularyList(false);
 				SelectedTabIndex = 0;
+				return;
 			}
-			else
-			{
-				_current = newEntry;
 
-				if (newEntry.Session.QueueIndex == 0)
-				{
-					LoadVocabularyList(false);
-				}
+			_current = newEntryContainer;
+
+			if (newEntryContainer.Session.QueueIndex == 0)
+			{
+				LoadVocabularyList(false);
 			}
 
 			ShowEntry(isNewEntry: true);

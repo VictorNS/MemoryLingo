@@ -1,5 +1,4 @@
-﻿using System.IO;
-using MemoryLingo.Core.Models;
+﻿using MemoryLingo.Core.Models;
 using MemoryLingo.Infrastructure.Settings;
 using MemoryLingo.Infrastructure.VocabularyExcel;
 using MemoryLingo.Infrastructure.VocabularyProgress;
@@ -15,10 +14,10 @@ public interface ILearnService
 	void RemoveVocabularyFile(string filePath);
 
 	VocabularyExcelDto? StartVocabularySession(string filePath, int sessionIndex, bool continueSession);
-	EntryProgress GetFirstEntry();
-	EntryProgress? GetNextEntry();
-	EntryProgress? GetFirstEntryOfNewSession();
-	EntryProgress SaveEntryProgress(string ruText, bool isAnswerCorrect);
+	EntryContainer GetFirstEntry();
+	EntryContainer GetNextEntry();
+	EntryContainer GetFirstEntryOfNewSession();
+	EntryContainer SaveEntryProgress(string ruText, bool isAnswerCorrect);
 }
 
 public class LearnService : ILearnService
@@ -241,12 +240,12 @@ public class LearnService : ILearnService
 			QueueIndex = 0,
 			LessonsCompletedCount = 0,
 			TotalEntriesCompletedCount = 0,
-			IsLastLearned = false,
 			Entries = restEntries,
-			Queue = BuildQueue(restEntries, sessionIndex),
+			Queue = [],
 			VocabularyEntriesCount = _vocabularyProgress.Entries.Count - skippedCount,
 			VocabularyLearnedCount = _vocabularyProgress.Entries.Count - restEntries.Count - skippedCount,
 		};
+		_session.Queue = BuildQueue(restEntries);
 
 		if (!continueSession)
 		{
@@ -256,7 +255,7 @@ public class LearnService : ILearnService
 			_vocabularyReferenceService.UpdateSessionAndSave(_vocabulary.FilePath, _session.SessionIndex, progress.LearnedEntries, progress.TotalEntries);
 		}
 
-		return true;
+		return _session.Queue.Count > 0;
 	}
 
 	internal LearnSession? GetCurrentSession()
@@ -264,22 +263,22 @@ public class LearnService : ILearnService
 		return _session;
 	}
 
-	public EntryProgress GetFirstEntry()
+	public EntryContainer GetFirstEntry()
 	{
-		return GetEntryByQueueIndex();
+		if (_session is null)
+			return EntryContainer.Empty;
+
+		var entryProgress = _session.Queue[_session.QueueIndex];
+		return EntryContainer.Create(entryProgress, _session);
 	}
 
-	public EntryProgress? GetNextEntry()
+	public EntryContainer GetNextEntry()
 	{
-		if (_vocabularyProgress is null || _session is null)
-			return null;
-
-		if (_session.Queue.Count == 0) // it's possible when all entries are learned
-			return null;
+		if (_session is null || _session.Queue.Count == 0) // it's possible when all entries are learned
+			return EntryContainer.Empty;
 
 		_session.TotalEntriesCompletedCount++;
-		var expectQueueIndex = _session.QueueIndex + (_session.IsLastLearned ? 0 : 1);
-		_session.IsLastLearned = false;
+		var expectQueueIndex = _session.QueueIndex + 1;
 
 		if (expectQueueIndex >= _session.Queue.Count) // We have completed the session.
 		{
@@ -290,152 +289,132 @@ public class LearnService : ILearnService
 				return GetFirstEntryOfNewSession(); // Start a new session if the repeat count is reached.
 		}
 
-		if (_session.Queue.Count > 3) // if there are more than 3 entries, repeat the queue, otherwise reshuffle to avoid quick repetition
-		{
-			_session.QueueIndex = expectQueueIndex;
-			return GetEntryByQueueIndex();
-		}
-
-		var restEntries = _vocabularyProgress.Entries
-			.Where(kv => !kv.Value.Sessions[_session.SessionIndex].IsSkipped && !kv.Value.Sessions[_session.SessionIndex].IsLearned)
-			.ToDictionary(kv => kv.Key, kv => kv.Value);
-
-		if (_session.Queue.Count == restEntries.Count) // if the queue is the same as before, just move to the next entry without reshuffling
-		{
-			_session.QueueIndex = expectQueueIndex;
-			return GetEntryByQueueIndex();
-		}
-
-		if (restEntries.Count == 0)
-			return null;
-
-		_session.Queue = BuildQueue(restEntries, _session.SessionIndex);
-		_session.QueueIndex = 0;
-		_session.LessonsCompletedCount = 0;
-		return GetEntryByQueueIndex();
+		_session.QueueIndex = expectQueueIndex;
+		var entryProgress = _session.Queue[_session.QueueIndex];
+		return EntryContainer.Create(entryProgress, _session);
 	}
 
-	public EntryProgress? GetFirstEntryOfNewSession()
+	public EntryContainer GetFirstEntryOfNewSession()
 	{
 		if (_vocabularyProgress is null || _session is null)
-			return null;
+			return EntryContainer.Empty;
 
 		var restEntries = _vocabularyProgress.Entries
 			.Where(kv => !kv.Value.Sessions[_session.SessionIndex].IsSkipped && !kv.Value.Sessions[_session.SessionIndex].IsLearned)
 			.ToDictionary(kv => kv.Key, kv => kv.Value);
 
 		if (restEntries.Count == 0)
-			return null;
+			return EntryContainer.Empty;
 
-		_session.Queue = BuildQueue(restEntries, _session.SessionIndex);
 		_session.QueueIndex = 0;
 		_session.LessonsCompletedCount = 0;
 		_session.TotalEntriesCompletedCount = 0;
-		return GetEntryByQueueIndex();
+		_session.Queue = BuildQueue(restEntries);
+
+		var entryProgress = _session.Queue[_session.QueueIndex];
+		return EntryContainer.Create(entryProgress, _session);
 	}
 
-	EntryProgress GetEntryByQueueIndex()
+	internal List<EntryProgress> BuildQueue(Dictionary<string, VocabularyProgressEntry> entries)
 	{
 		if (_vocabulary is null || _session is null)
-			return EntryProgress.Empty;
+			return [];
 
-		var ruText = _session.Queue[_session.QueueIndex];
-		var entry = _vocabulary.Entries.First(e => e.RuText == ruText);
-		var progress = _session.Entries[ruText].Sessions[_session.SessionIndex];
-
-		return new EntryProgress
-		{
-			Entry = entry,
-			IsLearned = progress.IsLearned,
-			CorrectAnswers = progress.CorrectAnswers,
-			TotalAttempts = progress.TotalAttempts,
-			TotalEntriesCompletedCount = _session.TotalEntriesCompletedCount,
-			Session = new()
-			{
-				QueueIndex = _session.QueueIndex,
-				QueueCount = _session.Queue.Count,
-				VocabularyLearnedCount = _session.VocabularyLearnedCount,
-				VocabularyEntriesCount = _session.VocabularyEntriesCount,
-			}
-		};
-	}
-
-	internal List<string> BuildQueue(Dictionary<string, VocabularyProgressEntry> entries, int sessionIndex)
-	{
+		List<string> queue;
+		var sessionIndex = _session.SessionIndex;
 		var exerciseSize = _settings.Learn.LessonSize;
 
 		// Level 0: just take the first N entries (no randomization)
 		if (_settings.Behavior.RandomizeLevel == 0)
 		{
-			return [.. entries.Take(exerciseSize).Select(kv => kv.Key)];
+			queue = [.. entries.Take(exerciseSize).Select(kv => kv.Key)];
 		}
 		// If entries count is less than or equal to 1.4 times the exercise size, just randomize and take the first N entries
-		if (entries.Count <= exerciseSize * 1.4)
+		else if (entries.Count <= exerciseSize * 1.4)
 		{
-			return [.. entries.OrderBy(_ => Random.Shared.Next()).Take(exerciseSize).Select(kv => kv.Key)];
+			queue = [.. entries.OrderBy(_ => Random.Shared.Next()).Take(exerciseSize).Select(kv => kv.Key)];
 		}
 		// Level 3: just randomize all entries
-		if (_settings.Behavior.RandomizeLevel == 3)
+		else if (_settings.Behavior.RandomizeLevel == 3)
 		{
-			return entries
+			queue = entries
 				.Select(kv => kv.Key)
 				.OrderBy(_ => Random.Shared.Next())
 				.Take(exerciseSize)
 				.ToList();
 		}
 		// Level 4: prioritize entries with fewer attempts
-		if (_settings.Behavior.RandomizeLevel == 4)
+		else if (_settings.Behavior.RandomizeLevel == 4)
 		{
-			return entries
+			queue = entries
 				.OrderBy(kv => kv.Value.Sessions[sessionIndex].TotalAttempts)
 				.ThenBy(_ => Random.Shared.Next())
 				.Select(kv => kv.Key)
 				.Take(exerciseSize)
 				.ToList();
 		}
-
-		// Split proportionally into 3 groups, where the split ratios depend on RandomizeLevel:
-		// Group 1 (startedP): already started entries (TotalAttempts > 0)
-		// Group 2 (nearP of the remainder): from the nearest range
-		// Group 3 (remainder): from the farther range
-		// Higher RandomizeLevel lowers startedP/nearP, shifting weight toward farther, more random entries:
-		// Level 1: startedP 0.70, nearP 0.65
-		// Level 2: startedP 0.30, nearP 0.30
-
-		// Default: RandomizeLevel == 1
-		double startedP = 0.70;
-		double nearP = 0.65;
-
-		if (_settings.Behavior.RandomizeLevel == 2)
+		else
 		{
-			startedP = 0.30;
-			nearP = 0.30;
+			// Split proportionally into 3 groups, where the split ratios depend on RandomizeLevel:
+			// Group 1 (startedP): already started entries (TotalAttempts > 0)
+			// Group 2 (nearP of the remainder): from the nearest range
+			// Group 3 (remainder): from the farther range
+			// Higher RandomizeLevel lowers startedP/nearP, shifting weight toward farther, more random entries:
+			// Level 1: startedP 0.70, nearP 0.65
+			// Level 2: startedP 0.30, nearP 0.30
+
+			// Default: RandomizeLevel == 1
+			double startedP = 0.70;
+			double nearP = 0.65;
+
+			if (_settings.Behavior.RandomizeLevel == 2)
+			{
+				startedP = 0.30;
+				nearP = 0.30;
+			}
+
+			var startedCount = (int)Math.Round(exerciseSize * startedP);
+			var startedKeys = entries
+				.Where(kv => kv.Value.Sessions[sessionIndex].TotalAttempts > 0)
+				.OrderByDescending(kv => kv.Value.Sessions[sessionIndex].TotalAttempts)
+				.Select(kv => kv.Key).ToList();
+			var started = startedKeys.Take(startedCount).ToList();
+
+			var nearCount = (int)Math.Round((exerciseSize - started.Count) * nearP);
+			var restKeys = entries.Select(kv => kv.Key).Except(started).ToList();
+			var near = restKeys.Take(exerciseSize * 2).OrderBy(_ => Random.Shared.Next()).Take(nearCount).ToList();
+
+			var farCount = exerciseSize - started.Count - near.Count;
+			restKeys = restKeys.Except(near).ToList();
+			var far = restKeys.OrderBy(_ => Random.Shared.Next()).Take(farCount).ToList();
+			queue = started.Concat(near).Concat(far).OrderBy(_ => Random.Shared.Next()).ToList();
 		}
 
-		var startedCount = (int)Math.Round(exerciseSize * startedP);
-		var startedKeys = entries
-			.Where(kv => kv.Value.Sessions[sessionIndex].TotalAttempts > 0)
-			.OrderByDescending(kv => kv.Value.Sessions[sessionIndex].TotalAttempts)
-			.Select(kv => kv.Key).ToList();
-		var started = startedKeys.Take(startedCount).ToList();
+		List<EntryProgress> entryProgressList = [];
 
-		var nearCount = (int)Math.Round((exerciseSize - started.Count) * nearP);
-		var restKeys = entries.Select(kv => kv.Key).Except(started).ToList();
-		var near = restKeys.Take(exerciseSize * 2).OrderBy(_ => Random.Shared.Next()).Take(nearCount).ToList();
+		foreach (var text in queue)
+		{
+			var entry = _vocabulary.Entries.First(e => e.RuText == text);
+			var progress = entries[text].Sessions[sessionIndex];
 
-		var farCount = exerciseSize - started.Count - near.Count;
-		restKeys = restKeys.Except(near).ToList();
-		var far = restKeys.OrderBy(_ => Random.Shared.Next()).Take(farCount).ToList();
-		return started.Concat(near).Concat(far).OrderBy(_ => Random.Shared.Next()).ToList();
+			entryProgressList.Add(new EntryProgress
+			{
+				Entry = entry,
+				IsLearned = progress.IsLearned,
+				CorrectAnswers = progress.CorrectAnswers,
+				TotalAttempts = progress.TotalAttempts,
+			});
+		}
+
+		return entryProgressList;
 	}
 
-	public EntryProgress SaveEntryProgress(string ruText, bool isAnswerCorrect)
+	public EntryContainer SaveEntryProgress(string ruText, bool isAnswerCorrect)
 	{
 		if (_vocabulary is null || _vocabularyProgress is null || _session is null)
-			return EntryProgress.Empty;
+			return EntryContainer.Empty;
 
-		var entry = _vocabulary.Entries.FirstOrDefault(e => e.RuText == ruText)
-			?? throw new InvalidDataException($"Entry with RuText '{ruText}' not found in vocabulary.");
+		var entryProgress = _session.Queue.First(x => x.Entry.RuText == ruText);
 		var progressEntrySession = _session.Entries[ruText].Sessions[_session.SessionIndex];
 		progressEntrySession.TotalAttempts++;
 
@@ -445,12 +424,8 @@ public class LearnService : ILearnService
 
 			if (progressEntrySession.CorrectAnswers >= _settings.Learn.CorrectAnswersToLearn)
 			{
-				// mark as learned
 				progressEntrySession.IsLearned = true;
-				// update session
 				_session.VocabularyLearnedCount++;
-				_session.IsLastLearned = true;
-				_session.Queue.Remove(ruText);
 				// update vocabulary progress
 				var progress = _vocabularyProgress.GetSessionProgress(_session.SessionIndex);
 				_vocabularyReferenceService.UpdateSessionAndSave(_vocabulary.FilePath, _session.SessionIndex, progress.LearnedEntries, progress.TotalEntries);
@@ -459,21 +434,11 @@ public class LearnService : ILearnService
 
 		_vocabularyProgressStore.Save(_vocabulary.FilePath, _session.SessionIndex, _vocabularyProgress);
 
-		return new EntryProgress
-		{
-			Entry = entry,
-			IsLearned = progressEntrySession.IsLearned,
-			IsLastAttemptSuccess = isAnswerCorrect,
-			CorrectAnswers = progressEntrySession.CorrectAnswers,
-			TotalAttempts = progressEntrySession.TotalAttempts,
-			TotalEntriesCompletedCount = _session.TotalEntriesCompletedCount,
-			Session = new()
-			{
-				QueueIndex = _session.QueueIndex,
-				QueueCount = _session.Queue.Count,
-				VocabularyLearnedCount = _session.VocabularyLearnedCount,
-				VocabularyEntriesCount = _session.VocabularyEntriesCount,
-			}
-		};
+		entryProgress.IsLearned = progressEntrySession.IsLearned;
+		entryProgress.IsLastAttemptSuccess = isAnswerCorrect;
+		entryProgress.CorrectAnswers = progressEntrySession.CorrectAnswers;
+		entryProgress.TotalAttempts = progressEntrySession.TotalAttempts;
+
+		return EntryContainer.Create(entryProgress, _session);
 	}
 }
