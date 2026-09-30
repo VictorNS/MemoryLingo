@@ -25,6 +25,10 @@ public class BehaviorSettings
 	/// Randomize the order of entries in the session queue with a level of randomness from 0 to 3
 	/// </summary>
 	public int RandomizeLevel { get; set; } = 1;
+	/// <summary>
+	/// Delay in milliseconds before playing the learned entry.
+	/// </summary>
+	public int LearnedEntryDelay { get; set; } = 1500;
 }
 
 public class LearnSettings

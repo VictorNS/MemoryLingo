@@ -494,7 +494,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	{
 		_validationTimer.Stop();
 		TipsUsedForCurrentEntry = true;
-		ShowEntry(isNewEntry: false);
+		ShowEntry(isInitialize: false);
 	}
 
 	void RestartValidationTimer()
@@ -640,7 +640,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			}
 
 			_current = newEntryContainer;
-			ShowEntry(isNewEntry: true);
+			ShowEntry(isInitialize: true);
 			ShowSessionInfo(_current.Session);
 
 			IsOverlayVisible = false;
@@ -678,13 +678,13 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		VocabularyStat = $"{sessionProgress.VocabularyLearnedCount}/{sessionProgress.VocabularyEntriesCount}";
 	}
 
-	void ShowEntry(bool isNewEntry)
+	void ShowEntry(bool isInitialize)
 	{
 		HideIncorrectTokens = false;
 		RuText = _current.Entry.RuText;
 		RuTip = _current.Entry.RuTip;
 
-		if (isNewEntry)
+		if (isInitialize)
 		{
 			Answer = string.Empty;
 			TipsUsedForCurrentEntry = false;
@@ -749,12 +749,13 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			if (vocabulary is null)
 				return;
 
+			IsOverlayVisible = false;
 			_vocabularyLanguage = vocabulary.Lang;
 			_vocabularyPath = vocabulary.FilePath;
 			FileName = vocabulary.FileName;
 			ShowPreviousEntry();
 			_current = _learnService.GetFirstEntry();
-			ShowEntry(isNewEntry: true);
+			ShowEntry(isInitialize: true);
 			ShowSessionInfo(_current.Session);
 			SelectedTabIndex = 1;
 			TotalEntitiesAnswered = 0;
@@ -771,24 +772,13 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 	void ProcessAnswer(string answer)
 	{
-		EntryCheckResult wordResults;
-
-		try
-		{
-			ShowEntry(isNewEntry: false);
-
-			wordResults = _entryValidationService.GetEntryCheckResult(answer, _current.Entry.EnText);
-		}
-		catch (Exception ex)
-		{
-			SW.MessageBox.Show("An error occurred while processing the answer.", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
-			_logService.LogError(ex, nameof(ProcessAnswer));
-			SelectedTabIndex = 0;
-			return;
-		}
+		ShowEntry(isInitialize: false);
+		var wordResults = _entryValidationService.GetEntryCheckResult(answer, _current.Entry.EnText);
 
 		if (wordResults.IsCorrect)
 		{
+			IsOverlayVisible = true;
+
 			try
 			{
 				// the answer is considered correct if no tips were used
@@ -827,7 +817,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
 	async void SpeakPreviousEntryThenInitializeNext()
 	{
-		IsOverlayVisible = true;
 		await Task.Delay(TimeSpan.FromMilliseconds(100));
 		await SpeakPreviousEntry();
 		await Task.Delay(TimeSpan.FromMilliseconds(100));
@@ -839,7 +828,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			IsOverlayVisible = true;
 			_previous = _current;
 			ShowPreviousEntry();
-			await Task.Delay(TimeSpan.FromMilliseconds(100));
+			await Task.Delay(TimeSpan.FromMilliseconds(_settings.Behavior.LearnedEntryDelay));
 			await SpeakPreviousEntry();
 			await Task.Delay(TimeSpan.FromMilliseconds(100));
 			InitializeNextEntry();
@@ -886,7 +875,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 				LoadVocabularyList(false);
 			}
 
-			ShowEntry(isNewEntry: true);
+			ShowEntry(isInitialize: true);
 			ShowSessionInfo(_current.Session);
 
 			IsOverlayVisible = false;

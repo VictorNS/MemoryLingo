@@ -23,12 +23,17 @@
 				</Grid.RowDefinitions>
 
 				<WrapPanel Grid.Row="0" Style="{StaticResource ToolbarWrapPanel}">
-					<Button Content="Add Vocabulary" Command="{Binding AddVocabularyCommand}"
-							Style="{StaticResource ToolbarLinkButton}"/>
-					<Button Command="{Binding ReloadVocabulariesCommand}"
-							Style="{StaticResource ToolbarImageButton}"
-							ToolTip="Reload all sessions">
-						<Image Source="/Presentation/Assets/Images/refresh-16.png" Width="16" Height="16"/>
+					<Button Command="{Binding AddVocabularyCommand}" Style="{StaticResource ToolbarLinkButton}">
+						<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+							<Image Source="/Presentation/Assets/Images/add-16.png" Width="16" Height="16"/>
+							<TextBlock Text="Add Vocabulary" VerticalAlignment="Center" Margin="4,0,0,0"/>
+						</StackPanel>
+					</Button>
+					<Button Command="{Binding ReloadVocabulariesCommand}" Style="{StaticResource ToolbarLinkButton}">
+						<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+							<Image Source="/Presentation/Assets/Images/refresh-16.png" Width="16" Height="16"/>
+							<TextBlock Text="Reload all sessions" VerticalAlignment="Center" Margin="4,0,0,0"/>
+						</StackPanel>
 					</Button>
 				</WrapPanel>
 
@@ -253,10 +258,11 @@
 					<Label Content="Repeat Lesson" Style="{StaticResource ToolbarLabel}"/>
 					<TextBox Text="{Binding LessonRepeatCount}" Style="{StaticResource ToolbarNumericTextBox}"
 						Width="30" ToolTip="Maximum repetitions per lesson (1-100)"/>
-					<Button Command="{Binding ReloadLessonCommand}"
-							Style="{StaticResource ToolbarImageButton}"
-							ToolTip="Reload lesson">
-						<Image Source="/Presentation/Assets/Images/refresh-16.png" Width="16" Height="16"/>
+					<Button Command="{Binding ReloadLessonCommand}" Style="{StaticResource ToolbarLinkButton}">
+						<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+							<Image Source="/Presentation/Assets/Images/refresh-16.png" Width="16" Height="16"/>
+							<TextBlock Text="Reload lesson" VerticalAlignment="Center" Margin="4,0,0,0"/>
+						</StackPanel>
 					</Button>
 				</WrapPanel>
 
@@ -407,7 +413,7 @@
 
 				<Grid Grid.Row="0" Grid.RowSpan="2" Panel.ZIndex="1000" Background="#80FFFFFF" Visibility="{Binding IsOverlayVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
 					<Border VerticalAlignment="Top" HorizontalAlignment="Center">
-						<Label Content="wait..." Padding="34" HorizontalAlignment="Center" Foreground="Gray" Style="{StaticResource LessonLabel}"/>
+						<Label Content="wait..." Padding="0,50,0,0" HorizontalAlignment="Center" Foreground="Gray" Style="{StaticResource LessonLabel}"/>
 					</Border>
 				</Grid>
 			</Grid>

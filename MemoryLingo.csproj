@@ -37,6 +37,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Resource Include="Presentation\Assets\Images\add-16.png" />
 		<Resource Include="Presentation\Assets\Images\check-16.png" />
 		<Resource Include="Presentation\Assets\Images\decrease-16.png" />
 		<Resource Include="Presentation\Assets\Images\delete-16.png" />
