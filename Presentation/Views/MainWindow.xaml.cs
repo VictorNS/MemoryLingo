@@ -68,7 +68,7 @@ public partial class MainWindow : Window
 
 	void MainWindow_KeyDown(object sender, SWI.KeyEventArgs e)
 	{
-		if (e.Key == SWI.Key.F1)
+		if (e.Key == SWI.Key.F1 || e.Key == SWI.Key.Escape)
 		{
 			ViewModel.ShowTipsCommand.Execute(null);
 			e.Handled = true;
