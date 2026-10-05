@@ -26,6 +26,7 @@ public class EntryContainer
 		},
 		session: new()
 		{
+			SessionIndex = 0,
 			QueueIndex = 0,
 			QueueCount = 0,
 			VocabularyLearnedCount = 0,
@@ -40,6 +41,7 @@ public class EntryContainer
 			progress: entryProgress,
 			session: new EntryCurrentSession
 			{
+				SessionIndex = session.SessionIndex,
 				QueueIndex = session.QueueIndex,
 				QueueCount = session.Queue.Count,
 				VocabularyLearnedCount = session.VocabularyLearnedCount,
@@ -60,6 +62,7 @@ public class EntryProgress
 
 public class EntryCurrentSession
 {
+	public required int SessionIndex { get; set; }
 	public required int QueueIndex { get; set; }
 	public required int QueueCount { get; set; }
 	public required int VocabularyLearnedCount { get; set; }

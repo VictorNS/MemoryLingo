@@ -347,7 +347,8 @@ public class LearnService : ILearnService
 		else if (_settings.Behavior.RandomizeLevel == 4)
 		{
 			queue = entries
-				.OrderBy(kv => kv.Value.Sessions[sessionIndex].TotalAttempts)
+				.OrderBy(kv => kv.Value.Sessions[sessionIndex].CorrectAnswers)
+				.ThenBy(kv => kv.Value.Sessions[sessionIndex].TotalAttempts)
 				.ThenBy(_ => Random.Shared.Next())
 				.Select(kv => kv.Key)
 				.Take(exerciseSize)

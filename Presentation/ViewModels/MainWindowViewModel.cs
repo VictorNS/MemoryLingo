@@ -508,7 +508,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		if (sessionParam == null)
 			return;
 
-		StartVocabularySession(sessionParam.VocabularyFile, sessionParam.SessionIndex, true);
+		StartVocabularySession(sessionParam.VocabularyFile.FilePath, sessionParam.SessionIndex, true);
 	}
 
 	void OnRefreshSessionClick(SessionClickParameter? sessionParam)
@@ -525,7 +525,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 			SW.MessageBoxImage.Question))
 			return;
 
-		StartVocabularySession(vocabularyFile, sessionParam.SessionIndex, false);
+		StartVocabularySession(vocabularyFile.FilePath, sessionParam.SessionIndex, false);
 	}
 
 	void OnOpenCurrentFileClick()
@@ -627,30 +627,10 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	#region Lesson
 	void ReloadLesson()
 	{
-		try
-		{
-			var newEntryContainer = _learnService.GetFirstEntryOfNewSession();
+		if (string.IsNullOrWhiteSpace(_vocabularyPath) || !_current.IsReady)
+			return;
 
-			if (!newEntryContainer.IsReady)
-			{
-				_current = EntryContainer.Empty;
-				LoadVocabularyList(false);
-				SelectedTabIndex = 0;
-				return;
-			}
-
-			_current = newEntryContainer;
-			ShowEntry(isInitialize: true);
-			ShowSessionInfo(_current.Session);
-
-			IsOverlayVisible = false;
-		}
-		catch (Exception ex)
-		{
-			SW.MessageBox.Show("An error occurred while initializing the next entry.", "Error", SW.MessageBoxButton.OK, SW.MessageBoxImage.Error);
-			_logService.LogError(ex, nameof(InitializeNextEntry));
-			SelectedTabIndex = 0;
-		}
+		StartVocabularySession(_vocabularyPath, _current.Session.SessionIndex, true);
 	}
 	#endregion Lesson
 
@@ -741,11 +721,11 @@ public class MainWindowViewModel : INotifyPropertyChanged
 	}
 	#endregion Show/Hide UI elements
 
-	void StartVocabularySession(VocabularyReferenceModel vocabularyFile, int sessionIndex, bool continueSession)
+	void StartVocabularySession(string filePath, int sessionIndex, bool continueSession)
 	{
 		try
 		{
-			var vocabulary = _learnService.StartVocabularySession(vocabularyFile.FilePath, sessionIndex, continueSession);
+			var vocabulary = _learnService.StartVocabularySession(filePath, sessionIndex, continueSession);
 			if (vocabulary is null)
 				return;
 
