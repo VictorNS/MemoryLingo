@@ -467,10 +467,10 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		OpenCurrentFileCommand = new RelayCommand(OnOpenCurrentFileClick);
 
 		_validationTimer.Interval = TimeSpan.FromMilliseconds(300);
-		_validationTimer.Tick += (s, e) =>
+		_validationTimer.Tick += async (s, e) =>
 		{
 			_validationTimer.Stop();
-			ProcessAnswer(Answer);
+			await ProcessAnswer(Answer);
 		};
 	}
 
@@ -750,7 +750,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		}
 	}
 
-	void ProcessAnswer(string answer)
+	async Task ProcessAnswer(string answer)
 	{
 		ShowEntry(isInitialize: false);
 		var wordResults = _entryValidationService.GetEntryCheckResult(answer, _current.Entry.EnText);
@@ -758,6 +758,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 		if (wordResults.IsCorrect)
 		{
 			IsOverlayVisible = true;
+			await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
 
 			try
 			{
